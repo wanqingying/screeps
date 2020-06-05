@@ -42,6 +42,22 @@ function flush_memory() {
             delete Memory[k];
         }
     });
+
+    if (!Memory.resource_energy) {
+        Memory.resource_energy = {};
+    }
+    config.rooms.W2N8.resource_energy_ids.forEach(id => {
+        if (!Memory.resource_energy[id]) {
+            Memory.resource_energy[id] = { miners: [] };
+        }
+    });
+    Object.keys(Memory.creeps).forEach(name => {
+        let targetId = Memory.creeps[name].target_resource_id;
+        let target = Memory.resource_energy[Memory.creeps[name].target_resource_id];
+        if (target && !target.miners.includes(name)) {
+            Memory.resource_energy[targetId].miners.push(name);
+        }
+    });
 }
 
 function spawn_creeps_on_start(n: number) {

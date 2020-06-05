@@ -34,10 +34,18 @@ export interface spawn_creep_opt {
 
 export function spawn_creep(opt: spawn_creep_opt) {
     const ind = Object.keys(Game.creeps).length;
+    let k=0;
+    let indexList=Object.values(Memory.creeps).map(c=>c.index);
+    for (let i = 0; i <= ind; i++) {
+        if (!indexList.includes(i)){
+            k=i;
+            break;
+        }
+    }
     const spawn = opt.spawn || Game.spawns[config.rooms.W2N8.spawn_name];
-    const creep_name = opt.name || `creep${ind}`;
+    const creep_name = opt.name || `creep${k}`;
     spawn.spawnCreep(opt.body, creep_name, {
-        memory: { role: opt.role, index: ind },
+        memory: { role: opt.role, index: k },
     });
 }
 

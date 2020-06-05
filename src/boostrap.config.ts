@@ -1,5 +1,5 @@
-
 const names: (keyof Memory)[] = [
+    'resource_energy',
     'creeps_spawn_index',
     'creeps',
     'powerCreeps',
@@ -19,9 +19,15 @@ export const config = {
     creep_check_name: false,
     creep_kill_all: false,
     creep_spawn_on: true,
-    rooms: { W2N8: { name: 'W2N8', spawn_name: 'Spawn1' } },
+    path_config_mine:{ visualizePathStyle: { stroke: '#ffaa00' } },
+    rooms: {
+        W2N8: {
+            name: 'W2N8',
+            spawn_name: 'Spawn1',
+            resource_energy_ids: ['ad7c07746802348', '2484077468064e9'],
+            resource_energy_nums: [2, 2],
+        },
+    },
     memory_key_names: names,
     log_on: true,
 };
-
-
