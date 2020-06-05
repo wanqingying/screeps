@@ -1,1 +1,1 @@
-export const roomList=[{room_name:'W7N7',spawn_name:'Spawn1'}];
+export const roomList = ['W2N8'];
