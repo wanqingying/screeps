@@ -15,7 +15,7 @@ module.exports.loop = function main() {
 
         if (
             Object.values(Game.creeps).filter(c => c.memory.role === 'carry').length < count &&
-            ['builder', 'upgrader', 'starter', 'container_carry'].includes(creep.memory.role)
+            ['builder', 'upgrader', 'container_carry'].includes(creep.memory.role)
         ) {
             role_runner.carry(Game.creeps[name]);
             continue;

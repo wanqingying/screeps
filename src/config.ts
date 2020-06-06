@@ -17,7 +17,7 @@ const config_online = {
             // 800
             body: { [MOVE]: 2, [CARRY]: 4 },
         },
-        { role: 'builder', count: 4, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
+        { role: 'builder', count: 2, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
         // 800
         {
             role: 'upgrader',
@@ -44,22 +44,18 @@ const config_online = {
     // path_config_mine: { visualizePathStyle: { stroke: '#ffaa00' } },
     path_config_mine: {},
     rooms: {
-        E34N9: {
-            name: 'E34N9',
+        W38N47: {
+            name: 'W38N47',
             spawn_name: 'Spawn1',
-            resource_energy_ids: [
-                '5bbcaeed9099fc012e639cb2',
-                '5bbcaeed9099fc012e639cb3',
-                '9d330774017e6b9',
-            ],
-            resource_energy_nums: [1, 1, 0],
+            resource_energy_ids: ['5bbcaae29099fc012e6325b3', '5bbcaae29099fc012e6325b4'],
+            resource_energy_nums: [1, 1],
             extension_pos: [
                 // { x: 31, y: 4 },
             ],
             tower_id: 'af41925331a4dcd',
         },
     },
-    room_name_1: 'E34N9',
+    room_name_1: 'W38N47',
     memory_key_names: names,
     log_on: true,
     renew_min: 150,

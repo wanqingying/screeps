@@ -42,7 +42,6 @@ function run_builder(creep: Creep) {
 }
 
 function run_harvester(creep: Creep) {
-
     // 根据配置分配矿工
     function clear_resource_id(creep: Creep, id: string) {
         creep.memory.target_resource_id = undefined;
@@ -93,7 +92,7 @@ function run_starter(creep: Creep) {
         let target = Object.keys(Memory.resource_energy)
             .filter(k => {
                 let g: Source = Game.getObjectById(k);
-                return g.energy > 500;
+                return g && g.energy > 500;
             })
             .pop();
         if (target) {
