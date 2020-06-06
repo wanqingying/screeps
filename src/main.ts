@@ -1,13 +1,12 @@
 import { role_runner } from './role';
 
 import { check_state, check_structure } from './bootstrap';
-import { create } from 'domain';
+import { log } from './utils.uta';
+
 import { config } from './config';
 
 module.exports.loop = function main() {
-    console.log(
-        '===================================================tick====================================='
-    );
+    log('==============================================tick=====================================');
     check_state();
     check_structure();
     let count = config.creep_spawn_role.find(r => r.role === 'carry').count;

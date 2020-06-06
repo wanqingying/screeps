@@ -185,7 +185,7 @@ export function check_structure() {
         if (!exist) {
             let code = room.createConstructionSite(pos.x, pos.y, STRUCTURE_EXTENSION);
             if (code !== 0) {
-                console.log('STRUCTURE_EXTENSION:', code);
+                log('STRUCTURE_EXTENSION:', code);
             }
         } else {
             // console.log('exist', exist.id, exist.isActive());

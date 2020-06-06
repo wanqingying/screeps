@@ -30,7 +30,7 @@ function run_builder(creep: Creep) {
             const bd = () => creep.build(tag);
             moveToTargetDoFn(creep, tag.pos || tag, bd);
         } else {
-            console.log('build not found:', creep.name);
+            log('build not found:', creep.name);
             creep.memory.target_id = undefined;
         }
     } else {
