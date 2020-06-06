@@ -115,6 +115,12 @@ function flush_memory() {
             }
         }
     });
+    Object.keys(Memory.resource_energy).forEach(k=>{
+        let t=Game.getObjectById(k);
+        if (!t){
+            delete Memory.resource_energy[k]
+        }
+    })
 }
 
 function spawn_role_on_start() {

@@ -10,20 +10,20 @@ const names: (keyof Memory)[] = [
 ];
 const config_online = {
     creep_spawn_role: [
-        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 2 } },
+        { role: 'worker', count: 4, body: { [MOVE]: 2, [WORK]: 2 } },
         {
             role: 'carry',
             count: 2,
             // 800
-            body: { [MOVE]: 2, [CARRY]: 4 },
+            body: { [MOVE]: 4, [CARRY]: 4 },
         },
-        { role: 'builder', count: 2, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
+        { role: 'builder', count: 2, body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 } },
         // 800
         {
             role: 'upgrader',
-            count: 2,
+            count: 1,
             // 800
-            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 6 },
+            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
         },
         { role: 'harvester', count: 0, body: [MOVE, CARRY, WORK] },
         { role: 'heal', count: 0, body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, HEAL] },
@@ -48,7 +48,7 @@ const config_online = {
             name: 'W38N47',
             spawn_name: 'Spawn1',
             resource_energy_ids: ['5bbcaae29099fc012e6325b3', '5bbcaae29099fc012e6325b4'],
-            resource_energy_nums: [1, 1],
+            resource_energy_nums: [2, 2],
             extension_pos: [
                 // { x: 31, y: 4 },
             ],

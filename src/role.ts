@@ -126,7 +126,10 @@ function run_upgrader(creep: Creep) {
         // if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity())) {
         //     return;
         // }
-        findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);
+        let cont = findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);
+        if (!cont) {
+            findMaxEnergyWithDraw(creep);
+        }
     }
 }
 function run_carry(creep: Creep) {
@@ -163,6 +166,9 @@ function findMaxEnergyWithDraw(creep: Creep, types?: any[]) {
         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, config.path_config_mine);
         }
+        return true;
+    } else {
+        return false;
     }
 }
 
