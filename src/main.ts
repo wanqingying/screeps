@@ -1,24 +1,28 @@
-import { harvester } from './role.harvester';
-import { builder } from './role.builder';
-import { upgrader } from './role.upgrader';
-import { check_state } from './bootstrap.check';
+import { role_runner } from './role';
+
+import { check_state, check_structure } from './bootstrap';
+import { create } from 'domain';
+import { config } from './config';
 
 module.exports.loop = function main() {
-    console.log('tick');
+    console.log(
+        '===================================================tick====================================='
+    );
     check_state();
+    check_structure();
+    let count = config.creep_spawn_role.find(r => r.role === 'carry').count;
     for (const name in Game.creeps) {
         const creep = Game.creeps[name];
-        if (creep.memory.role == 'harvester') {
-            harvester.run(creep);
+
+        if (
+            Object.values(Game.creeps).filter(c => c.memory.role === 'carry').length < count &&
+            ['builder', 'upgrader', 'starter', 'container_carry'].includes(creep.memory.role)
+        ) {
+            role_runner.carry(Game.creeps[name]);
+            continue;
         }
-        if (creep.memory.role == 'upgrader') {
-            upgrader.run(creep);
-        }
-        if (creep.memory.role == 'builder') {
-            builder.run(creep);
-        }
-        if (creep.memory.role == 'starter') {
-            harvester.run(creep);
+        if (Object.keys(role_runner).includes(creep.memory.role)) {
+            role_runner[creep.memory.role](creep);
         }
     }
 };
