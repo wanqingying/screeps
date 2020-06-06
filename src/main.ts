@@ -6,7 +6,7 @@ import { log } from './utils.uta';
 import { config } from './config';
 
 module.exports.loop = function main() {
-    log('==============================================tick=====================================');
+    log('1==============================================tick=====================================1');
     check_state();
     check_structure();
     let count = config.creep_spawn_role.find(r => r.role === 'carry').count;
