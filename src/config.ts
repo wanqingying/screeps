@@ -10,12 +10,12 @@ const names: (keyof Memory)[] = [
 ];
 const config_online = {
     creep_spawn_role: [
-        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 6 } },
+        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 2 } },
         {
             role: 'carry',
             count: 2,
             // 800
-            body: { [MOVE]: 3, [CARRY]: 13 },
+            body: { [MOVE]: 2, [CARRY]: 4 },
         },
         { role: 'builder', count: 4, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
         // 800
@@ -64,6 +64,7 @@ const config_online = {
             tower_id: 'af41925331a4dcd',
         },
     },
+    room_name_1: 'W2N8',
     memory_key_names: names,
     log_on: true,
     renew_min: 150,
@@ -106,33 +107,29 @@ const config_local = {
     // path_config_mine: { visualizePathStyle: { stroke: '#ffaa00' } },
     path_config_mine: {},
     rooms: {
-        W2N8: {
-            name: 'W2N8',
+        E34N9: {
+            name: 'E34N9',
             spawn_name: 'Spawn1',
-            resource_energy_ids: ['ad7c07746802348', '2484077468064e9', '9d330774017e6b9'],
+            resource_energy_ids: [
+                '5bbcaeed9099fc012e639cb2',
+                '5bbcaeed9099fc012e639cb3',
+                '9d330774017e6b9',
+            ],
             resource_energy_nums: [1, 1, 0],
             extension_pos: [
-                { x: 42, y: 9 },
-                { x: 42, y: 8 },
-                { x: 43, y: 8 },
-                { x: 43, y: 9 },
-                { x: 38, y: 15 },
-                { x: 27, y: 4 },
-                { x: 28, y: 4 },
-                { x: 29, y: 4 },
-                { x: 30, y: 4 },
-                { x: 31, y: 4 },
+                // { x: 31, y: 4 },
             ],
             tower_id: 'af41925331a4dcd',
         },
     },
+    room_name_1: 'E34N9',
     memory_key_names: names,
     log_on: true,
     renew_min: 150,
     renew_max: 1400,
 };
 
-let cfg: typeof config_local;
+let cfg: typeof config_local | typeof config_online;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
     cfg = config_local;
 } else {

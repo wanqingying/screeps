@@ -44,7 +44,7 @@ export function spawn_creep(opt: spawn_creep_opt) {
             break;
         }
     }
-    const spawn = opt.spawn || Game.spawns[config.rooms.W2N8.spawn_name];
+    const spawn = opt.spawn || Game.spawns[config.rooms[config.room_name_1].spawn_name];
     const creep_name = opt.name + '_' + k || `creep${k}`;
     if (spawn.room.energyAvailable < 200 || !config.creep_spawn_on) {
         return;

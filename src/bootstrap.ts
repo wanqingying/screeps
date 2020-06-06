@@ -20,7 +20,7 @@ function flush_creeps() {
 }
 
 function renew_creeps() {
-    let spawn = Game.spawns[config.rooms.W2N8.spawn_name];
+    let spawn = Game.spawns[config.rooms[config.room_name_1].spawn_name];
     // if (spawn.store.getUsedCapacity(RESOURCE_ENERGY) < 5000) {
     //     Memory.renew_creeps.forEach(p => {
     //         let creep = Game.creeps[p.name];
@@ -94,7 +94,7 @@ function flush_memory() {
     if (!Memory.resource_energy) {
         Memory.resource_energy = {};
     }
-    config.rooms.W2N8.resource_energy_ids.forEach(id => {
+    config.rooms[config.room_name_1].resource_energy_ids.forEach(id => {
         if (!Memory.resource_energy[id]) {
             Memory.resource_energy[id] = { miners: [] };
         }
@@ -150,7 +150,7 @@ function spawn_role_on_start() {
 }
 
 function log_energy() {
-    let room_name = config.rooms.W2N8.name;
+    let room_name = config.rooms[config.room_name_1].name;
     let room_target = Game.rooms[room_name];
     let eng = room_target.energyAvailable;
     log('energy/capacity:', `${eng}/${room_target.energyCapacityAvailable}`);
@@ -170,17 +170,17 @@ function spawn_starter(n: number) {
 }
 
 export function check_structure() {
-    let room = Game.rooms[config.rooms.W2N8.name];
+    let room = Game.rooms[config.rooms[config.room_name_1].name];
     let extensions = room.find(FIND_STRUCTURES, { filter: s => s.structureType === 'extension' });
     extensions.forEach(ext => {
-        let meet = config.rooms.W2N8.extension_pos.find(
+        let meet = config.rooms[config.room_name_1].extension_pos.find(
             pos => ext.pos.x === pos.x && ext.pos.y === pos.y
         );
         if (!meet) {
             ext.destroy();
         }
     });
-    config.rooms.W2N8.extension_pos.forEach(pos => {
+    config.rooms[config.room_name_1].extension_pos.forEach(pos => {
         let exist = extensions.find(ext => ext.pos.x === pos.x && ext.pos.y === pos.y);
         if (!exist) {
             let code = room.createConstructionSite(pos.x, pos.y, STRUCTURE_EXTENSION);
@@ -195,7 +195,7 @@ export function check_structure() {
 }
 
 function tower_reaper() {
-    let tower = Game.getObjectById<StructureTower>(config.rooms.W2N8.tower_id);
+    let tower = Game.getObjectById<StructureTower>(config.rooms[config.room_name_1].tower_id);
     if (tower) {
         let targets = tower.room
             .find(FIND_STRUCTURES, {

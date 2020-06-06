@@ -18,6 +18,7 @@ declare type RoleName =
     | 'renew'
     | 'heal';
 
+
 declare interface CreepMemory {
     role: RoleName;
     target_resource_id?: string;

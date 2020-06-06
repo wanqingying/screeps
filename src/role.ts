@@ -61,7 +61,7 @@ function run_harvester(creep: Creep) {
     }
     if (!targetId) {
         targetId = Object.keys(Memory.resource_energy).find((id, i) => {
-            let nums = config.rooms.W2N8.resource_energy_nums[i];
+            let nums = config.rooms[config.room_name_1].resource_energy_nums[i];
             let a = Memory.resource_energy[id].miners.length < nums;
             let b = Game.getObjectById<Source>(id);
             return a && b && b.energy > 400;
@@ -87,6 +87,7 @@ function run_worker(creep: Creep) {
     // 根据配置分配矿工
     run_harvester(creep);
 }
+
 function run_starter(creep: Creep) {
     if (creep.store.getFreeCapacity() > 0 && creep.memory.process !== 'drop') {
         let target = Object.keys(Memory.resource_energy)
@@ -206,7 +207,7 @@ function pickUpMaxDropEnergy(creep: Creep, min?: number) {
     if (creep.memory.target_drop_source_id) {
         target = Game.getObjectById(creep.memory.target_drop_source_id);
     } else {
-        let room = Game.rooms[config.rooms.W2N8.name];
+        let room = Game.rooms[config.rooms[config.room_name_1].name];
         let targets = room.find(FIND_DROPPED_RESOURCES);
         target = targets
             .sort((a, b) => {
