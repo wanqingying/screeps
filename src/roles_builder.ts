@@ -1,4 +1,3 @@
-import { log } from './utils.uta';
 import { moveToTargetDoFn,pickUpMaxDropEnergy ,findMaxEnergyWithDraw} from './lib_creep';
 
 
@@ -33,7 +32,7 @@ builder.setUp = function (creep) {
             const bd = () => creep.build(tag);
             moveToTargetDoFn(creep, tag.pos || tag, bd);
         } else {
-            log('build not found:', creep.name);
+            creep.log('build not found');
             creep.memory.target_id = undefined;
         }
     } else {

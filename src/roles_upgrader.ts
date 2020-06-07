@@ -1,5 +1,4 @@
-import { moveToTargetDoFn } from './roles';
-import { findMaxEnergyWithDraw } from './lib_creep';
+import { findMaxEnergyWithDraw,moveToTargetDoFn } from './lib_creep';
 
 
 const upgrader = {} as Role;

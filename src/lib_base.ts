@@ -5,7 +5,3 @@ export function find_nearby_target(base, targets): RoomPosition {
     })[0];
     return target?.pos || target;
 }
-
-export function get_creep_config(room: Room) {
-    const level = room.controller.level;
-}

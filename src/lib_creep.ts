@@ -141,7 +141,7 @@ export function findMaxEnergyWithDraw(creep: Creep, types?: any[]) {
     let target = findMaxEnergyStructure(creep, types);
     if (target) {
         if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, config.path_config_mine);
+            creep.moveTo(target);
         }
         return true;
     } else {

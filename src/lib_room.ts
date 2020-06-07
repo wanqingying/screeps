@@ -1,4 +1,3 @@
-import { run_creep } from './lib_creep';
 import { get_creep_config, get_creep_body } from './config';
 
 export function prepare_room(room: Room): boolean {
