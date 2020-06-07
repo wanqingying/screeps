@@ -97,7 +97,7 @@ function flash_room() {
         // 初始化角色
         room.memory.role_exist = [];
         Object.values(role_name).forEach(role => {
-            const rs = room.findBy(FIND_CREEPS, c => c.memory.role === role);
+            const rs = room.findBy(FIND_CREEPS, c => c?.memory?.role === role);
             room.memory.role_exist.push({ role: role, exist: rs.length });
         });
     });

@@ -1,13 +1,14 @@
 Creep.prototype.log = function (...msg) {
-    log(msg);
+    let px = `creep ${this.name} : `;
+    log(px, msg);
 };
 
 Room.prototype.log = function (...msg) {
-    log.bind(this)(msg);
+    let px = `room ${this.name} : `;
+    log(px, msg);
 };
 
-function log(msg) {
-    let px = `room ${this.name} : `;
+function log(px, msg) {
     let x = msg.pop();
     while (x) {
         px += x;
