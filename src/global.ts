@@ -1,4 +1,4 @@
-import { config_global,role_name } from './config';
+import { config_global, role_name } from './config';
 
 global.roles = {} as Roles;
 
@@ -25,12 +25,14 @@ global.get_code_msg_screeps = function (code) {
     return ScreepsReturnCodeMsg[0 - code];
 };
 
-global.role_name = role_name as any
+global.role_name = role_name as any;
 
 global.count_distance = function (a, b) {
     let dx = a.x - b.x;
     let dy = a.y - b.y;
     return Math.round(Math.pow(dx * dx + dy * dy, 0.5));
 };
+
+global.ERR_TARGET_NOT_FOUND = -217;
 
 global.config = config_global;

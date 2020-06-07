@@ -14,27 +14,50 @@ export function run_creep(creep: Creep) {
     }
 }
 
-export function transfer_nearby(creep, types?) {
-    const filters = [STRUCTURE_CONTAINER, STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER];
-    const targets: StructureHasStore = creep.room.find(FIND_STRUCTURES, {
-        filter: function (structure: StructureHasStore) {
-            if (!structure || !structure.store) {
-                return false;
-            }
-            const meet_type = (types || filters).includes(structure.structureType);
-            const free = structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            return meet_type && free;
-        },
-    });
-    const target: StructureHasStore = find_nearby_target(creep, targets) as any;
+export function transfer_nearby(creep: Creep, types?): ScreepsReturnCode | number {
+    let target: StructureHasStore;
+    if (creep.memory.target_id) {
+        let t = Game.getObjectById(creep.memory.target_id) as StructureHasStore;
+        if (t.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            target = t;
+        } else {
+            creep.memory.target_id = undefined;
+        }
+    } else {
+        const filters = [
+            STRUCTURE_CONTAINER,
+            STRUCTURE_EXTENSION,
+            STRUCTURE_SPAWN,
+            STRUCTURE_TOWER,
+        ];
+        const targets = creep.room.find(FIND_STRUCTURES, {
+            filter: function (structure: StructureHasStore) {
+                if (!structure || !structure.store) {
+                    return false;
+                }
+                const meet_type = (types || filters).includes(structure.structureType);
+                const free = structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                let f = structure.store.getFreeCapacity(RESOURCE_ENERGY);
+                let o = structure.store.getCapacity(RESOURCE_ENERGY);
+                return meet_type && free;
+            },
+        });
+        target = find_nearby_target(creep, targets) as any;
+    }
+
     if (target) {
+        creep.memory.target_id = target.id;
         const act = creep.transfer(target, RESOURCE_ENERGY);
         if (act === ERR_NOT_IN_RANGE) {
             creep.moveTo(target);
         }
+        if (creep.store.getUsedCapacity() === 0) {
+            creep.memory.target_id = undefined;
+        }
         return act;
     } else {
         creep.log('transfer target not found');
+        return ERR_TARGET_NOT_FOUND;
     }
 }
 
@@ -46,8 +69,8 @@ export function renew_creep(creep: Creep) {
         target = find_spawn(creep);
         creep.memory.renew_spawn_id = target.id;
     }
-    if (!target.renewCreep){
-        creep.log('renew err ',target)
+    if (!target.renewCreep) {
+        creep.log('renew err ', target);
         return;
     }
     const act = target.renewCreep(creep);
@@ -55,7 +78,7 @@ export function renew_creep(creep: Creep) {
         creep.moveTo(target);
     }
     if (act !== OK) {
-        creep.log('renew ', get_code_msg_screeps(act));
+        creep.log(' renew ', get_code_msg_screeps(act));
     }
     return act;
 }

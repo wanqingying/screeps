@@ -27,9 +27,11 @@ declare namespace NodeJS {
         count_distance: count_distance;
         config: ConfigGlobal;
         roles: Roles;
+        ERR_TARGET_NOT_FOUND:-217
     }
 }
 
+declare const ERR_TARGET_NOT_FOUND = -217;
 declare const roles: Roles;
 declare const count_distance: count_distance;
 declare const role_name: role_name;

@@ -4,9 +4,24 @@ const carrier = {} as Role;
 
 carrier.setUp = function (creep) {
     if (creep.store.getUsedCapacity() === 0) {
+        creep.memory.process = 'pick';
+        creep.memory.target_id = undefined;
+    }
+    if (creep.store.getFreeCapacity() === 0) {
+        creep.memory.process = 'drop';
+    }
+    if (creep.memory.process === 'pick') {
         pickUpMaxDropEnergy(creep);
     } else {
-        transfer_nearby(creep, [STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_EXTENSION]);
+        const act = transfer_nearby(creep, [STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_EXTENSION]);
+        if (act === ERR_TARGET_NOT_FOUND) {
+            transfer_nearby(creep, [
+                STRUCTURE_SPAWN,
+                STRUCTURE_TOWER,
+                STRUCTURE_EXTENSION,
+                STRUCTURE_CONTAINER,
+            ]);
+        }
     }
 };
 

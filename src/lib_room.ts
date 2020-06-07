@@ -2,7 +2,9 @@ import { get_creep_body, get_creep_config, get_possible_max_energy } from './con
 
 export function prepare_room(room: Room): boolean {
     check_tower(room);
-    prepare_creep(room);
+    prepare_spawn_creep(room);
+    prepare_kill_creep(room);
+    prepare_kill_more_creep(room);
     return false;
 }
 
@@ -70,7 +72,7 @@ export function spawn_creep(room: Room, role: role_name_key) {
     }
 }
 
-function prepare_creep(room: Room) {
+function prepare_spawn_creep(room: Room) {
     const cfg = get_creep_config(room);
     let q = room.memory.role_exist.sort((a, b) => {
         return a.exist - b.exist;
@@ -105,71 +107,48 @@ function prepare_creep(room: Room) {
     //     }
     // }
 }
-// export function get_creep_config(room: Room): RoomCreepCfg {
-//     return {
-//         [role_name.starter]: { max: 0 },
-//         [role_name.carrier]: { max: 2 },
-//         [role_name.builder]: { max: 2 },
-//         [role_name.harvester]: { max: 2 },
-//         [role_name.upgrader]: { max: 1 },
-//     };
-// }
-// export function get_possible_max_energy(room: Room): number {
-//     let max = 0;
-//     room.memory.energy_rate.forEach(r => {
-//         if (r > max) {
-//             max = r;
-//         }
-//     });
-//     return Math.floor(max * room.energyCapacityAvailable);
-// }
-// export function get_creep_body(room: Room, role: role_name_key) {
-//     let energy_max = room.energyCapacityAvailable;
-//     const energy_lack = room.memory.energy_lack;
-//     let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+function prepare_kill_creep(room: Room) {
+    // 单位更新换代
+    const energy_full = room.memory.energy_full;
+    const cut = room.energyCapacityAvailable;
+    const cs = room
+        .findBy(FIND_CREEPS, c => {
+            return c.memory.cost < Math.max(cut / 2, cut - 100, 200);
+        })
+        .sort((a, b) => {
+            return a.memory.cost - b.memory.cost;
+        });
+    let tg = cs.shift();
+    console.log('refresh', tg, energy_full, room.memory.spawning);
+    if (tg && energy_full && !room.memory.spawning) {
+        tg.log('die auto ');
+        tg.suicide();
+        return;
+    }
+}
+
+function prepare_kill_more_creep(room: Room) {
+    const cps = room.findBy(FIND_CREEPS).sort((a, b) => {
+        return a.memory.cost - b.memory.cost;
+    });
+    const cfg = get_creep_config(room);
+    const ex = room.memory.role_exist;
+    for (let j = 0; j < ex.length; j++) {
+        let r = ex[j];
+        const exist = r.exist;
+        const max = cfg[r.role].max;
+        if (exist > max) {
+            for (let i = 0; i < cps.length; i++) {
+                let c = cps[i];
+                if (c.memory.role === r.role) {
+                    c.suicide();
+                    return;
+                }
+            }
+        }
+    }
+}
+
+// function prepare_() {
 //
-//     if (energy_lack) {
-//         energy_max = get_possible_max_energy(room);
-//         return [WORK, MOVE, CARRY];
-//     }
-//     if (room.memory.energy_stop){
-//         energy_max=300
-//     }
-//     let n;
-//     switch (role) {
-//         case 'builder':
-//             n = Math.floor(energy_max / 200);
-//             return get_repeat_body(n, [MOVE, CARRY, WORK]);
-//         case 'carrier':
-//             n = Math.floor(energy_max / 100);
-//             return get_repeat_body(n, [MOVE, CARRY]);
-//         case 'harvester':
-//             let mk = 0;
-//             if (energy_max <= 400) {
-//                 mk = 2;
-//             }
-//             if (energy_max <= 550) {
-//                 mk = 3;
-//             }
-//             if (energy_max <= 850) {
-//                 mk = 4;
-//             }
-//             n = Math.floor((energy_max - mk * 50) / 100);
-//             let mv = new Array(mk).fill(MOVE);
-//             let wk = new Array(n).fill(WORK);
-//             return mv.concat(wk);
-//         case 'starter':
-//             return body;
-//         case 'upgrader':
-//             n = Math.floor(energy_max / 200);
-//             return get_repeat_body(n, [MOVE, CARRY, WORK]);
-//     }
-// }
-//
-// function get_repeat_body(n: number, part: any[]) {
-//     let bd = [];
-//     for (let i = 0; i < n; i++) {
-//         bd = bd.concat(part);
-//     }
-//     return bd;
 // }

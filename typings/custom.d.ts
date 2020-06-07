@@ -41,3 +41,4 @@ declare interface RoomCreepCfg {
         max: number;
     };
 }
+

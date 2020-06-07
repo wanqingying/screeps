@@ -74,17 +74,18 @@ function flash_room() {
         const rate = room.energyAvailable / room.energyCapacityAvailable;
         room.memory.energy_rate.push(rate);
         room.memory.energy_exist.push(energy);
-        let ex=room.memory.energy_exist;
+        let ex = room.memory.energy_exist;
         if (room.memory.energy_rate.length > config.energy_lack_tick) {
             room.memory.energy_rate.shift();
         }
-        if (ex.length>config.energy_lack_tick){
-            room.memory.energy_exist=ex.slice(-100)
+        if (ex.length > config.energy_lack_tick) {
+            room.memory.energy_exist = ex.slice(-100);
         }
+        const rts = room.memory.energy_rate;
         room.memory.energy_lack =
             room.memory.energy_rate.every(rate => rate < config.energy_lack_rate) &&
             room.memory.energy_rate.length > 10;
-        room.memory.energy_full = rate > 0.9999;
+        room.memory.energy_full = rate > 0.9999 && rts[rts.length - 2] > 0.99;
         room.memory.energy_stop = room.memory.energy_exist.every(r => r === 300);
 
         room.log(`energy ${energy}/${room.energyCapacityAvailable}`);
@@ -100,6 +101,11 @@ function flash_room() {
             const rs = room.findBy(FIND_CREEPS, c => c?.memory?.role === role);
             room.memory.role_exist.push({ role: role, exist: rs.length });
         });
+        // spawn
+        let has_spawn = room
+            .findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_SPAWN)
+            .some((s: StructureSpawn) => s.spawning);
+        room.memory.spawning = has_spawn;
     });
 }
 
@@ -145,17 +151,16 @@ function flash_creep() {
             if (danger > 25) {
                 start_renew(creep);
             }
-        })
-    Object.values(Game.creeps).forEach(creep=>{
-        if (!creep.memory.cost){
-            let cost=0;
-            creep.body.forEach(b=>{
-                cost+=config.internal.body_cost[b.type];
-            })
-            creep.memory.cost=cost;
+        });
+    Object.values(Game.creeps).forEach(creep => {
+        if (!creep.memory.cost) {
+            let cost = 0;
+            creep.body.forEach(b => {
+                cost += config.internal.body_cost[b.type];
+            });
+            creep.memory.cost = cost;
         }
-
-    })
+    });
 }
 
 function stop_renew(creep: Creep) {
