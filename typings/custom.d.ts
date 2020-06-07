@@ -18,11 +18,6 @@ declare type RoleName =
     | 'renew'
     | 'heal';
 
-declare namespace NodeJS {
-    export interface Global {
-        get_code_msg_screeps: (code: ScreepsReturnCode) => string;
-    }
-}
 declare interface role_name {
     carrier: 'carrier';
     harvester: 'harvester';
@@ -30,17 +25,19 @@ declare interface role_name {
     upgrader: 'upgrader';
     builder: 'builder';
 }
-declare type get_code_msg_screeps = (code: ScreepsReturnCode) => string;
-declare namespace NodeJS {
-    export interface Global {
-        get_code_msg_screeps: get_code_msg_screeps;
-        role_name: role_name;
-    }
+declare type role_name_key = keyof role_name;
+
+declare interface Source_h {
+    target: Source;
+    harvester: Creep[];
 }
-declare const role_name: role_name;
-declare const get_code_msg_screeps: get_code_msg_screeps;
 
-declare type role_run_fn = () => void;
+declare interface StructureHasStore extends Structure<any> {
+    store: Store<any, any>;
+}
 
-
-
+declare interface RoomCreepCfg {
+    [role: string]: {
+        max: number;
+    };
+}

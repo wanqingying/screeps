@@ -1,139 +1,77 @@
-const names: (keyof Memory)[] = [
-    'resource_energy',
-    'creeps_spawn_index',
-    'creeps',
-    'powerCreeps',
-    'flags',
-    'rooms',
-    'renew_creeps',
-    'spawns',
-];
-const config_online = {
-    creep_spawn_role: [
-        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 2 } },
-        {
-            role: 'carry',
-            count: 2,
-            // 800
-            body: { [MOVE]: 2, [CARRY]: 4 },
-        },
-        { role: 'builder', count: 4, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
-        // 800
-        {
-            role: 'upgrader',
-            count: 2,
-            // 800
-            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 6 },
-        },
-        { role: 'harvester', count: 0, body: [MOVE, CARRY, WORK] },
-        { role: 'heal', count: 0, body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, HEAL] },
-        { role: 'starter', count: 3, body: [MOVE, CARRY, WORK, WORK] },
-        {
-            role: 'container_carry',
-            count: 4,
-            // 800
-            body: { [MOVE]: 4, [CARRY]: 12 },
-        },
-    ],
-    creep_spawn_starter: 2,
-    // 重新召唤名字错误的creep
-    creep_check_name: false,
-    creep_kill_all: false,
-    creep_kill_more: true,
-    creep_spawn_on: true,
-    // path_config_mine: { visualizePathStyle: { stroke: '#ffaa00' } },
-    path_config_mine: {},
-    rooms: {
-        E34N9: {
-            name: 'E34N9',
-            spawn_name: 'Spawn1',
-            resource_energy_ids: [
-                '5bbcaeed9099fc012e639cb2',
-                '5bbcaeed9099fc012e639cb3',
-                '9d330774017e6b9',
-            ],
-            resource_energy_nums: [1, 1, 0],
-            extension_pos: [
-                // { x: 31, y: 4 },
-            ],
-            tower_id: 'af41925331a4dcd',
-        },
-    },
-    room_name_1: 'E34N9',
-    memory_key_names: names,
-    log_on: true,
-    renew_min: 150,
-    renew_max: 1400,
+import {  get_possible_max_energy } from './lib_room';
+
+export const role_name= {
+    carrier: 'carrier',
+    harvester: 'harvester',
+    starter: 'starter',
+    upgrader: 'upgrader',
+    builder: 'builder',
 };
-const config_local = {
-    creep_spawn_role: [
-        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 6 } },
-        {
-            role: 'carry',
-            count: 2,
-            // 800
-            body: { [MOVE]: 3, [CARRY]: 13 },
-        },
-        { role: 'builder', count: 2, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
-        // 800
-        {
-            role: 'upgrader',
-            count: 2,
-            // 800
-            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 6 },
-        },
-        { role: 'harvester', count: 0, body: [MOVE, CARRY, WORK] },
-        { role: 'heal', count: 0, body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, HEAL] },
-        { role: 'starter', count: 1, body: [MOVE, CARRY, WORK, WORK] },
-        {
-            role: 'container_carry',
-            count: 4,
-            // 800
-            body: { [MOVE]: 4, [CARRY]: 12 },
-        },
-    ],
-    creep_spawn_starter: 2,
-    // 重新召唤名字错误的creep
-    creep_check_name: false,
-    creep_kill_all: false,
-    creep_kill_more: true,
-    creep_spawn_on: true,
-    // path_config_mine: { visualizePathStyle: { stroke: '#ffaa00' } },
-    path_config_mine: {},
-    rooms: {
-        W2N8: {
-            name: 'W2N8',
-            spawn_name: 'Spawn1',
-            resource_energy_ids: ['ad7c07746802348', '2484077468064e9', '9d330774017e6b9'],
-            resource_energy_nums: [1, 1, 0],
-            extension_pos: [
-                { x: 42, y: 9 },
-                { x: 42, y: 8 },
-                { x: 43, y: 8 },
-                { x: 43, y: 9 },
-                { x: 31, y: 7 },
-                { x: 27, y: 4 },
-                { x: 28, y: 4 },
-                { x: 29, y: 4 },
-                { x: 30, y: 4 },
-                { x: 31, y: 4 },
-            ],
-            tower_id: 'af41925331a4dcd',
-        },
+export const config_global: ConfigGlobal = {
+    enable_log: true,
+    internal: {
+        extension_limit: [0, 0, 5, 10, 20, 30, 40, 50, 60],
     },
-    room_name_1: 'W2N8',
-    memory_key_names: names,
-    log_on: true,
-    renew_min: 150,
-    renew_max: 1400,
+    energy_lack_rate: 0.2,
+    renew_max_rate: 0.4,
+    energy_lack_tick: 100,
+    renew_interval: 200,
+    creep_order: [role_name.harvester, role_name.carrier, role_name.builder, role_name.upgrader],
 };
 
-
-let cfg: typeof config_local | typeof config_online;
-if (Game.shard.name === 'LAPTOP-B07N3SVP') {
-    cfg = config_local;
-} else {
-    cfg = config_online;
+export function get_creep_config(room: Room): RoomCreepCfg {
+    return {
+        [role_name.starter]: { max: 0 },
+        [role_name.carrier]: { max: 2 },
+        [role_name.builder]: { max: 2 },
+        [role_name.harvester]: { max: 2 },
+    };
 }
 
-export const config = cfg;
+export function get_creep_body(room: Room, role: role_name_key) {
+    let energy_max = room.energyCapacityAvailable;
+    const energy_lack = room.memory.energy_lack;
+    let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+
+    if (energy_lack) {
+        energy_max = get_possible_max_energy(room);
+        return [WORK, MOVE, CARRY];
+    }
+    let n;
+    switch (role) {
+        case 'builder':
+            n = Math.floor(energy_max / 200);
+            return get_repeat_body(n, [MOVE, CARRY, WORK]);
+        case 'carrier':
+            n = Math.floor(energy_max / 100);
+            return get_repeat_body(n, [MOVE, CARRY]);
+        case 'harvester':
+            let mk = 0;
+            if (energy_max <= 400) {
+                mk = 2;
+            }
+            if (energy_max <= 550) {
+                mk = 3;
+            }
+            if (energy_max <= 850) {
+                mk = 4;
+            }
+            n = Math.floor((energy_max - mk * 50) / 100);
+            let mv = new Array(mk).fill(MOVE);
+            let wk = new Array(n).fill(WORK);
+            return mv.concat(wk);
+        case 'starter':
+            return body;
+        case 'upgrader':
+            n = Math.floor(energy_max / 200);
+            return get_repeat_body(n, [MOVE, CARRY, WORK]);
+    }
+}
+
+function get_repeat_body(n: number, part: any[]) {
+    let bd = [];
+    for (let i = 0; i < n; i++) {
+        bd = bd.concat(part);
+    }
+    return bd;
+}

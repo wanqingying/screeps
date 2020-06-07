@@ -1,31 +1,15 @@
-import { role_runner } from './role';
+import { prepare_room } from './lib_room';
+import { run_creep } from './lib_creep';
+import { flash } from './flash';
 
-import { check_state, check_structure } from './bootstrap';
-import { log } from './utils.uta';
-import {get} from 'lodash';
+function main() {
+    flash();
+    Object.values(Game.rooms).forEach(room => {
+        prepare_room(room);
+    });
+    Object.values(Game.creeps).forEach(creep => {
+        run_creep(creep);
+    });
+}
 
-
-import { config } from './config';
-
-
-module.exports.loop = function main() {
-    let n=get(Game,'shard.name')
-    log('==============================================tick=====================================',role_name.builder);
-    check_state();
-    check_structure();
-    let count = config.creep_spawn_role.find(r => r.role === 'carry').count;
-    for (const name in Game.creeps) {
-        const creep = Game.creeps[name];
-
-        if (
-            Object.values(Game.creeps).filter(c => c.memory.role === 'carry').length < count &&
-            ['builder', 'upgrader', 'container_carry'].includes(creep.memory.role)
-        ) {
-            role_runner.carry(Game.creeps[name]);
-            continue;
-        }
-        if (Object.keys(role_runner).includes(creep.memory.role)) {
-            role_runner[creep.memory.role](creep);
-        }
-    }
-};
+module.exports.loop = main;
