@@ -52,7 +52,7 @@ export function spawn_creep(opt: spawn_creep_opt) {
     let res = spawn.spawnCreep(opt.body, creep_name, {
         memory: { role: opt.role, index: k },
     });
-    log('spawn_creep:', res, opt.role);
+    log('spawn_creep:', global.get_code_msg_screeps(res), opt.role);
 }
 
 export function getDistance(a: RoomPosition, b: RoomPosition): number {

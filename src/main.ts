@@ -4,7 +4,6 @@ import { check_state, check_structure } from './bootstrap';
 import { log } from './utils.uta';
 
 import { config } from './config';
-
 module.exports.loop = function main() {
     log('1==============================================tick=====================================1');
     check_state();
