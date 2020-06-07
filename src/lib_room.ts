@@ -1,4 +1,4 @@
-import { get_creep_config, get_creep_body } from './config';
+import { get_creep_body, get_creep_config, get_possible_max_energy } from './config_creep';
 
 export function prepare_room(room: Room): boolean {
     check_tower(room);
@@ -54,16 +54,6 @@ export function find_source_min_harvester(room: Room) {
     })[0];
 }
 
-export function get_possible_max_energy(room: Room): number {
-    let max = 0;
-    room.memory.energy_rate.forEach(r => {
-        if (r > max) {
-            max = r;
-        }
-    });
-    return Math.floor(max * room.energyCapacityAvailable);
-}
-
 export function spawn_creep(room: Room, role: role_name_key) {
     const body = get_creep_body(room, role);
     const name = `${role}_${Game.time}`;
@@ -82,13 +72,104 @@ export function spawn_creep(room: Room, role: role_name_key) {
 
 function prepare_creep(room: Room) {
     const cfg = get_creep_config(room);
-    for (let i = 0; i < config.creep_order.length; i++) {
-        const role = config.creep_order[i];
-        const creeps = room.findBy(FIND_CREEPS, c => c.memory.role === role);
-        const max = cfg[role].max;
-        if (creeps.length < max) {
-            spawn_creep(room, role);
-            break;
-        }
+    let q = room.memory.role_exist.sort((a, b) => {
+        return a.exist - b.exist;
+    });
+    const harvester = room.memory.role_exist.find(r => r.role === role_name.harvester);
+    const carrier = room.memory.role_exist.find(r => r.role === role_name.carrier);
+    if (harvester.exist === 0) {
+        return spawn_creep(room, 'harvester');
     }
+    if (carrier.exist === 0) {
+        return spawn_creep(room, 'carrier');
+    }
+    q = Array.from(q);
+    let me = q.shift();
+    // let target_exist=room.findBy(FIND_CREEPS, c => c.memory.role === min_exist_role.role).length;
+
+    while (q.length && me.exist >= cfg[me.role].max) {
+        me = q.shift();
+    }
+    if (me.exist >= cfg[me.role].max) {
+        return;
+    }
+    spawn_creep(room, me.role as any);
+
+    // for (let i = 0; i < config.creep_order.length; i++) {
+    //     const role = config.creep_order[i];
+    //     const creeps = room.findBy(FIND_CREEPS, c => c.memory.role === role);
+    //     const max = cfg[role].max;
+    //     if (creeps.length < max) {
+    //         spawn_creep(room, role);
+    //         break;
+    //     }
+    // }
 }
+// export function get_creep_config(room: Room): RoomCreepCfg {
+//     return {
+//         [role_name.starter]: { max: 0 },
+//         [role_name.carrier]: { max: 2 },
+//         [role_name.builder]: { max: 2 },
+//         [role_name.harvester]: { max: 2 },
+//         [role_name.upgrader]: { max: 1 },
+//     };
+// }
+// export function get_possible_max_energy(room: Room): number {
+//     let max = 0;
+//     room.memory.energy_rate.forEach(r => {
+//         if (r > max) {
+//             max = r;
+//         }
+//     });
+//     return Math.floor(max * room.energyCapacityAvailable);
+// }
+// export function get_creep_body(room: Room, role: role_name_key) {
+//     let energy_max = room.energyCapacityAvailable;
+//     const energy_lack = room.memory.energy_lack;
+//     let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+//
+//     if (energy_lack) {
+//         energy_max = get_possible_max_energy(room);
+//         return [WORK, MOVE, CARRY];
+//     }
+//     if (room.memory.energy_stop){
+//         energy_max=300
+//     }
+//     let n;
+//     switch (role) {
+//         case 'builder':
+//             n = Math.floor(energy_max / 200);
+//             return get_repeat_body(n, [MOVE, CARRY, WORK]);
+//         case 'carrier':
+//             n = Math.floor(energy_max / 100);
+//             return get_repeat_body(n, [MOVE, CARRY]);
+//         case 'harvester':
+//             let mk = 0;
+//             if (energy_max <= 400) {
+//                 mk = 2;
+//             }
+//             if (energy_max <= 550) {
+//                 mk = 3;
+//             }
+//             if (energy_max <= 850) {
+//                 mk = 4;
+//             }
+//             n = Math.floor((energy_max - mk * 50) / 100);
+//             let mv = new Array(mk).fill(MOVE);
+//             let wk = new Array(n).fill(WORK);
+//             return mv.concat(wk);
+//         case 'starter':
+//             return body;
+//         case 'upgrader':
+//             n = Math.floor(energy_max / 200);
+//             return get_repeat_body(n, [MOVE, CARRY, WORK]);
+//     }
+// }
+//
+// function get_repeat_body(n: number, part: any[]) {
+//     let bd = [];
+//     for (let i = 0; i < n; i++) {
+//         bd = bd.concat(part);
+//     }
+//     return bd;
+// }

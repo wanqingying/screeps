@@ -1,3 +1,8 @@
+
+declare interface RoleExist{
+    role:string
+    exist:number
+}
 declare interface Memory {
     creeps_spawn_index: number[];
     resource_energy: { [id: string]: { miners: string[] } };
@@ -21,6 +26,7 @@ declare interface CreepMemory {
     distance_2?: number;
     act_msg?: any;
     step?: number;
+    cost?: number;
     id?: string;
     born_tick: number;
     renew_spawn_id?: string;
@@ -32,8 +38,13 @@ declare interface RoomMemory {
     creep_count: number;
     renew_count: number;
     energy_rate: number[];
+    energy_exist: number[];
     energy_lack: boolean;
+    energy_stop: boolean;
     energy_lack_tick: 50;
     energy_full: boolean;
     spawning: boolean;
+    role_exist:RoleExist[]
 }
+
+

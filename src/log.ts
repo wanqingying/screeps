@@ -3,7 +3,7 @@ Creep.prototype.log = function (...msg) {
 };
 
 Room.prototype.log = function (...msg) {
-    log(msg);
+    log.bind(this)(msg);
 };
 
 function log(msg) {

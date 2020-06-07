@@ -1,8 +1,10 @@
+import './bootstrap'
 import { prepare_room } from './lib_room';
 import { run_creep } from './lib_creep';
 import { flash } from './flash';
 
 function main() {
+    console.log('tick',Game.time);
     flash();
     Object.values(Game.rooms).forEach(room => {
         prepare_room(room);

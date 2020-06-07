@@ -38,6 +38,9 @@ function flash_room() {
         if (!Array.isArray(room.memory.energy_rate)) {
             room.memory.energy_rate = [];
         }
+        if (!Array.isArray(room.memory.energy_exist)) {
+            room.memory.energy_exist = [];
+        }
         if (!room.memory.structure) {
             room.memory.structure = { extension: 0 };
         }
@@ -53,7 +56,7 @@ function flash_room() {
                         return creep;
                     }
                 })
-                .filter(k => k.name);
+                .filter(k => k && k.name);
             room.source_energy.push({ target: source, harvester: cps });
         });
         // 初始化extension
@@ -70,13 +73,19 @@ function flash_room() {
         const energy = room.energyAvailable;
         const rate = room.energyAvailable / room.energyCapacityAvailable;
         room.memory.energy_rate.push(rate);
+        room.memory.energy_exist.push(energy);
+        let ex=room.memory.energy_exist;
         if (room.memory.energy_rate.length > config.energy_lack_tick) {
             room.memory.energy_rate.shift();
+        }
+        if (ex.length>config.energy_lack_tick){
+            room.memory.energy_exist=ex.slice(-100)
         }
         room.memory.energy_lack =
             room.memory.energy_rate.every(rate => rate < config.energy_lack_rate) &&
             room.memory.energy_rate.length > 10;
         room.memory.energy_full = rate > 0.9999;
+        room.memory.energy_stop = room.memory.energy_exist.every(r => r === 300);
 
         room.log(`energy ${energy}/${room.energyCapacityAvailable}`);
         // 初始化基地
@@ -84,6 +93,13 @@ function flash_room() {
             FIND_STRUCTURES,
             s => s.structureType === STRUCTURE_SPAWN
         ) as StructureSpawn[];
+
+        // 初始化角色
+        room.memory.role_exist = [];
+        Object.values(role_name).forEach(role => {
+            const rs = room.findBy(FIND_CREEPS, c => c.memory.role === role);
+            room.memory.role_exist.push({ role: role, exist: rs.length });
+        });
     });
 }
 
@@ -92,7 +108,7 @@ function flash_creep() {
         .sort((a, b) => {
             return a.ticksToLive - b.ticksToLive;
         })
-        .map(creep => {
+        .forEach(creep => {
             // 能量回复策略
             const life = creep.ticksToLive;
             // 正常回到 1450
@@ -129,7 +145,17 @@ function flash_creep() {
             if (danger > 25) {
                 start_renew(creep);
             }
-        });
+        })
+    Object.values(Game.creeps).forEach(creep=>{
+        if (!creep.memory.cost){
+            let cost=0;
+            creep.body.forEach(b=>{
+                cost+=config.internal.body_cost[b.type];
+            })
+            creep.memory.cost=cost;
+        }
+
+    })
 }
 
 function stop_renew(creep: Creep) {

@@ -1,6 +1,7 @@
-import './role.builder';
-import './role.starter';
-import './roles.carrier';
-import './roles.harvester';
+import './roles_builder';
+import './roles_carrier';
+import './roles_harvester';
+import './roles_starter';
+import './roles_upgrader'
 
 

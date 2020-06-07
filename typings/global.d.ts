@@ -4,6 +4,7 @@ declare interface ConfigGlobal {
     enable_log: boolean;
     internal: {
         extension_limit: number[];
+        body_cost:{[k:string]:number}
     };
     energy_lack_rate: number;
     energy_lack_tick: number;

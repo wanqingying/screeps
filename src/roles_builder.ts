@@ -1,5 +1,4 @@
-import { moveToTargetDoFn,pickUpMaxDropEnergy ,findMaxEnergyWithDraw} from './lib_creep';
-
+import { pickUpMaxDropEnergy, findMaxEnergyWithDraw } from './lib_creep';
 
 const builder = {} as Role;
 
@@ -29,8 +28,8 @@ builder.setUp = function (creep) {
             }
         }
         if (tag) {
-            const bd = () => creep.build(tag);
-            moveToTargetDoFn(creep, tag.pos || tag, bd);
+            creep.build(tag);
+            creep.moveTo(tag);
         } else {
             creep.log('build not found');
             creep.memory.target_id = undefined;

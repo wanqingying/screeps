@@ -1,9 +1,8 @@
-import { findMaxEnergyWithDraw,moveToTargetDoFn } from './lib_creep';
-
+import { findMaxEnergyWithDraw } from './lib_creep';
 
 const upgrader = {} as Role;
 
-upgrader.setUp = function (creep:Creep) {
+upgrader.setUp = function (creep: Creep) {
     if (creep.memory.upgrading && creep.store.energy === 0) {
         creep.memory.upgrading = false;
         creep.say('find energy');
@@ -13,8 +12,9 @@ upgrader.setUp = function (creep:Creep) {
         creep.say('upgrade');
     }
     if (creep.memory.upgrading) {
-        let fn = () => creep.upgradeController(creep.room.controller);
-        moveToTargetDoFn(creep, creep.room.controller.pos, fn);
+        creep.say('upg');
+        creep.upgradeController(creep.room.controller);
+        creep.moveTo(creep.room.controller);
     } else {
         // if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity())) {
         //     return;
@@ -23,6 +23,7 @@ upgrader.setUp = function (creep:Creep) {
         if (!cont) {
             findMaxEnergyWithDraw(creep);
         }
+        creep.say('find');
     }
 };
 

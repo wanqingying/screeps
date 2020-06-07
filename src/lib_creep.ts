@@ -4,7 +4,13 @@ export function run_creep(creep: Creep) {
     if (creep.memory.renew) {
         renew_creep(creep);
     } else {
-        roles[creep.memory.role].setUp(creep);
+        const rs = roles[creep.memory.role];
+        if (rs && rs.setUp) {
+            rs.setUp(creep);
+        } else {
+            creep.log('no role', creep.memory.role);
+        }
+        // roles[creep.memory.role].setUp(creep);
     }
 }
 
@@ -12,15 +18,15 @@ export function transfer_nearby(creep, types?) {
     const filters = [STRUCTURE_CONTAINER, STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER];
     const targets: StructureHasStore = creep.room.find(FIND_STRUCTURES, {
         filter: function (structure: StructureHasStore) {
-            if (structure) {
+            if (!structure || !structure.store) {
                 return false;
             }
             const meet_type = (types || filters).includes(structure.structureType);
-            const free = structure.store.getFreeCapacity() > 0;
+            const free = structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             return meet_type && free;
         },
     });
-    const target: StructureHasStore = creep.find_nearby_target(targets);
+    const target: StructureHasStore = find_nearby_target(creep, targets) as any;
     if (target) {
         const act = creep.transfer(target, RESOURCE_ENERGY);
         if (act === ERR_NOT_IN_RANGE) {
@@ -28,7 +34,7 @@ export function transfer_nearby(creep, types?) {
         }
         return act;
     } else {
-        this.log('transfer target not found');
+        creep.log('transfer target not found');
     }
 }
 
@@ -39,6 +45,10 @@ export function renew_creep(creep: Creep) {
     } else {
         target = find_spawn(creep);
         creep.memory.renew_spawn_id = target.id;
+    }
+    if (!target.renewCreep){
+        creep.log('renew err ',target)
+        return;
     }
     const act = target.renewCreep(creep);
     if (act === ERR_NOT_IN_RANGE) {
@@ -66,16 +76,6 @@ export function find_spawn(creep: Creep): StructureSpawn {
         target = find_nearby_target(creep, spw);
     }
     return target as any;
-}
-
-// 移动到目标执行操作
-// 针对大量单位拥挤的行为做优化
-// todo 待优化 实际的操作会延迟一帧
-export function moveToTargetDoFn(creep: Creep, target: RoomPosition, fn) {
-    if (!target) {
-        return;
-    }
-    creep.moveTo(target);
 }
 
 // 捡最大的垃圾
