@@ -1,10 +1,10 @@
 export function get_creep_config(room: Room): RoomCreepCfg {
     return {
         [role_name.starter]: { max: 0 },
-        [role_name.carrier]: { max: 5 },
-        [role_name.builder]: { max: 1 },
-        [role_name.harvester]: { max: 2 },
-        [role_name.upgrader]: { max: 1 },
+        [role_name.carrier]: { max: 4 },
+        [role_name.builder]: { max: 2 },
+        [role_name.harvester]: { max: 4 },
+        [role_name.upgrader]: { max: 4 },
     };
 }
 export function get_possible_max_energy(room: Room): number {

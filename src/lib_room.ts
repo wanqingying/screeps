@@ -113,13 +113,12 @@ function prepare_kill_creep(room: Room) {
     const cut = room.energyCapacityAvailable;
     const cs = room
         .findBy(FIND_CREEPS, c => {
-            return c.memory.cost < Math.max(cut / 2, cut - 100, 200);
+            return c.memory?.cost < Math.max(cut / 2, cut - 100, 200);
         })
         .sort((a, b) => {
-            return a.memory.cost - b.memory.cost;
+            return a.memory?.cost - b.memory?.cost;
         });
     let tg = cs.shift();
-    console.log('refresh', tg, energy_full, room.memory.spawning);
     if (tg && energy_full && !room.memory.spawning) {
         tg.log('die auto ');
         tg.suicide();
@@ -129,7 +128,7 @@ function prepare_kill_creep(room: Room) {
 
 function prepare_kill_more_creep(room: Room) {
     const cps = room.findBy(FIND_CREEPS).sort((a, b) => {
-        return a.memory.cost - b.memory.cost;
+        return a.memory?.cost - b.memory?.cost;
     });
     const cfg = get_creep_config(room);
     const ex = room.memory.role_exist;
