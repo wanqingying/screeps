@@ -2,10 +2,15 @@ import { role_runner } from './role';
 
 import { check_state, check_structure } from './bootstrap';
 import { log } from './utils.uta';
+import {get} from 'lodash';
+
 
 import { config } from './config';
+
+
 module.exports.loop = function main() {
-    log('1==============================================tick=====================================1');
+    let n=get(Game,'shard.name')
+    log('==============================================tick=====================================',role_name.builder);
     check_state();
     check_structure();
     let count = config.creep_spawn_role.find(r => r.role === 'carry').count;

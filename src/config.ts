@@ -10,20 +10,20 @@ const names: (keyof Memory)[] = [
 ];
 const config_online = {
     creep_spawn_role: [
-        { role: 'worker', count: 4, body: { [MOVE]: 2, [WORK]: 2 } },
+        { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 2 } },
         {
             role: 'carry',
             count: 2,
             // 800
-            body: { [MOVE]: 4, [CARRY]: 4 },
+            body: { [MOVE]: 2, [CARRY]: 4 },
         },
-        { role: 'builder', count: 2, body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 } },
+        { role: 'builder', count: 4, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
         // 800
         {
             role: 'upgrader',
-            count: 1,
+            count: 2,
             // 800
-            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
+            body: { [MOVE]: 2, [CARRY]: 2, [WORK]: 6 },
         },
         { role: 'harvester', count: 0, body: [MOVE, CARRY, WORK] },
         { role: 'heal', count: 0, body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, HEAL] },
@@ -44,24 +44,27 @@ const config_online = {
     // path_config_mine: { visualizePathStyle: { stroke: '#ffaa00' } },
     path_config_mine: {},
     rooms: {
-        W38N47: {
-            name: 'W38N47',
+        E34N9: {
+            name: 'E34N9',
             spawn_name: 'Spawn1',
-            resource_energy_ids: ['5bbcaae29099fc012e6325b3', '5bbcaae29099fc012e6325b4'],
-            resource_energy_nums: [2, 2],
+            resource_energy_ids: [
+                '5bbcaeed9099fc012e639cb2',
+                '5bbcaeed9099fc012e639cb3',
+                '9d330774017e6b9',
+            ],
+            resource_energy_nums: [1, 1, 0],
             extension_pos: [
                 // { x: 31, y: 4 },
             ],
             tower_id: 'af41925331a4dcd',
         },
     },
-    room_name_1: 'W38N47',
+    room_name_1: 'E34N9',
     memory_key_names: names,
     log_on: true,
     renew_min: 150,
     renew_max: 1400,
 };
-
 const config_local = {
     creep_spawn_role: [
         { role: 'worker', count: 2, body: { [MOVE]: 2, [WORK]: 6 } },
@@ -71,7 +74,7 @@ const config_local = {
             // 800
             body: { [MOVE]: 3, [CARRY]: 13 },
         },
-        { role: 'builder', count: 4, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
+        { role: 'builder', count: 2, body: { [MOVE]: 3, [CARRY]: 7, [WORK]: 3 } },
         // 800
         {
             role: 'upgrader',
@@ -108,7 +111,7 @@ const config_local = {
                 { x: 42, y: 8 },
                 { x: 43, y: 8 },
                 { x: 43, y: 9 },
-                { x: 38, y: 15 },
+                { x: 31, y: 7 },
                 { x: 27, y: 4 },
                 { x: 28, y: 4 },
                 { x: 29, y: 4 },
@@ -124,6 +127,7 @@ const config_local = {
     renew_min: 150,
     renew_max: 1400,
 };
+
 
 let cfg: typeof config_local | typeof config_online;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {

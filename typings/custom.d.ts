@@ -18,44 +18,29 @@ declare type RoleName =
     | 'renew'
     | 'heal';
 
-declare interface CreepMemory {
-    role: RoleName;
-    target_resource_id?: string;
-    index: number;
-    building?: boolean;
-    upgrading?: boolean;
-    target_drop_source_id?: string;
-    target_id?: string;
-    renew_role?: RoleName;
-    process?: string;
-    distance?: number;
-    distance_1?: number;
-    distance_2?: number;
-    act_msg?: any;
-    step?: number;
-}
-
-declare interface Memory {
-    creeps_spawn_index: number[];
-    resource_energy: { [id: string]: { miners: string[] } };
-    renew_creeps?: { name: string; ticks: number }[];
-}
 declare namespace NodeJS {
     export interface Global {
         get_code_msg_screeps: (code: ScreepsReturnCode) => string;
     }
 }
-
-declare interface Creep {
-    // 捡起最大的垃圾
-    pick_up_max_drop: (target: any) => boolean;
-    target_id?: string;
-    target_id_mine_energy?: string;
-    target_id_drop_source?: string;
-    target_id_move_to?: string;
-    // 工作前自检，false则表示无法工作
-    action_before_work?: () => boolean;
-    // 运输到最近的仓库
-    transfer_nearby: () => boolean;
-    log: (p: any) => void;
+declare interface role_name {
+    carrier: 'carrier';
+    harvester: 'harvester';
+    starter: 'starter';
+    upgrader: 'upgrader';
+    builder: 'builder';
 }
+declare type get_code_msg_screeps = (code: ScreepsReturnCode) => string;
+declare namespace NodeJS {
+    export interface Global {
+        get_code_msg_screeps: get_code_msg_screeps;
+        role_name: role_name;
+    }
+}
+declare const role_name: role_name;
+declare const get_code_msg_screeps: get_code_msg_screeps;
+
+declare type role_run_fn = () => void;
+
+
+
