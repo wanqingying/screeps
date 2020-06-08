@@ -2,9 +2,11 @@ import './bootstrap';
 import { prepare_room } from './lib_room';
 import { run_creep } from './lib_creep';
 import { flash } from './flash';
-import { create } from 'domain';
 
 function main() {
+    Promise.resolve(3).then(res => {
+        console.log(res);
+    });
     console.log('---tick---', Game.time);
     flash();
     Object.values(Game.creeps).forEach(creep => {

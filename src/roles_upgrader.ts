@@ -1,5 +1,5 @@
 import { findMaxEnergyWithDraw, pickUpMaxDropEnergy } from './lib_creep';
-import {find_nearby_target} from "./lib_base";
+import { find_nearby_target } from './lib_base';
 
 const upgrader = {} as Role;
 
@@ -23,14 +23,17 @@ upgrader.setUp = function (creep: Creep) {
         // if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity())) {
         //     return;
         // }
-        const containers=creep.room.findBy(FIND_STRUCTURES,t=>t.structureType===STRUCTURE_CONTAINER);
-        const target=find_nearby_target(creep,containers) as any;
+        const containers = creep.room.findBy(
+            FIND_STRUCTURES,
+            t => t.structureType === STRUCTURE_CONTAINER
+        );
+        const target = find_nearby_target(creep, containers) as any;
         let cont = findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);
-        if (target){
+        if (target) {
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
-            cont=true
+            cont = true;
         }
         if (config.upgrader_only_container) {
             return;

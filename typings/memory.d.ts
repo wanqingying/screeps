@@ -1,8 +1,6 @@
-
-declare interface RoleExist{
-    role:string
-    exist:number
-}
+declare type RoleExist = {
+    [k in role_name_key]: number;
+};
 declare interface Memory {
     creeps_spawn_index: number[];
     resource_energy: { [id: string]: { miners: string[] } };
@@ -35,16 +33,13 @@ declare interface CreepMemory {
 declare interface RoomMemory {
     username: string;
     structure: { extension: number };
-    creep_count: number;
     renew_count: number;
-    energy_rate: number[];
-    energy_exist: number[];
-    energy_lack: boolean;
-    energy_stop: boolean;
-    energy_lack_tick: 50;
-    energy_full: boolean;
-    spawning: boolean;
-    role_exist:RoleExist[]
+    // 过去 n tik 的饱和度
+    energyRate: ListA<number>;
+    // 过去 n tik 的存量
+    energyExist: number[];
 }
 
-
+declare interface SpawnMemory {
+    tasks: any[];
+}

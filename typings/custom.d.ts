@@ -7,29 +7,11 @@
 //CLAIM 600
 //TOUGH 10
 
-declare type RoleName =
-    | 'harvester'
-    | 'upgrader'
-    | 'builder'
-    | 'starter'
-    | 'worker'
-    | 'carry'
-    | 'container_carry'
-    | 'renew'
-    | 'heal';
-
-declare interface role_name {
-    carrier: 'carrier';
-    harvester: 'harvester';
-    starter: 'starter';
-    upgrader: 'upgrader';
-    builder: 'builder';
-}
-declare type role_name_key = keyof role_name;
+declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 'builder';
 
 declare interface Source_h {
-    target: Source;
-    harvester: Creep[];
+    source: Source;
+    harvesters: Creep[];
 }
 
 declare interface StructureHasStore extends Structure<any> {
@@ -42,3 +24,17 @@ declare interface RoomCreepCfg {
     };
 }
 
+declare type FindPropertyConstant = 'structureType' | 'id' | 'name';
+
+declare class ListA<T> {
+    private array: T[];
+    private usage: number;
+    public readonly length: number;
+    constructor(length: number);
+    public push(unit: T): number;
+    public filter<T>(
+        callback: (value: T, index: number, array: T[]) => value is T,
+        thisArg?: any
+    ): T[];
+    public every: typeof Array.prototype.every;
+}

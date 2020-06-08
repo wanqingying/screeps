@@ -56,8 +56,8 @@ function find_attack_target(room: Room): AnyCreep {
     return null as any;
 }
 export function find_source_min_harvester(room: Room) {
-    return room.source_energy.sort((a, b) => {
-        return a.harvester.length - b.harvester.length;
+    return room.sourceInfo.sort((a, b) => {
+        return a.harvesters.length - b.harvesters.length;
     })[0];
 }
 
@@ -90,11 +90,11 @@ export function get_index() {
 
 function prepare_spawn_creep(room: Room) {
     const cfg = get_creep_config(room);
-    let q = room.memory.role_exist.sort((a, b) => {
+    let q = room.memory.roleExist.sort((a, b) => {
         return a.exist - b.exist;
     });
-    const harvester = room.memory.role_exist.find(r => r.role === role_name.harvester);
-    const carrier = room.memory.role_exist.find(r => r.role === role_name.carrier);
+    const harvester = room.memory.roleExist.find(r => r.role === role_name.harvester);
+    const carrier = room.memory.roleExist.find(r => r.role === role_name.carrier);
     if (harvester.exist === 0) {
         return spawn_creep(room, 'harvester');
     }
@@ -125,7 +125,7 @@ function prepare_spawn_creep(room: Room) {
 }
 function prepare_kill_creep(room: Room) {
     // 单位更新换代
-    const energy_full = room.memory.energy_full;
+    const energy_full = room.memory.energyFull;
     const cut = room.energyCapacityAvailable;
     const cs = room
         .findBy(FIND_CREEPS, c => {
@@ -151,12 +151,12 @@ function prepare_kill_more_creep(room: Room) {
         return a.memory?.cost - b.memory?.cost;
     });
     const cfg = get_creep_config(room);
-    const role_exists = room.memory.role_exist;
+    const role_exists = room.memory.roleExist;
     for (let j = 0; j < role_exists.length; j++) {
         let role_current = role_exists[j];
         const exist = role_current.exist;
         const max = cfg[role_current?.role]?.max;
-        const del_role=role_current.role;
+        const del_role = role_current.role;
         if (exist > max) {
             for (let i = 0; i < creeps.length; i++) {
                 let creep = creeps[i];

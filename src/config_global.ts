@@ -1,4 +1,13 @@
 // 不能引入其他模块
+
+export const role_name = {
+    carrier: 'carrier',
+    harvester: 'harvester',
+    starter: 'starter',
+    upgrader: 'upgrader',
+    builder: 'builder',
+};
+global.w_role_name = role_name;
 global.w_roles = {} as Roles;
 
 global.get_code_msg_screeps = function (code) {
@@ -33,6 +42,5 @@ global.count_distance = function (a, b) {
 global.ERR_TARGET_NOT_FOUND = -217;
 
 global.w_cache = new Map<any, any>();
-global.w_rooms = new Map();
 
 global.module_loaded = true;

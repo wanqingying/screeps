@@ -13,7 +13,7 @@ harvester.setUp = function (creep) {
     creep.drop(RESOURCE_ENERGY);
     if (!creep.memory.target_resource_id) {
         const source = find_source_min_harvester(creep.room);
-        target = source.target;
+        target = source.source;
     } else {
         target = Game.getObjectById(creep.memory.target_resource_id);
     }

@@ -1,1 +1,1 @@
-console.log([1, 4, 3].sort((a, b) => a - b));
+console.log(`${[2,3,4,'ss']}555`);

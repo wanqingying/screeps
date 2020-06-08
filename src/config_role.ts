@@ -1,13 +1,14 @@
-// role
-export const role_name = {
-    carrier: 'carrier',
-    harvester: 'harvester',
-    starter: 'starter',
-    upgrader: 'upgrader',
-    builder: 'builder',
+import { role_name } from './config';
+
+export const creep_cfg_num = {
+    [role_name.starter]: 0,
+    [role_name.carrier]: 4,
+    [role_name.builder]: 2,
+    [role_name.harvester]: 4,
+    [role_name.upgrader]: 3,
 };
-global.w_role_name = role_name;
-// body
+
+// 每个房间等级的部件配置
 export const creep_cfg_body = {
     [role_name.carrier]: [
         { [MOVE]: 3, [CARRY]: 3 },
@@ -35,6 +36,7 @@ export const creep_cfg_body = {
         { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
     ],
 };
+
 export const body_cost = {
     [MOVE]: 50,
     [WORK]: 100,
@@ -46,57 +48,13 @@ export const body_cost = {
     [TOUGH]: 10,
 };
 
-export const creep_cfg_num = {
-    [role_name.starter]: 0,
-    [role_name.carrier]: 4,
-    [role_name.builder]: 2,
-    [role_name.harvester]: 4,
-    [role_name.upgrader]: 3,
-};
-
-global.w_roles = {} as Roles;
-
-global.get_code_msg_screeps = function (code) {
-    let ScreepsReturnCodeMsg = [
-        'OK',
-        'ERR_NOT_OWNER',
-        'ERR_NO_PATH',
-        'ERR_BUSY',
-        'ERR_NAME_EXISTS',
-        'ERR_NOT_FOUND',
-        'ERR_NOT_ENOUGH_RESOURCES',
-        'ERR_NOT_ENOUGH_ENERGY',
-        'ERR_INVALID_TARGET',
-        'ERR_FULL',
-        'ERR_NOT_IN_RANGE',
-        'ERR_INVALID_ARGS',
-        'ERR_TIRED',
-        'ERR_NO_BODYPART',
-        'ERR_NOT_ENOUGH_EXTENSIONS',
-        'ERR_RCL_NOT_ENOUGH',
-        'ERR_GCL_NOT_ENOUGH',
-    ];
-    return ScreepsReturnCodeMsg[0 - code];
-};
-
-global.count_distance = function (a, b) {
-    let dx = a.x - b.x;
-    let dy = a.y - b.y;
-    return Math.round(Math.pow(dx * dx + dy * dy, 0.5));
-};
-
-global.ERR_TARGET_NOT_FOUND = -217;
-
-global.w_cache = new Map<any, any>();
-
 export const config_global: ConfigGlobal = {
     enable_log: false,
     internal: {
         extension_limit: [0, 0, 5, 10, 20, 30, 40, 50, 60],
         body_cost: body_cost,
     },
-    // 持续 n tik 能量饱和率过低则判断此房间缺能量
-    energy_lack_rate: 0.5,
+    energy_lack_rate: 0.2,
     renew_max_rate: 0.4,
     energy_lack_tick: 100,
     renew_interval: 200,
@@ -105,7 +63,4 @@ export const config_global: ConfigGlobal = {
     creep_cfg_body: creep_cfg_body as any,
     creep_cfg_num: creep_cfg_num as any,
 };
-
 global.w_config = config_global;
-
-global.module_loaded = true;

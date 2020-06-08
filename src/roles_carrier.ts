@@ -30,7 +30,7 @@ carrier.setUp = function (creep) {
 
 // 捡最大的垃圾
 function pickUpMaxDropEnergy(creep: Creep, min?: number) {
-    if (creep.room.memory.energy_full) {
+    if (creep.room.memory.energyFull) {
         // creep.moveTo(16,27)
         // creep.say('stop')
         // return
@@ -79,7 +79,7 @@ function pickUpMaxDropEnergy(creep: Creep, min?: number) {
             carrier.targets[target.id].push(creep.name);
         }
         carrier.vt++;
-        creep.memory.target_drop_source_id=target.id;
+        creep.memory.target_drop_source_id = target.id;
         const act = creep.pickup(target);
         if (act == ERR_NOT_IN_RANGE) {
             creep.moveTo(target);

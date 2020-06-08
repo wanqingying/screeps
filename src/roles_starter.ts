@@ -14,16 +14,16 @@ starter.setUp = function (creep) {
         if (!target) {
             return creep.log('source not found');
         }
-        target.harvester.push(creep);
-        let act = creep.harvest(target.target);
+        target.harvesters.push(creep);
+        let act = creep.harvest(target.source);
         if (act === ERR_NOT_IN_RANGE) {
-            this.moveTo(target.target);
+            this.moveTo(target.source);
             return false;
         }
         if (act === OK) {
             return true;
         }
-        this.log(`harvest mine ${target?.target?.id} ${get_code_msg_screeps(act)}`);
+        this.log(`harvest mine ${target?.source?.id} ${get_code_msg_screeps(act)}`);
     }
     if (process === 'drop') {
         // 卸货状态，直到写完
