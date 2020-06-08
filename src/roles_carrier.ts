@@ -1,6 +1,9 @@
 import { transfer_nearby } from './lib_creep';
 
-const carrier = {} as Role;
+const carrier = {
+    targets: {},
+    vt: 0,
+} as Role;
 
 carrier.setUp = function (creep) {
     if (creep.store.getUsedCapacity() === 0) {
@@ -27,6 +30,12 @@ carrier.setUp = function (creep) {
 
 // 捡最大的垃圾
 function pickUpMaxDropEnergy(creep: Creep, min?: number) {
+    if (creep.room.memory.energy_full) {
+        // creep.moveTo(16,27)
+        // creep.say('stop')
+        // return
+    }
+
     let pick_min = min || 0;
     // 如果捡垃圾的目标已经有多个人去捡，重新分配
     let target_id = creep.memory.target_drop_source_id;
@@ -52,18 +61,36 @@ function pickUpMaxDropEnergy(creep: Creep, min?: number) {
             .sort((a, b) => {
                 return a.amount - b.amount;
             })
+            .filter(t => {
+                let id = t.id;
+                const ta = carrier.targets[id];
+                if (Array.isArray(ta)) {
+                    return ta.length < 3;
+                } else {
+                    return true;
+                }
+            })
             .pop();
     }
     if (target && target.amount > pick_min) {
-        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
+        if (!Array.isArray(carrier.targets[target.id])) {
+            carrier.targets[target.id] = [creep.name];
+        } else {
+            carrier.targets[target.id].push(creep.name);
+        }
+        carrier.vt++;
+        creep.memory.target_drop_source_id=target.id;
+        const act = creep.pickup(target);
+        if (act == ERR_NOT_IN_RANGE) {
             creep.moveTo(target);
         } else {
             creep.memory.target_drop_source_id = undefined;
         }
-        return true;
-    } else {
-        return false;
+        if (act === ERR_FULL) {
+            creep.say('full');
+        }
     }
+    return target_id;
 }
 
 roles.carrier = carrier as any;

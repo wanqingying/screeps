@@ -1,4 +1,9 @@
-import { get_creep_body, get_creep_config, get_possible_max_energy } from './config_creep';
+import {
+    get_creep_body,
+    get_creep_body_cost,
+    get_creep_config,
+    get_possible_max_energy,
+} from './config_creep';
 
 export function prepare_room(room: Room): boolean {
     check_tower(room);
@@ -58,16 +63,27 @@ export function find_source_min_harvester(room: Room) {
 
 export function spawn_creep(room: Room, role: role_name_key) {
     const body = get_creep_body(room, role);
-    const name = `${role}_${Game.time}`;
+    const index = get_index();
+    const name = `${role}_${index}`;
     const spawns = room.findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_SPAWN);
     if (spawns.length) {
-        const spa: StructureSpawn = spawns.pop() as StructureSpawn;
-        const act = spa.spawnCreep(body, name, { memory: { role: role, born_tick: Game.time } });
+        const spawn: StructureSpawn = spawns.pop() as StructureSpawn;
+        const act = spawn.spawnCreep(body, name, {
+            memory: { role: role, born_tick: Game.time, index: index },
+        });
         if (act === OK) {
             room.memory.spawning = false;
         } else {
             room.memory.spawning = true;
-            room.log(`spawn ${role} ` + get_code_msg_screeps(act));
+            room.log(`spawn ${name} ` + get_code_msg_screeps(act));
+        }
+    }
+}
+export function get_index() {
+    const mk = Object.values(Game.creeps).map(k => k.memory.index);
+    for (let i = 0; i < mk.length + 1; i++) {
+        if (!mk.includes(i)) {
+            return i;
         }
     }
 }
@@ -113,7 +129,11 @@ function prepare_kill_creep(room: Room) {
     const cut = room.energyCapacityAvailable;
     const cs = room
         .findBy(FIND_CREEPS, c => {
-            return c.memory?.cost < Math.max(cut / 2, cut - 100, 200);
+            if (!c.memory?.role) {
+                return false;
+            }
+            let max = get_creep_body_cost(room, c.memory.role);
+            return c.memory?.cost < max;
         })
         .sort((a, b) => {
             return a.memory?.cost - b.memory?.cost;
@@ -127,20 +147,28 @@ function prepare_kill_creep(room: Room) {
 }
 
 function prepare_kill_more_creep(room: Room) {
-    const cps = room.findBy(FIND_CREEPS).sort((a, b) => {
+    const creeps = room.findBy(FIND_CREEPS).sort((a, b) => {
         return a.memory?.cost - b.memory?.cost;
     });
     const cfg = get_creep_config(room);
-    const ex = room.memory.role_exist;
-    for (let j = 0; j < ex.length; j++) {
-        let r = ex[j];
-        const exist = r.exist;
-        const max = cfg[r.role].max;
+    const role_exists = room.memory.role_exist;
+    for (let j = 0; j < role_exists.length; j++) {
+        let role_current = role_exists[j];
+        const exist = role_current.exist;
+        const max = cfg[role_current?.role]?.max;
+        const del_role=role_current.role;
         if (exist > max) {
-            for (let i = 0; i < cps.length; i++) {
-                let c = cps[i];
-                if (c.memory.role === r.role) {
-                    c.suicide();
+            for (let i = 0; i < creeps.length; i++) {
+                let creep = creeps[i];
+                if (!creep.memory?.role) {
+                    creep.suicide();
+                    return;
+                }
+                if (!del_role) {
+                    return;
+                }
+                if (creep.memory.role === del_role) {
+                    creep.suicide();
                     return;
                 }
             }

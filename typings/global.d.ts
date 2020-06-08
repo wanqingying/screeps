@@ -11,10 +11,13 @@ declare interface ConfigGlobal {
     renew_max_rate: number;
     renew_interval: number;
     creep_order: any[];
+    upgrader_only_container:boolean
 }
 
 declare interface Role {
     setUp: (creep: Creep) => void;
+    targets:any
+    vt:number
 }
 declare type Roles = {
     [name in role_name_key]: Role;

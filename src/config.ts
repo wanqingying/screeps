@@ -16,7 +16,7 @@ export const body_cost = {
     [TOUGH]: 10,
 };
 export const config_global: ConfigGlobal = {
-    enable_log: true,
+    enable_log: false,
     internal: {
         extension_limit: [0, 0, 5, 10, 20, 30, 40, 50, 60],
         body_cost:body_cost
@@ -26,4 +26,5 @@ export const config_global: ConfigGlobal = {
     energy_lack_tick: 100,
     renew_interval: 200,
     creep_order: [role_name.harvester, role_name.carrier, role_name.builder, role_name.upgrader],
+    upgrader_only_container:true
 };
