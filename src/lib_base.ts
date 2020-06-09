@@ -1,6 +1,9 @@
-export function find_nearby_target(base, targets): RoomPosition {
+// 不能引用其他模块
+
+export function find_nearby_target<T>(base, targets:T[]): T {
     const c = base.pos || base;
     const tt = targets.sort((a, b) => {
+        // @ts-ignore
         return count_distance(c, a.pos || a) - count_distance(c, b.pos || b);
     });
     return tt.shift();
@@ -25,5 +28,21 @@ export class ListA<T> {
     public every = f => this.array.every(f);
     public get length() {
         return Math.min(this.max, this.usage);
+    }
+    public _get_array = () => this.array;
+}
+
+// 获取等级
+export function getEnergyLevel(energyMax: number) {
+    // 每等级扩展提供的数量 0-300=>1 300-550=>2
+    const energy_ext = [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000];
+    let min = 0;
+    let max = 0;
+    for (let i = 1; i < energy_ext.length; i++) {
+        min = 300 + energy_ext[i - 1];
+        max = 300 + energy_ext[i];
+        if (min < energyMax && energyMax <= max) {
+            return i;
+        }
     }
 }

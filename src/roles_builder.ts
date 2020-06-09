@@ -38,8 +38,8 @@ builder.setUp = function (creep) {
         if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity() / 2)) {
             return;
         }
-        findMaxEnergyWithDraw(creep);
+        findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);
     }
 };
 
-roles.builder = builder as any;
+w_roles.builder = builder as any;

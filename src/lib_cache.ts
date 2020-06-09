@@ -24,7 +24,7 @@ export function find_by_filter<T extends FindConstant>(param: ParamRoomFilter<T>
 export function find_by_cache_key<T extends FindConstant>(param: ParamRoomFilter<T>) {
     const { room, type, property, property_in } = param;
     const key = `${room.name}_${type}_${property}_${property_in.join('#')}`;
-    const cache_res = cache.get(key);
+    const cache_res = w_cache.get(key);
     let res: any[];
     if (cache_res) {
         res = cache_res;
@@ -35,7 +35,7 @@ export function find_by_cache_key<T extends FindConstant>(param: ParamRoomFilter
             return property_in.includes(value);
         },
     });
-    cache.set(key, res);
+    w_cache.set(key, res);
     return res;
 }
 

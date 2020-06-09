@@ -14,7 +14,19 @@ function log(px, msg) {
         px += x;
         x = msg.pop();
     }
-    if (config.enable_log) {
+    if (w_config.enable_log) {
         console.log(px);
     }
+}
+
+global.log = function (k) {
+    switch (k) {
+        case 1:
+            return log_W2N8();
+    }
+};
+
+function log_W2N8() {
+    const room = Game.rooms['W2N8'];
+    console.log(JSON.stringify(room.roleExist));
 }

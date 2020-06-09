@@ -5,6 +5,7 @@ declare interface ConfigGlobal {
     internal: {
         extension_limit: number[];
         body_cost: { [k: string]: number };
+        extension_energy: number[];
     };
     energy_lack_rate: number;
     energy_lack_tick: number;
@@ -29,9 +30,28 @@ declare type RoleName = {
     [role in role_name_key]: string;
 };
 
+declare interface SourceWithContainer {
+    source: Source;
+    container: StructureContainer;
+    cap: number;
+}
+
 declare type CreepCfgNum = { [role in role_name_key]: number };
 declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } };
-declare type WRoom = Map<string, { energyCount: ListA<number>; energyRate: ListA<number> }>;
+declare interface CacheRoom {
+    energyCount: ListA<number>;
+    energyRate: ListA<number>;
+    spawnCode: any;
+    spawnIndex: number;
+    spawnFailTick: number;
+    sources: SourceWithContainer[];
+}
+declare interface CacheCreep {
+    renewTime: number;
+}
+
+declare type WRoom = Map<string, CacheRoom>;
+declare type WCreep = Map<string, CacheCreep>;
 
 declare namespace NodeJS {
     export interface Global {
@@ -45,13 +65,17 @@ declare namespace NodeJS {
         cache_tick: 50;
         module_loaded: boolean;
         w_rooms: WRoom;
+        w_creeps: WCreep;
+        log(...p: any): void;
     }
 }
 
 declare const ERR_TARGET_NOT_FOUND = -217;
-declare const roles: Roles;
+declare const w_roles: Roles;
 declare const count_distance: count_distance;
-declare const role_name: RoleName;
+declare const w_role_name: RoleName;
 declare const get_code_msg_screeps: get_code_msg_screeps;
-declare const config: ConfigGlobal;
-declare const cache: CacheGlobal;
+declare const w_config: ConfigGlobal;
+declare const w_cache: CacheGlobal;
+declare const w_rooms: WRoom;
+declare const w_creeps: WCreep;

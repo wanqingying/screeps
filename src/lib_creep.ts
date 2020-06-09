@@ -1,19 +1,5 @@
 import { find_nearby_target } from './lib_base';
 
-export function run_creep(creep: Creep) {
-    if (creep.memory.renew) {
-        renew_creep(creep);
-    } else {
-        const rs = roles[creep.memory?.role];
-        if (rs && rs.setUp) {
-            rs.setUp(creep);
-        } else {
-            creep.log('no role', creep.memory?.role);
-        }
-        // roles[creep.memory.role].setUp(creep);
-    }
-}
-
 export function transfer_nearby(creep: Creep, types?): ScreepsReturnCode | number {
     let target: StructureHasStore;
     if (creep.memory.target_id) {
@@ -123,7 +109,7 @@ export function pickUpMaxDropEnergy(creep: Creep, min?: number) {
         target = Game.getObjectById(creep.memory.target_drop_source_id);
     } else {
         let room = creep.room;
-        let targets = room.find(FIND_DROPPED_RESOURCES);
+        let targets = room.find(FIND_DROPPED_RESOURCES).filter(a => a?.amount);
         target = targets
             .sort((a, b) => {
                 return a.amount - b.amount;

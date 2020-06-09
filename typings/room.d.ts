@@ -21,6 +21,8 @@ declare interface Room {
     energyExist: ListA<number>;
     // 上一次更新半持久化数据的时间
     refreshTick: number;
+    // 维护掉在地上的垃圾队列，用于carrier捡垃圾策略 cap:有多少空间被预定
+    dropResources: { resource: Resource; cap: number }[];
     findBy<K extends FindConstant>(type: K, filter?: FilterFunction<K>): Array<FindTypes[K]>;
     findByFilter<K extends FindConstant>(
         type: K,
@@ -40,12 +42,24 @@ declare interface Room {
     refreshEnergyData(): void;
     // 初始化半持久化的数据
     refreshData(): void;
+    // 单位自杀更新换代  一次自杀一个
+    refreshCreep(): void;
+    // 杀死房间内多余的单位
+    killMoreCreep(): void;
     // 初始化持久化数据
     prepareMemory(): void;
+    // 维护单位
+    checkCreep(): void;
     checkTower(): void;
     findTargetHeal(): any;
     findTargetRepair(): any;
     findTargetAttack(): any;
     findSourceMinHarvester(): any;
     checkSpawnCreep(): any;
+    checkSources():any
+    start(): void;
+    getCurrentMaxBodyCost(role: role_name_key): void;
+    spawnCreep(role: role_name_key, k: number): void;
+    getRoomCache(): CacheRoom;
+    refreshDropEnergy(): void;
 }

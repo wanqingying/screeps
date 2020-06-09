@@ -1,4 +1,3 @@
-// role
 export const role_name = {
     carrier: 'carrier',
     harvester: 'harvester',
@@ -7,32 +6,37 @@ export const role_name = {
     builder: 'builder',
 };
 global.w_role_name = role_name;
-// body
+// body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
 export const creep_cfg_body = {
     [role_name.carrier]: [
         { [MOVE]: 3, [CARRY]: 3 },
         { [MOVE]: 3, [CARRY]: 8 },
-        { [MOVE]: 3, [CARRY]: 15 },
+        { [MOVE]: 3, [CARRY]: 13 },
+        { [MOVE]: 4, [CARRY]: 22 },
     ],
     [role_name.starter]: [
-        { [MOVE]: 3, [CARRY]: 3 },
-        { [MOVE]: 3, [CARRY]: 8 },
+        { [MOVE]: 2, [CARRY]: 2,[WORK]:1 },
+        { [MOVE]: 2, [CARRY]: 2,[WORK]:3 },
+        { [MOVE]: 3, [CARRY]: 15 },
         { [MOVE]: 3, [CARRY]: 15 },
     ],
     [role_name.harvester]: [
         { [MOVE]: 2, [WORK]: 2 },
         { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
         { [MOVE]: 2, [WORK]: 7 },
+        { [MOVE]: 4, [WORK]: 10, [CARRY]: 2 },
     ],
     [role_name.builder]: [
         { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
         { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
         { [MOVE]: 3, [WORK]: 4, [CARRY]: 5 },
+        { [MOVE]: 4, [WORK]: 5, [CARRY]: 12 },
     ],
     [role_name.upgrader]: [
         { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
         { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
         { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
+        { [MOVE]: 5, [WORK]: 8, [CARRY]: 5 },
     ],
 };
 export const body_cost = {
@@ -49,9 +53,9 @@ export const body_cost = {
 export const creep_cfg_num = {
     [role_name.starter]: 0,
     [role_name.carrier]: 4,
-    [role_name.builder]: 2,
-    [role_name.harvester]: 4,
-    [role_name.upgrader]: 3,
+    [role_name.builder]: 6,
+    [role_name.harvester]: 2,
+    [role_name.upgrader]: 1,
 };
 
 global.w_roles = {} as Roles;
@@ -94,6 +98,7 @@ export const config_global: ConfigGlobal = {
     internal: {
         extension_limit: [0, 0, 5, 10, 20, 30, 40, 50, 60],
         body_cost: body_cost,
+        extension_energy: [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000],
     },
     // 持续 n tik 能量饱和率过低则判断此房间缺能量
     energy_lack_rate: 0.5,

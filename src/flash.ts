@@ -33,78 +33,7 @@ function flash_memory() {
 
 function flash_room() {
     Object.values(Game.rooms).forEach(room => {
-        // // 初始化房间数据
-        // if (!Array.isArray(room.memory.energyRate)) {
-        //     room.memory.energyRate = [];
-        // }
-        // if (!Array.isArray(room.memory.energyExist)) {
-        //     room.memory.energyExist = [];
-        // }
-        // if (!room.memory.structure) {
-        //     room.memory.structure = { extension: 0 };
-        // }
-        // if (!room.memory.renew_count) {
-        //     room.memory.renew_count = 0;
-        // }
-        // room.memory.creep_count = room.find(FIND_CREEPS).length;
-        // 初始化能量资源
-        // room.find(FIND_SOURCES).forEach(source => {
-        //     const cps = Object.values(Game.creeps)
-        //         .map(creep => {
-        //             if (creep.memory.target_resource_id === source.id) {
-        //                 return creep;
-        //             }
-        //         })
-        //         .filter(k => k && k.name);
-        //     room.sourceInfo.push({ source: source, harvesters: cps });
-        // });
-        // 初始化extension
-        // const extensions = room.findBy(
-        //     FIND_STRUCTURES,
-        //     s => s.structureType === STRUCTURE_EXTENSION
-        // );
-        // room.memory.structure.extension = extensions.length;
-        // 初始化能量状态
-        // let limit = config.internal.extension_limit[room.controller.level];
-        // if (extensions.length < limit) {
-        //     room.log(`extension current/limit ${extensions.length}/${limit}`);
-        // }
-        const energy = room.energyAvailable;
-        const rate = room.energyAvailable / room.energyCapacityAvailable;
-        room.memory.energyRate.push(rate);
-        room.memory.energyExist.push(energy);
-        let ex = room.memory.energyExist;
-        if (room.memory.energyRate.length > config.energy_lack_tick) {
-            room.memory.energyRate.shift();
-        }
-        if (ex.length > config.energy_lack_tick) {
-            room.memory.energyExist = ex.slice(-100);
-        }
-        const rts = room.memory.energyRate;
-        room.energyLack =
-            room.memory.energyRate.every(rate => rate < config.energy_lack_rate) &&
-            room.memory.energyRate.length > 10;
-        room.memory.energyFull = rate > 0.9999 && rts[rts.length - 2] > 0.99;
-        room.memory.energyStop = room.memory.energyExist.every(r => r === 300);
-
-        // room.log(`energy ${energy}/${room.energyCapacityAvailable}`);
-        // 初始化基地
-        // room.spawns = room.findBy(
-        //     FIND_STRUCTURES,
-        //     s => s.structureType === STRUCTURE_SPAWN
-        // ) as StructureSpawn[];
-
-        // 初始化角色
-        // room.roleExist = {} as any;
-        // Object.values(role_name).forEach(role => {
-        //     const exists = room.findBy(FIND_CREEPS, c => c.memory?.role === role);
-        //     room.roleExist[role]=exists.length;
-        // });
-        // spawn
-        // let has_spawn = room
-        //     .findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_SPAWN)
-        //     .some((s: StructureSpawn) => s.spawning);
-        // room.memory.spawning = has_spawn;
+        room.spawns = room.findByFilter(FIND_STRUCTURES, 'structureType', [STRUCTURE_SPAWN]) as any;
     });
 }
 
@@ -121,8 +50,11 @@ function flash_creep() {
                 return stop_renew(creep);
             }
             // 缺能量时只需要回到400
-            if (creep.ticksToLive >= 400 && creep.room.memory.energyLack) {
+            if (creep.ticksToLive >= 400 && creep.room.energyLack) {
                 return stop_renew(creep);
+            }
+            if (creep.getRenewTime() > 100) {
+                creep.log('renew ----- tick too long', creep.getRenewTime());
             }
             // 大于 250 tick 不考虑
             if (life >= 250) {
@@ -133,12 +65,11 @@ function flash_creep() {
                 return;
             }
             // 缺能量不考虑
-            if (creep.room.memory.energyLack) {
+            if (creep.room.energyLack) {
                 return;
             }
             // 同时回能量人数不能超过上限
-            let rate = creep.room.memory.renew_count / creep.room.memory.creep_count;
-            if (rate > config.renew_max_rate) {
+            if (creep.room.memory.renew_count > 3) {
                 return;
             }
             const spawn = find_nearby_target(
@@ -155,7 +86,7 @@ function flash_creep() {
         if (!creep.memory.cost) {
             let cost = 0;
             creep.body.forEach(b => {
-                cost += config.internal.body_cost[b.type];
+                cost += w_config.internal.body_cost[b.type];
             });
             creep.memory.cost = cost;
         }
@@ -180,3 +111,5 @@ export function flash() {
     flash_room();
     flash_creep();
 }
+
+flash();

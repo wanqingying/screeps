@@ -34,5 +34,5 @@ global.ERR_TARGET_NOT_FOUND = -217;
 
 global.w_cache = new Map<any, any>();
 global.w_rooms = new Map();
-
+global.w_creeps = new Map();
 global.module_loaded = true;

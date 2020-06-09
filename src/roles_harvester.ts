@@ -33,7 +33,7 @@ harvester.setUp = function (creep) {
     // creep.moveTo(target)
 };
 
-roles.harvester = harvester as any;
+w_roles.harvester = harvester as any;
 
 function try_transfer_drop(creep: Creep) {
     if (creep.store.getFreeCapacity() === 0) {
@@ -46,7 +46,6 @@ function try_transfer_drop(creep: Creep) {
         creep.memory.target_id = undefined;
     }
     if (creep.memory.process === 'transfer') {
-        console.log('goto', creep.name, creep.memory.target_id);
         if (creep.memory.target_id) {
             transfer_nearby(creep);
             return true;

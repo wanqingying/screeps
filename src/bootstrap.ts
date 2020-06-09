@@ -1,7 +1,8 @@
 // order matter
-import './global';
 import './config';
+import './global';
 import './roles';
 import './log';
-import './prototype';
+import './prototype'
 import './flash';
+

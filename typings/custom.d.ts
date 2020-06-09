@@ -12,6 +12,9 @@ declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 
 declare interface Source_h {
     source: Source;
     harvesters: Creep[];
+    // 此矿的每秒开采次数
+    speed?: number;
+    container: StructureContainer;
 }
 
 declare interface StructureHasStore extends Structure<any> {
