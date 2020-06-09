@@ -1,3 +1,5 @@
+
+declare interface DropResource{ resource: Resource; cap: number }
 declare interface Room {
     sourceInfo: Source_h[];
     // 当前的角色数量信息
@@ -22,7 +24,8 @@ declare interface Room {
     // 上一次更新半持久化数据的时间
     refreshTick: number;
     // 维护掉在地上的垃圾队列，用于carrier捡垃圾策略 cap:有多少空间被预定
-    dropResources: { resource: Resource; cap: number }[];
+    dropResources: DropResource[];
+    maxCreepCount:number
     findBy<K extends FindConstant>(type: K, filter?: FilterFunction<K>): Array<FindTypes[K]>;
     findByFilter<K extends FindConstant>(
         type: K,
@@ -51,8 +54,6 @@ declare interface Room {
     // 维护单位
     checkCreep(): void;
     checkTower(): void;
-    findTargetHeal(): any;
-    findTargetRepair(): any;
     findTargetAttack(): any;
     findSourceMinHarvester(): any;
     checkSpawnCreep(): any;

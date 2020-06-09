@@ -7,7 +7,7 @@
 //CLAIM 600
 //TOUGH 10
 
-declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 'builder';
+declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 'builder' | string;
 
 declare interface Source_h {
     source: Source;

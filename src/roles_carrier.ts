@@ -1,4 +1,4 @@
-import { transfer_nearby } from './lib_creep';
+import {findDropTarget, pickUpEnergyFromMine, transfer_nearby} from './lib_creep';
 
 const carrier = {} as Role;
 
@@ -11,10 +11,9 @@ carrier.setUp = function (creep) {
         creep.memory.process = 'drop';
     }
     if (creep.memory.process === 'pick') {
-        creep.say('p');
         let pick = pickEnergyDrop(creep);
         if (!pick) {
-            creep.pickUpEnergyFromMine();
+            pickUpEnergyFromMine(creep)
         }
     } else {
         creep.say('f');
@@ -32,8 +31,7 @@ carrier.setUp = function (creep) {
 
 // 捡最大的垃圾
 function pickEnergyDrop(creep: Creep, min?: number) {
-    let pick_min = min || 0;
-
+    let pick_min = min || 20;
     let target: Resource;
     if (creep.memory.target_drop_source_id) {
         // 当前的目标数量大于0则继续
@@ -45,22 +43,14 @@ function pickEnergyDrop(creep: Creep, min?: number) {
         }
     }
     if (!target) {
-        let room = creep.room;
-        let targets = room.dropResources;
-        let target_drop = Array.from(targets)
-            .sort((a, b) => {
-                let ea = a.resource?.amount - a.cap;
-                let eb = b.resource?.amount - b.cap;
-                return ea - eb;
-            })
-            .filter(b => b && b?.resource?.amount)
-            .pop();
-        if (target_drop) {
-            target_drop.cap += creep.store.getCapacity(RESOURCE_ENERGY);
-            target = target_drop.resource;
+        let drop = findDropTarget(creep);
+        if (drop) {
+            drop.cap += creep.store.getCapacity(RESOURCE_ENERGY);
+            target = drop.resource;
         }
     }
     if (target && target.amount > pick_min) {
+        console.log('gp ');
         creep.memory.target_drop_source_id = target.id;
         const act = creep.pickup(target);
 

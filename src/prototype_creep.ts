@@ -4,7 +4,7 @@ Creep.prototype.run = function () {
     const creep = this;
     if (creep.memory.renew) {
         creep.increaseRenewTime();
-
+        creep.say('renew')
         renew_creep(creep);
     } else {
         const rs = w_roles[creep.memory?.role];
@@ -24,14 +24,6 @@ Creep.prototype.increaseRenewTime = function () {
     const che = creep.getCache();
     che.renewTime++;
     return this.renewTime;
-};
-
-Creep.prototype.prepare = function () {
-    const creep = this;
-};
-
-Creep.prototype.refresh = function () {
-    const creep = this;
 };
 
 Creep.prototype.getCache = function () {
@@ -85,6 +77,10 @@ Creep.prototype.pickUpEnergyFromMine = function () {
     }
     return false;
 };
+
+function findDropTarget() {
+
+}
 
 // 捡最大的垃圾
 function pickEnergyFormMine(creep: Creep, min?: number) {

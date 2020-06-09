@@ -25,6 +25,9 @@ global.get_code_msg_screeps = function (code) {
 };
 
 global.count_distance = function (a, b) {
+    if (!a || !b) {
+        return 9999;
+    }
     let dx = a.x - b.x;
     let dy = a.y - b.y;
     return Math.round(Math.pow(dx * dx + dy * dy, 0.5));

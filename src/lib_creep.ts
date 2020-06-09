@@ -157,3 +157,54 @@ export function findMaxEnergyWithDraw(creep: Creep, types?: any[]) {
         return false;
     }
 }
+
+// 找到垃圾
+export function findDropTarget(creep: Creep): DropResource {
+    let room = creep.room;
+    let targets = room.dropResources;
+    let target = Array.from(targets)
+        .sort((a, b) => {
+            let ea = a.resource?.amount - a.cap;
+            let eb = b.resource?.amount - b.cap;
+            return ea - eb;
+        })
+        .filter(b => b && b?.resource?.amount)
+        .pop();
+    return target;
+}
+export function pickUpEnergyFromMine(creep: Creep) {
+    const sources = creep.room.sourceInfo;
+    const h = RESOURCE_ENERGY;
+    const preId = creep.memory.target_drop_source_id;
+    let target: StructureContainer;
+
+    if (preId) {
+        const t: StructureContainer = Game.getObjectById(preId);
+        if (t && t.store && t.store.getUsedCapacity(h) > 0) {
+            target = t;
+        }
+    }
+    if (!target) {
+        for (let i = 0; i < sources.length; i++) {
+            let source_h = sources[i];
+            if (source_h.container && source_h.container.store.getUsedCapacity(h) > 0) {
+                target = source_h.container;
+                break;
+            }
+        }
+    }
+    if (target) {
+        creep.memory.target_drop_source_id = target.id;
+        creep.memory.target_drop_source_id = target.id;
+        const act = creep.withdraw(target, h);
+
+        if (act == ERR_NOT_IN_RANGE) {
+            creep.moveTo(target);
+            return true;
+        } else {
+            creep.memory.target_drop_source_id = undefined;
+        }
+        return act === OK;
+    }
+    return false;
+}

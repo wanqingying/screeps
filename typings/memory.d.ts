@@ -38,6 +38,7 @@ declare interface RoomMemory {
     energyRate: ListA<number>;
     // 过去 n tik 的存量
     energyExist: number[];
+    spawnRole:string
 }
 
 declare interface SpawnMemory {

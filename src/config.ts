@@ -52,10 +52,10 @@ export const body_cost = {
 
 export const creep_cfg_num = {
     [role_name.starter]: 0,
-    [role_name.carrier]: 4,
-    [role_name.builder]: 6,
+    [role_name.carrier]: 1,
+    [role_name.builder]: 1,
     [role_name.harvester]: 2,
-    [role_name.upgrader]: 1,
+    [role_name.upgrader]: 0,
 };
 
 global.w_roles = {} as Roles;

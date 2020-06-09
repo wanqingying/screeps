@@ -1,65 +1,68 @@
 import { find_nearby_target, ListA } from './lib_base';
+import { checkCreep } from './prototype_room_spawn';
 
 Room.prototype.start = function () {
     const room = this;
-    room.refresh();
-    room.checkTower();
-    room.checkCreep();
-    room.refreshDropEnergy();
+    refresh(room);
+    refreshDropEnergy(room);
+    refreshMaxCreepCount(room)
+    checkTower(room);
+    checkCreep(room);
 };
 Room.prototype.findBy = function (type, filter) {
     return this.find(type, { filter });
 };
 
-// Room.prototype.findByFilter = function (type, filter) {
-//     return this.find(type, { filter });
-// };
+function refresh(room: Room) {
+    refreshData(room);
+    refreshEnergyData(room);
+    refreshHotData(room);
+    prepareMemory(room);
+}
 
-Room.prototype.refresh = function () {
-    const room = this;
-    room.refreshData();
-    room.refreshEnergyData();
-    room.refreshHotData();
-    room.prepareMemory();
-};
-Room.prototype.checkTower = function () {
-    const room = this;
+function checkTower(room: Room) {
     const towers = room.findBy(
         FIND_STRUCTURES,
         t => t.structureType === STRUCTURE_TOWER
     ) as StructureTower[];
     for (let i = 0; i < towers.length; i++) {
         const tower = towers[i];
-        const targetHeal = room.findTargetHeal(room);
+        const targetHeal = findHealTarget(room);
         if (targetHeal) {
             tower.heal(targetHeal);
             continue;
         }
-        const targetRepair = room.findTargetRepair(room);
+        const targetRepair = findRepairTarget(room);
         if (targetRepair) {
             tower.repair(targetRepair);
             continue;
         }
-        const targetAttack = room.findTargetAttack(room);
+        const targetAttack = findTargetAttack(room);
         if (targetAttack) {
             tower.attack(targetAttack);
             continue;
         }
         room.log('tower no target');
     }
-};
-Room.prototype.findSourceMinHarvester = function () {
-    const room = this;
-};
-Room.prototype.findTargetHeal = function () {
-    const room = this;
-};
-Room.prototype.findTargetAttack = function () {
-    const room = this;
-};
-Room.prototype.findTargetRepair = function () {
-    const room = this;
-};
+}
+function findHealTarget(room: Room): AnyCreep {
+    return room
+        .findBy(FIND_CREEPS, t => t.hits < t.hitsMax)
+        .sort((a, b) => {
+            return a.hits - b.hits;
+        })[0];
+}
+function findRepairTarget(room: Room): AnyStructure {
+    return room
+        .findBy(FIND_STRUCTURES, t => t.hits < t.hitsMax)
+        .sort((a, b) => {
+            return a.hits - b.hits;
+        })[0];
+}
+function findSourceMinHarvester(room: Room) {}
+function findTargetAttack(room: Room) {
+    return null;
+}
 Room.prototype.findByFilter = function (type, property, propertyIn, filter) {
     const room = this;
     const res = room.findByCacheKey(type, property, propertyIn);
@@ -89,8 +92,7 @@ Room.prototype.findByCacheKey = function (type, property, propertyIn = []) {
     return res;
 };
 // 初始化每 tik 都需要更新的数据
-Room.prototype.refreshHotData = function () {
-    const room = this;
+function refreshHotData(room: Room) {
     room.log(`energy ${room.energyAvailable}/${room.energyCapacityAvailable}`);
     // 初始化角色
     const creepsIn = room.findByFilter(FIND_CREEPS);
@@ -116,8 +118,16 @@ Room.prototype.refreshHotData = function () {
                 }
             })
             .filter(k => k && k.name);
-        const near = find_nearby_target<StructureContainer>(source, containers);
-        const far = count_distance(near.pos, source.pos);
+        const near = find_nearby_target(source, containers) as StructureContainer;
+        const far = count_distance(near?.pos, source?.pos);
+        let speed = 0;
+        target_creeps.forEach(a => {
+            a.body.forEach(b => {
+                if (b.type === WORK) {
+                    speed += 2;
+                }
+            });
+        });
         if (far === 1) {
             room.sourceInfo.push({
                 source: source,
@@ -126,14 +136,18 @@ Room.prototype.refreshHotData = function () {
                 speed: 0,
             });
         } else {
-            room.sourceInfo.push({ source: source, harvesters: target_creeps, speed: 0 });
+            room.sourceInfo.push({
+                source: source,
+                harvesters: target_creeps,
+                speed: speed,
+                container: undefined,
+            });
         }
     });
     // 初始化房间状态
     room.spawning = room.spawns.some(s => s.spawning);
-};
-Room.prototype.refreshEnergyData = function () {
-    const room = this;
+}
+function refreshEnergyData(room) {
     const n = 10;
     // 初始化能量资源状况
     let state = global.w_rooms.get(room.name);
@@ -154,10 +168,9 @@ Room.prototype.refreshEnergyData = function () {
             rates.every(rt => rt < w_config.energy_lack_rate) && rates.length > 10;
         room.energyFull = rates.every(r => r > 0.99);
     }
-};
+}
 // 刷新半持久数据
-Room.prototype.refreshData = function () {
-    const room = this;
+function refreshData(room) {
     // const che = room.getRoomCache()
     if (!room.refreshTick) {
         room.refreshTick = 0;
@@ -168,14 +181,13 @@ Room.prototype.refreshData = function () {
     if (!room.energyExist) {
         room.energyExist = {};
     }
-};
-Room.prototype.prepareMemory = function () {
-    const room = this;
+}
+function prepareMemory(room: Room) {
     // 初始化房间数据
     if (!room.memory.renew_count) {
         room.memory.renew_count = 0;
     }
-};
+}
 Room.prototype.getRoomCache = function () {
     const room = this;
     let che = w_rooms.get(room.name);
@@ -208,17 +220,23 @@ Room.prototype.getRoomCache = function () {
     w_rooms.set(room.name, che);
     return che;
 };
-Room.prototype.refreshDropEnergy = function () {
-    const room = this;
+function refreshDropEnergy(room: Room) {
     room.dropResources = room.find(FIND_DROPPED_RESOURCES).map(d => {
         return {
             resource: d,
             cap: 0,
         };
     });
-};
+}
 
 Room.prototype.checkSources = function () {
     const room = this;
     const sources = room.sourceInfo;
 };
+
+function refreshMaxCreepCount(room: Room) {
+    const cfg = w_config.creep_cfg_num;
+    let k = 0;
+    Object.values(cfg).forEach(n => (k = k + n));
+    room.maxCreepCount=k;
+}

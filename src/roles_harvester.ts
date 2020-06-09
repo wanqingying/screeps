@@ -27,11 +27,23 @@ harvester.setUp = function (creep) {
     }
     creep.memory.target_resource_id = target.id;
     const act = creep.harvest(target);
-    if (act !== OK) {
+    if (act === ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
+        moveToMineOrContainer(creep, target);
     }
+    moveToMineOrContainer(creep, target);
+
     // creep.moveTo(target)
 };
+
+function moveToMineOrContainer(creep: Creep, mine: Source) {
+    let sh = creep.room.sourceInfo.find(t => t.source.id === mine.id);
+    if (!sh || !sh.container) {
+        creep.moveTo(mine);
+    } else {
+        creep.moveTo(sh.container);
+    }
+}
 
 w_roles.harvester = harvester as any;
 
