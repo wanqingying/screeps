@@ -1,11 +1,12 @@
-import { find_nearby_target, ListA } from './lib_base';
+import { find_nearby_target, getCreepsRoleAbility, ListA } from './lib_base';
 import { checkCreep } from './prototype_room_spawn';
+import { role_name } from './config';
 
 Room.prototype.start = function () {
     const room = this;
     refresh(room);
     refreshDropEnergy(room);
-    refreshMaxCreepCount(room)
+    refreshMaxCreepCount(room);
     checkTower(room);
     checkCreep(room);
 };
@@ -102,6 +103,8 @@ function refreshHotData(room: Room) {
         const exists = creepsIn.filter(c => c.memory?.role === role);
         room.roleExist[role] = exists.length;
     });
+    room.abilityCarry = getCreepsRoleAbility(creepsIn, role_name.carrier);
+    room.abilityMine = getCreepsRoleAbility(creepsIn, role_name.harvester);
     // 初始化基地
     room.spawns = room.findByFilter(FIND_STRUCTURES, 'structureType', [
         STRUCTURE_SPAWN,
@@ -119,7 +122,7 @@ function refreshHotData(room: Room) {
             })
             .filter(k => k && k.name);
         const near = find_nearby_target(source, containers) as StructureContainer;
-        const far = count_distance(near?.pos, source?.pos);
+        const far = w_utils.count_distance(near?.pos, source?.pos);
         let speed = 0;
         target_creeps.forEach(a => {
             a.body.forEach(b => {
@@ -147,10 +150,10 @@ function refreshHotData(room: Room) {
     // 初始化房间状态
     room.spawning = room.spawns.some(s => s.spawning);
 }
-function refreshEnergyData(room) {
+function refreshEnergyData(room: Room) {
     const n = 10;
     // 初始化能量资源状况
-    let state = global.w_rooms.get(room.name);
+    let state = room.getCache();
     if (!state) {
         state = { energyCount: new ListA<number>(n), energyRate: new ListA<number>(n) } as any;
         global.w_rooms.set(room.name, state);
@@ -164,8 +167,7 @@ function refreshEnergyData(room) {
     }
     if (state.energyRate.length > 20) {
         const rates = state.energyRate;
-        room.memory.energyLack =
-            rates.every(rt => rt < w_config.energy_lack_rate) && rates.length > 10;
+        room.energyLack = rates.every(rt => rt < w_config.energy_lack_rate) && rates.length > 10;
         room.energyFull = rates.every(r => r > 0.99);
     }
 }
@@ -188,7 +190,7 @@ function prepareMemory(room: Room) {
         room.memory.renew_count = 0;
     }
 }
-Room.prototype.getRoomCache = function () {
+Room.prototype.getCache = function () {
     const room = this;
     let che = w_rooms.get(room.name);
     let n = 50;
@@ -238,5 +240,5 @@ function refreshMaxCreepCount(room: Room) {
     const cfg = w_config.creep_cfg_num;
     let k = 0;
     Object.values(cfg).forEach(n => (k = k + n));
-    room.maxCreepCount=k;
+    room.maxCreepCount = k;
 }

@@ -1,7 +1,9 @@
-
-declare interface DropResource{ resource: Resource; cap: number }
+declare interface DropResource {
+    resource: Resource;
+    cap: number;
+}
 declare interface Room {
-    sourceInfo: Source_h[];
+    sourceInfo: SourceCache[];
     // 当前的角色数量信息
     roleExist: RoleExist;
     // 引用对象
@@ -25,7 +27,11 @@ declare interface Room {
     refreshTick: number;
     // 维护掉在地上的垃圾队列，用于carrier捡垃圾策略 cap:有多少空间被预定
     dropResources: DropResource[];
-    maxCreepCount:number
+    maxCreepCount: number;
+    //  carrier CARRY count
+    abilityCarry: number;
+    //  miner WORK count
+    abilityMine: number;
     findBy<K extends FindConstant>(type: K, filter?: FilterFunction<K>): Array<FindTypes[K]>;
     findByFilter<K extends FindConstant>(
         type: K,
@@ -57,10 +63,8 @@ declare interface Room {
     findTargetAttack(): any;
     findSourceMinHarvester(): any;
     checkSpawnCreep(): any;
-    checkSources():any
+    checkSources(): any;
     start(): void;
-    getCurrentMaxBodyCost(role: role_name_key): void;
-    spawnCreep(role: role_name_key, k: number): void;
-    getRoomCache(): CacheRoom;
+    getCache(): CacheRoom;
     refreshDropEnergy(): void;
 }

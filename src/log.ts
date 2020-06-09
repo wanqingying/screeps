@@ -24,6 +24,7 @@ global.log = function (k) {
         case 1:
             return log_W2N8();
     }
+
 };
 
 function log_W2N8() {

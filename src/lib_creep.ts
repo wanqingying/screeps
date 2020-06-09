@@ -1,70 +1,49 @@
-import { find_nearby_target } from './lib_base';
+import { find_nearby_target, isEmpty, isNotEmpty,isFull } from './lib_base';
+import { getActionLockTarget } from './prototype_creep';
 
-export function transfer_nearby(creep: Creep, types?): ScreepsReturnCode | number {
-    let target: StructureHasStore;
-    if (creep.memory.target_id) {
-        let t = Game.getObjectById(creep.memory.target_id) as StructureHasStore;
-        if (t.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            target = t;
-        } else {
-            creep.memory.target_id = undefined;
-        }
-    } else {
-        const filters = [
-            STRUCTURE_CONTAINER,
-            STRUCTURE_EXTENSION,
-            STRUCTURE_SPAWN,
-            STRUCTURE_TOWER,
-        ];
+export function transfer_nearby(
+    creep: Creep,
+    types?: StructureConstant[],
+    type?: ResourceConstant | null,
+    emptyCallback?: Function
+): ScreepsReturnCode {
+    type = type || RESOURCE_ENERGY;
+    let filters = [
+        STRUCTURE_CONTAINER,
+        STRUCTURE_EXTENSION,
+        STRUCTURE_SPAWN,
+        STRUCTURE_TOWER,
+        STRUCTURE_STORAGE,
+    ];
+    const { target, reset_target } = getActionLockTarget<StructureContainer>(creep, () => {
         const targets = creep.room.find(FIND_STRUCTURES, {
             filter: function (structure: StructureHasStore) {
                 if (!structure || !structure.store) {
                     return false;
                 }
                 const meet_type = (types || filters).includes(structure.structureType);
-                const free = structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-                let f = structure.store.getFreeCapacity(RESOURCE_ENERGY);
-                let o = structure.store.getCapacity(RESOURCE_ENERGY);
+                const free = structure.store.getFreeCapacity(type) > 0;
                 return meet_type && free;
             },
         });
-        target = find_nearby_target(creep, targets) as any;
+        return find_nearby_target(creep, targets) as any;
+    });
+    if (!target) {
+        reset_target();
+        return ERR_NOT_FOUND;
+    }
+    if (isFull(target)) {
+        reset_target();
+        return ERR_FULL;
     }
 
-    if (target) {
-        creep.memory.target_id = target.id;
-        const act = creep.transfer(target, RESOURCE_ENERGY);
-        if (act === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
-        }
-        if (creep.store.getUsedCapacity() === 0) {
-            creep.memory.target_id = undefined;
-        }
-        return act;
-    } else {
-        creep.log('transfer target not found');
-        return ERR_TARGET_NOT_FOUND;
-    }
-}
-
-export function renew_creep(creep: Creep) {
-    let target: StructureSpawn;
-    if (creep.memory.renew_spawn_id) {
-        target = Game.getObjectById(creep.memory.renew_spawn_id);
-    } else {
-        target = find_spawn(creep);
-        creep.memory.renew_spawn_id = target.id;
-    }
-    if (!target.renewCreep) {
-        creep.log('renew err ', target);
-        return;
-    }
-    const act = target.renewCreep(creep);
+    const act = creep.transfer(target, type);
     if (act === ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
     }
-    if (act !== OK) {
-        creep.log(' renew ', get_code_msg_screeps(act));
+    if (isEmpty(creep)) {
+        reset_target();
+        emptyCallback && emptyCallback();
     }
     return act;
 }
@@ -92,10 +71,7 @@ export function pickUpMaxDropEnergy(creep: Creep, min?: number) {
     let pick_min = min || 0;
     // 如果捡垃圾的目标已经有多个人去捡，重新分配
     let target_id = creep.memory.target_drop_source_id;
-    // let exist_id = Object.values(Game.creeps).map(c => c.memory.target_drop_source_id);
-    // if (exist_id.filter(d => d === target_id).length > 1) {
-    //     creep.memory.target_drop_source_id = undefined;
-    // }
+
     // 垃圾被捡完重新分配
     if (target_id) {
         let gbg: Resource = Game.getObjectById(creep.memory.target_drop_source_id);
@@ -126,6 +102,27 @@ export function pickUpMaxDropEnergy(creep: Creep, min?: number) {
     } else {
         return false;
     }
+}
+
+// 捡垃圾
+export function pickEnergyDrop(creep: Creep, min?: number):ScreepsReturnCode {
+    let { target,reset_target }=getActionLockTarget<Resource>(creep,()=>{
+        let drop = findDropTargetSync(creep);
+        return drop?.resource
+    })
+    if (!target||target.amount===0){
+        reset_target()
+        return ERR_NOT_FOUND
+    }
+    return pickUpEnergyDropSync(creep,target)
+}
+
+function pickUpEnergyDropSync(creep:Creep,target:Resource):ScreepsReturnCode {
+    const eng=creep.room.dropResources.find(d=>d.resource.id===target.id);
+    if (eng){
+        eng.cap+=creep.store.getFreeCapacity(RESOURCE_ENERGY);
+    }
+    return creep.pickup(target)
 }
 
 function findMaxEnergyStructure(creep: Creep, types?: any[]): AnyStructure {
@@ -159,10 +156,10 @@ export function findMaxEnergyWithDraw(creep: Creep, types?: any[]) {
 }
 
 // 找到垃圾
-export function findDropTarget(creep: Creep): DropResource {
+export function findDropTargetSync(creep: Creep): DropResource {
     let room = creep.room;
     let targets = room.dropResources;
-    let target = Array.from(targets)
+    return Array.from(targets)
         .sort((a, b) => {
             let ea = a.resource?.amount - a.cap;
             let eb = b.resource?.amount - b.cap;
@@ -170,41 +167,144 @@ export function findDropTarget(creep: Creep): DropResource {
         })
         .filter(b => b && b?.resource?.amount)
         .pop();
-    return target;
 }
-export function pickUpEnergyFromMine(creep: Creep) {
+export function pickUpEnergyFromMine(creep: Creep,type?:ResourceConstant):ScreepsReturnCode {
     const sources = creep.room.sourceInfo;
-    const h = RESOURCE_ENERGY;
-    const preId = creep.memory.target_drop_source_id;
-    let target: StructureContainer;
+    const h =type|| RESOURCE_ENERGY;
 
-    if (preId) {
-        const t: StructureContainer = Game.getObjectById(preId);
-        if (t && t.store && t.store.getUsedCapacity(h) > 0) {
-            target = t;
-        }
-    }
-    if (!target) {
-        for (let i = 0; i < sources.length; i++) {
-            let source_h = sources[i];
-            if (source_h.container && source_h.container.store.getUsedCapacity(h) > 0) {
-                target = source_h.container;
-                break;
+    let {target,reset_target}=getActionLockTarget<StructureContainer>(creep,()=>{
+        for (let sh of sources) {
+            if (sh.container && isNotEmpty(sh.container)) {
+                return sh.container;
             }
         }
-    }
-    if (target) {
-        creep.memory.target_drop_source_id = target.id;
-        creep.memory.target_drop_source_id = target.id;
-        const act = creep.withdraw(target, h);
+    })
 
-        if (act == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
-            return true;
-        } else {
-            creep.memory.target_drop_source_id = undefined;
-        }
-        return act === OK;
+    if (!target||isEmpty(target)){
+        reset_target()
+        return ERR_NOT_FOUND
     }
-    return false;
+    const code=creep.withdraw(target,h)
+    if (code===ERR_NOT_IN_RANGE){
+        creep.moveToTarget(target.pos)
+    }
+    return code;
+}
+
+export function renewCreep(creep: Creep) {
+    let target: StructureSpawn;
+    if (creep.memory.renew_spawn_id) {
+        target = Game.getObjectById(creep.memory.renew_spawn_id as Id<StructureSpawn>);
+    } else {
+        target = find_spawn(creep);
+        creep.memory.renew_spawn_id = target.id;
+    }
+    if (!target.renewCreep) {
+        creep.log('renew err ', target);
+        return;
+    }
+    const act = target.renewCreep(creep);
+    if (act === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target);
+    }
+    if (act === OK) {
+        creep.resetRenewFailTime();
+    }
+    if (act === ERR_NOT_ENOUGH_ENERGY) {
+        creep.increaseRenewFailTime();
+    }
+    return act;
+}
+export function checkRenewCreep(creep: Creep) {
+    // 能量回复策略
+    const life = creep.ticksToLive;
+
+    if (creep.memory?.renew) {
+        // 正常回到 1450
+        if (creep.ticksToLive >= 1450) {
+            return stop_renew(creep);
+        }
+        // 缺能量时只需要回到400
+        if (creep.ticksToLive >= 400 && creep.room.energyLack) {
+            return stop_renew(creep);
+        }
+        if (creep.getRenewFailTime() > 15) {
+            return stop_renew(creep);
+        }
+        return renewCreep(creep);
+    } else {
+        // 大于 250 tick 不考虑
+        let rt_a = life >= 250;
+        // 两次间隔 200 tick
+        let rt_b = Game.time - creep.memory.renew_tick < 200;
+        // 缺能量不考虑
+        let rt_c = creep.room.energyLack;
+        // 同时回能量人数不能超过上限
+        let rt_d = creep.room.memory.renew_count > 3;
+        if ([rt_a, rt_b, rt_c, rt_d].some(rt => rt)) {
+            return;
+        }
+
+        const spawn = find_nearby_target<StructureSpawn>(
+            creep,
+            creep.room.spawns.map(a => a.pos)
+        );
+        const far = w_utils.count_distance(spawn.pos, creep.pos);
+        const danger = far + (250 - life) / 10;
+        if (danger > 25) {
+            start_renew(creep);
+        }
+    }
+}
+
+function stop_renew(creep: Creep) {
+    creep.memory.renew_tick = Game.time;
+    creep.memory.renew = false;
+    creep.room.memory.renew_count--;
+    creep.memory.renew_spawn_id = undefined;
+    creep.resetRenewFailTime();
+}
+function start_renew(creep: Creep) {
+    creep.memory.renew = true;
+    creep.room.memory.renew_count++;
+}
+
+export function harvestSource(creep: Creep): ScreepsReturnCode {
+    let { target, reset_target } = getActionLockTarget<Source>(creep, () => {
+        const target = findSource(creep);
+        return target?.source;
+    });
+
+    if (!target) {
+        return ERR_NOT_FOUND;
+    }
+    if (target.energy === 0 && target.ticksToRegeneration > 500) {
+        // 能量耗尽时切换目标
+        reset_target();
+        creep.say('source empty see another');
+        return ERR_NOT_FOUND;
+    }
+    findAndMoveToSourcePos(creep, target);
+    return creep.harvest(target);
+}
+function findAndMoveToSourcePos(creep: Creep, target) {
+    let sh = creep.room.sourceInfo.find(t => t.source.id === target.id);
+    if (!sh?.container) {
+        return moveToTarget(creep, target);
+    } else {
+        return moveToTarget(creep, sh.container.pos);
+    }
+}
+function findSource(creep: Creep) {
+    let sourceH = creep.room.sourceInfo.sort((a, b) => {
+        return a.speed - b.speed;
+    });
+    return sourceH.shift();
+}
+function moveToTarget(creep: Creep, target: RoomPosition) {
+    const far = w_utils.count_distance(creep.pos, target);
+    if (far > 1) {
+        return creep.moveTo(target);
+    }
+    return OK;
 }

@@ -1,20 +1,39 @@
 import './bootstrap';
-import {flash} from "./flash";
 
 function main() {
-    flash();
     console.log('tick');
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
             creep.suicide();
         }
+        if (!creep.memory.cost) {
+            let cost = 0;
+            creep.body.forEach(b => {
+                cost += w_config.internal.body_cost[b.type];
+            });
+            creep.memory.cost = cost;
+        }
     });
+    Object.keys(Memory.creeps).forEach(name => {
+        if (!Game.creeps[name]) {
+            delete Memory.creeps[name];
+        }
+    });
+
     Object.values(Game.rooms).forEach(room => {
-        room.start();
+        try {
+            room.start();
+        } catch (e) {
+            console.error('err start room ', room.name, e);
+        }
     });
     Object.values(Game.creeps).forEach(creep => {
-        creep.run();
+        try {
+            creep.run();
+        } catch (e) {
+            console.error('err start creep ', creep.name, e);
+        }
     });
 }
 

@@ -9,24 +9,23 @@ declare interface Memory {
 
 declare interface CreepMemory {
     role: role_name_key;
+    cost: number;
+    index: number;
+    born_tick: number;
     target_resource_id?: string;
-    index?: number;
     building?: boolean;
     upgrading?: boolean;
     target_drop_source_id?: string;
     target_id?: string;
+    lock_id?: string;
     renew_role?: RoleName;
     renew?: boolean;
     renew_tick?: number;
     process?: string;
     distance?: number;
-    distance_1?: number;
-    distance_2?: number;
     act_msg?: any;
     step?: number;
-    cost?: number;
     id?: string;
-    born_tick: number;
     renew_spawn_id?: string;
 }
 
@@ -38,7 +37,8 @@ declare interface RoomMemory {
     energyRate: ListA<number>;
     // 过去 n tik 的存量
     energyExist: number[];
-    spawnRole:string
+    // 正在生产的角色
+    spawnRole: string;
 }
 
 declare interface SpawnMemory {

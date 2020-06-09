@@ -9,10 +9,10 @@
 
 declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 'builder' | string;
 
-declare interface Source_h {
+declare interface SourceCache {
     source: Source;
     harvesters: Creep[];
-    // 此矿的每秒开采次数
+    // 开采速度,等于 work*2
     speed?: number;
     container: StructureContainer;
 }

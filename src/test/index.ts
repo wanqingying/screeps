@@ -5,4 +5,3 @@ interface Task {
     res: any;
     msg?: string;
 }
-
