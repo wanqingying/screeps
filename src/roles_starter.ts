@@ -13,9 +13,11 @@ starter.setUp = function (creep) {
     }
 
     if (creep.memory.process !== 'drop') {
+        creep.say_one(w_debug_creep,'dig')
         harvestSource(creep);
     }
     if (creep.memory.process === 'drop') {
+        creep.say_one(w_debug_creep,'drop')
         const empty = transfer_nearby(creep);
         if (empty) {
             creep.memory.process = 'dig';

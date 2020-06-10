@@ -1,41 +1,52 @@
-import { pickUpMaxDropEnergy, findMaxEnergyWithDraw } from './lib_creep';
+import { pickUpMaxDropEnergy, findMaxEnergyWithDraw, moveToTarget, checkRepair } from './lib_creep';
+import { findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_base';
 
 const builder = {} as Role;
 
 builder.setUp = function (creep) {
-    if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
+    if (creep.memory.building && isEmpty(creep)) {
         creep.memory.building = false;
+        creep.memory.process = 'get';
         creep.memory.target_id = undefined;
         creep.say('store');
     }
-    if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
+    if (!creep.memory.building && isFull(creep)) {
         creep.memory.building = true;
+        creep.memory.process = 'build';
         creep.say('build');
     }
 
     if (creep.memory.building) {
-        let tag;
-        if (creep.memory.target_id) {
-            tag = Game.getObjectById(creep.memory.target_id);
-        } else {
-            let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-            targets = targets.sort((a, b) => {
+        // 建筑,维修,
+
+        let { target, unLock } = getActionLockTarget<any>(creep, 'builder_find', () => {
+            let targets = creep.room.find(FIND_CONSTRUCTION_SITES).sort((a, b) => {
                 return a.progress - b.progress;
             });
             if (targets.length) {
-                tag = targets.pop();
-                creep.memory.target_id = tag.id;
+                return targets.pop();
+            }
+        });
+        if (target) {
+            let act = creep.build(target);
+
+            if (act === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            } else if (act !== OK) {
+                unLock();
+            }
+        } else {
+            unLock();
+            console.log('rp');
+            let act = checkRepair(creep);
+            console.log(w_utils.get_code_msg(act));
+            if (act === ERR_NOT_FOUND) {
+                moveToTarget(creep, new RoomPosition(24, 41, creep.room.name));
             }
         }
-        if (tag) {
-            creep.build(tag);
-            creep.moveTo(tag);
-        } else {
-            creep.log('build not found');
-            creep.memory.target_id = undefined;
-        }
+        console.log('build');
     } else {
-        if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity() / 2)) {
+        if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity() / 3)) {
             return;
         }
         findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);

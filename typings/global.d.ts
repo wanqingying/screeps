@@ -58,6 +58,8 @@ declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } }
 
 declare interface CacheCreep {
     renewTime: number;
+    lockSeed:number
+    tick:number
 }
 
 declare type W_Room = Map<string, CacheRoom>;
@@ -76,6 +78,7 @@ declare namespace NodeJS {
         w_creeps: W_Creep;
         w_code: W_CODE;
         w_utils: W_Utils;
+        w_debug_creep:string
         log(...p: any): void;
     }
 }
@@ -88,4 +91,4 @@ declare const w_rooms: W_Room;
 declare const w_creeps: W_Creep;
 declare const w_code: W_CODE;
 declare const w_utils: W_Utils;
-declare const w_task:Task
+declare const w_debug_creep:string

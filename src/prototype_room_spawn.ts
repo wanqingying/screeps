@@ -22,7 +22,7 @@ function checkSpawnCreep(room: Room) {
         }
         return spawnCreep(room, role, code);
     }
-    role = checkSpawnCreepByAuto(room);
+    // role = checkSpawnCreepByAuto(room);
     if (role) {
         return spawnCreep(room, role);
     }
@@ -61,12 +61,12 @@ function checkSpawnCreepByCurrent(room: Room): role_name_key | undefined {
     const cs = current_exist[w_role_name.starter];
     const count = room.creepCount;
     let many_other = current_harvester === 0 && current_carrier === 0 && count > 3 && cs < 3;
-    if (count < 4) {
+    if (count < w_config.creep_cfg_num.starter) {
         return w_role_name.starter;
     }
-    if (many_other) {
-        return w_role_name.starter;
-    }
+    // if (many_other) {
+    //     return w_role_name.starter;
+    // }
     if (current_harvester < 1) {
         return w_role_name.harvester;
     }
@@ -129,7 +129,7 @@ function spawnCreep(room: Room, role: role_name_key, code?) {
             room.memory.spawnRole = role;
             che.spawnFailTick++;
             room.spawning = true;
-            room.log(`spawn ${name} ` + w_utils.get_code_msg(act));
+            console.log(`spawn ${name} ` + w_utils.get_code_msg(act), ' need ', cost, ' current ',room.energyAvailable);
         }
         che.spawnCode = act;
         w_rooms.set(room.name, che);
@@ -140,15 +140,15 @@ function getCreepBody(room: Room, role: role_name_key, code?: number) {
     let energy_max = room.energyCapacityAvailable;
     const energy_lack = room.energyLack;
     const che = room.getCache();
-    if (energy_lack) {
-        energy_max = getPossibleMaxEnergy(room);
-        return [WORK, MOVE, CARRY];
-    }
+    // if (energy_lack) {
+    //     energy_max = getPossibleMaxEnergy(room);
+    //     return [WORK, MOVE, CARRY];
+    // }
     if (room.energyStop) {
         energy_max = 300;
     }
     let index: number;
-    if (code === w_code.SPAWN_BY_FORCE) {
+    if (code === w_code.SPAWN_BY_FORCE || che.spawnFailTick > 50 || role === role_name.starter) {
         // 用于错误恢复
         index = 0;
     } else {
@@ -194,7 +194,7 @@ function killCreepByCost(room: Room) {
 // 杀死过多的单位
 function killCreepByConfig(room: Room) {
     if (shouldStopKillCreep(room)) {
-        return;
+        // return;
     }
     const creeps = room.findBy(FIND_CREEPS).sort((a, b) => {
         return a.memory?.cost - b.memory?.cost;
@@ -222,14 +222,22 @@ function killCreepByConfig(room: Room) {
 }
 // 挽救自杀行为
 function shouldStopKillCreep(room: Room): boolean {
+    const che = room.getCache();
+    if (che.stopKill > 80) {
+        // che.stopKill=0
+        // return false
+    }
     if (room.energyAvailable < room.energyCapacityAvailable) {
         // 能量未满不执行自杀
+        che.stopKill++;
         return true;
     }
     if (room.creepCount < room.maxCreepCount) {
+        che.stopKill++;
         // 数量未满不执行自杀
         return true;
     }
+    che.stopKill = 0;
     return false;
 }
 // 用于 creep name
@@ -249,7 +257,7 @@ export function getCurrentSpawnCost(room: Room, role: role_name_key) {
 
 export function getPossibleMaxEnergy(room: Room): number {
     let max = 0;
-    room.memory.energyExist.forEach(n => {
+    (room.memory.energyExist || []).forEach(n => {
         if (n > max) {
             max = n;
         }

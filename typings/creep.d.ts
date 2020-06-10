@@ -5,6 +5,8 @@ declare interface Creep {
     increaseRenewFailTime();
     resetRenewFailTime(): void;
     log(...p: any): void;
+    log_one(...p: any): void;
+    say_one(...p: any): void;
     run(): void;
     prepare(): void;
     // 自杀/更新换代

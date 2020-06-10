@@ -28,9 +28,9 @@ upgrader.setUp = function (creep: Creep) {
             }
             cont = true;
         }
-        if (w_config.upgrader_only_container) {
-            return;
-        }
+        // if (w_config.upgrader_only_container) {
+        //     return;
+        // }
         if (!cont) {
             cont = pickUpMaxDropEnergy(creep);
         }

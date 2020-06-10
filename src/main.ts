@@ -1,7 +1,6 @@
 import './bootstrap';
 
 function main() {
-    console.log('tick');
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
@@ -22,17 +21,14 @@ function main() {
     });
 
     Object.values(Game.rooms).forEach(room => {
-        try {
-            room.start();
-        } catch (e) {
-            console.error('err start room ', room.name, e);
-        }
+        room.start();
     });
     Object.values(Game.creeps).forEach(creep => {
+        creep.run();
+
         try {
-            creep.run();
         } catch (e) {
-            console.error('err start creep ', creep.name, e);
+            // console.t('err start creep ', creep.name, e);
         }
     });
 }

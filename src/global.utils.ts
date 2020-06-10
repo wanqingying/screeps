@@ -1,7 +1,10 @@
 global.w_utils = {
     count_distance(a, b) {
-        a=(a as any).pos||a;
-        b=(b as any).pos||b;
+        a=(a as any)?.pos||a;
+        b=(b as any)?.pos||b;
+        if (!a||!b){
+            return 999
+        }
         let dx = a.x - b.x;
         let dy = a.y - b.y;
         return Math.round(Math.pow(dx * dx + dy * dy, 0.5));

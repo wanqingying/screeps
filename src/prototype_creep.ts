@@ -1,8 +1,11 @@
-import { checkRenewCreep } from './lib_creep';
-import { find_source_min_harvester } from './lib_room';
+import {checkRenewCreep, getCache} from './lib_creep';
+import { getActionLockTarget } from './lib_base';
 
 Creep.prototype.run = function () {
     const creep = this;
+    let che=getCache(creep);
+    creep.log_one(che.tick)
+    che.tick++
     checkRenewCreep(creep);
     if (!creep.memory.renew) {
         const rs = w_roles[creep.memory?.role];
@@ -35,7 +38,7 @@ Creep.prototype.getCache = function () {
     const creep = this;
     let che: CacheCreep = w_creeps.get(creep.name);
     if (!che) {
-        che = { renewTime: 0 };
+        che = { renewTime: 0, lockSeed: 0,tick:0 };
         w_creeps.set(creep.name, che);
     }
     if (typeof che.renewTime !== 'number') {
@@ -45,27 +48,10 @@ Creep.prototype.getCache = function () {
     return che;
 };
 
-export function getActionLockTarget<T>(
-    creep: Creep,
-    getTarget
-): { target: T; reset_target: () => void } {
-    let target;
-    if (creep.memory.lock_id) {
-        target = Game.getObjectById(creep.memory.id);
-    } else {
-        target = getTarget();
-        creep.memory.lock_id = target?.id;
-    }
-    function reset() {
-        creep.memory.lock_id = undefined;
-    }
-    return { target, reset_target: reset };
-}
-
 Creep.prototype.harvestSource = function () {
     const creep = this;
 
-    let { target, reset_target } = getActionLockTarget<Source>(creep, () => {
+    let { target, unLock } = getActionLockTarget<Source>(creep, 'hs',() => {
         const target = creep.findSource();
         return target?.source;
     });
@@ -76,7 +62,7 @@ Creep.prototype.harvestSource = function () {
 
     if (target.energy === 0 && target.ticksToRegeneration > 500) {
         // 能量耗尽时切换目标
-        reset_target();
+        unLock();
         creep.say('source empty see another');
         return false;
     }
@@ -116,51 +102,3 @@ Creep.prototype.isEmpty = function (type = RESOURCE_ENERGY) {
 Creep.prototype.isFull = function (type = RESOURCE_ENERGY) {
     return this.store.getUsedCapacity(type) === 0;
 };
-
-function findDropTarget() {}
-
-// 捡最大的垃圾
-function pickEnergyFormMine(creep: Creep, min?: number) {
-    let pick_min = min || 0;
-
-    let target: Resource;
-    if (creep.memory.target_drop_source_id) {
-        // 当前的目标数量大于0则继续
-        let t: Resource = Game.getObjectById(creep.memory.target_drop_source_id);
-        if (t && t.amount > 0) {
-            target = t;
-        } else {
-            creep.memory.target_drop_source_id = undefined;
-        }
-    }
-    if (!target) {
-        let room = creep.room;
-        let targets = room.dropResources;
-        let target_drop = Array.from(targets)
-            .sort((a, b) => {
-                let ea = a.resource?.amount - a.cap;
-                let eb = b.resource?.amount - b.cap;
-                return ea - eb;
-            })
-            .filter(b => b && b?.resource?.amount)
-            .pop();
-        if (target_drop) {
-            target_drop.cap += creep.store.getCapacity(RESOURCE_ENERGY);
-            target = target_drop.resource;
-        }
-    }
-    if (target && target.amount > pick_min) {
-        creep.memory.target_drop_source_id = target.id;
-        const act = creep.pickup(target);
-
-        if (act == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
-        } else {
-            creep.memory.target_drop_source_id = undefined;
-        }
-        if (act === ERR_FULL) {
-            creep.say('full');
-        }
-    }
-    return false;
-}

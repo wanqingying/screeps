@@ -13,7 +13,7 @@ export const creep_cfg_body = {
     [role_name.carrier]: [
         { [MOVE]: 3, [CARRY]: 3 },
         { [MOVE]: 3, [CARRY]: 8 },
-        { [MOVE]: 3, [CARRY]: 13 },
+        { [MOVE]: 4, [CARRY]: 12 },
         { [MOVE]: 4, [CARRY]: 22 },
     ],
     [role_name.starter]: [
@@ -35,7 +35,7 @@ export const creep_cfg_body = {
         { [MOVE]: 4, [WORK]: 5, [CARRY]: 12 },
     ],
     [role_name.upgrader]: [
-        { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
+        { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
         { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
         { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
         { [MOVE]: 5, [WORK]: 8, [CARRY]: 5 },
@@ -60,11 +60,11 @@ export const body_cost = {
 
 export const creep_cfg_num = {
     [role_name.starter]: 0,
+    [role_name.carrier]: 3,
     [role_name.scout]: 0,
-    [role_name.carrier]: 1,
     [role_name.builder]: 1,
     [role_name.harvester]: 2,
-    [role_name.upgrader]: 0,
+    [role_name.upgrader]: 2,
 };
 
 global.w_roles = {} as Roles;
@@ -88,7 +88,7 @@ export const config_global: ConfigGlobal = {
     upgrader_only_container: true,
     creep_cfg_body: creep_cfg_body as any,
     creep_cfg_num: creep_cfg_num as any,
-    role_auto: [role_name.carrier, role_name.harvester],
+    role_auto: [],
 };
 
 global.w_config = config_global;
@@ -97,6 +97,6 @@ global.w_code = {
     SPAWN_BY_FORCE: 9,
     SPAWN_BY_AUTO: 7,
     SPAWN_BY_ROOM: 6,
-};
+} as any;
 
 global.module_loaded = true;
