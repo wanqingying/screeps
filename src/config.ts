@@ -4,6 +4,7 @@ export const role_name = {
     starter: 'starter',
     upgrader: 'upgrader',
     builder: 'builder',
+    scout: 'scout',
 };
 global.w_role_name = role_name;
 
@@ -39,6 +40,12 @@ export const creep_cfg_body = {
         { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
         { [MOVE]: 5, [WORK]: 8, [CARRY]: 5 },
     ],
+    [role_name.scout]: [
+        { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
+        { [MOVE]: 2, [CARRY]: 2, [WORK]: 3 },
+        { [MOVE]: 3, [CARRY]: 15 },
+        { [MOVE]: 3, [CARRY]: 15 },
+    ],
 };
 export const body_cost = {
     [MOVE]: 50,
@@ -53,6 +60,7 @@ export const body_cost = {
 
 export const creep_cfg_num = {
     [role_name.starter]: 0,
+    [role_name.scout]: 0,
     [role_name.carrier]: 1,
     [role_name.builder]: 1,
     [role_name.harvester]: 2,
@@ -61,7 +69,6 @@ export const creep_cfg_num = {
 
 global.w_roles = {} as Roles;
 
-global.ERR_TARGET_NOT_FOUND = -217;
 
 global.w_cache = new Map<any, any>();
 

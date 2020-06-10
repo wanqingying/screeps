@@ -55,14 +55,7 @@ declare interface SourceWithContainer {
 
 declare type CreepCfgNum = { [role in role_name_key]: number };
 declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } };
-declare interface CacheRoom {
-    energyCount: ListA<number>;
-    energyRate: ListA<number>;
-    spawnCode: any;
-    spawnIndex: number;
-    spawnFailTick: number;
-    sources: SourceWithContainer[];
-}
+
 declare interface CacheCreep {
     renewTime: number;
 }
@@ -87,7 +80,6 @@ declare namespace NodeJS {
     }
 }
 
-// declare const ERR_TARGET_NOT_FOUND = -217;
 declare const w_roles: Roles;
 declare const w_role_name: RoleName;
 declare const w_config: ConfigGlobal;
@@ -96,3 +88,4 @@ declare const w_rooms: W_Room;
 declare const w_creeps: W_Creep;
 declare const w_code: W_CODE;
 declare const w_utils: W_Utils;
+declare const w_task:Task

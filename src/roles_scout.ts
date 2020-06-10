@@ -1,10 +1,10 @@
 import { harvestSource, transfer_nearby } from './lib_creep';
 import { isEmpty, isFull } from './lib_base';
 
-const starter = {} as Role;
+const scout = {} as Role;
 
 
-starter.setUp = function (creep) {
+scout.setUp = function (creep) {
     if (isFull(creep)) {
         creep.memory.process = 'drop';
     }
@@ -23,4 +23,5 @@ starter.setUp = function (creep) {
     }
 };
 
-w_roles.starter = starter as any;
+
+w_roles.scout = scout as any;

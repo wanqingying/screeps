@@ -31,6 +31,7 @@ export class ListA<T> {
     public _get_array = () => this.array;
 }
 
+
 // 获取等级
 export function getEnergyLevel(energyMax: number) {
     // 每等级扩展提供的数量 0-300=>1 300-550=>2
@@ -118,3 +119,5 @@ export function isNotFull(target: any, type?: ResourceConstant): boolean {
 export function isFull(target: any, type?: ResourceConstant): boolean {
     return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) === 0;
 }
+
+

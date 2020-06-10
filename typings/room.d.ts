@@ -2,6 +2,14 @@ declare interface DropResource {
     resource: Resource;
     cap: number;
 }
+declare interface CacheRoom {
+    energyCount: ListA<number>;
+    energyRate: ListA<number>;
+    spawnCode: any;
+    spawnIndex: number;
+    spawnFailTick: number;
+    sources: SourceWithContainer[];
+}
 declare interface Room {
     sourceInfo: SourceCache[];
     // 当前的角色数量信息
