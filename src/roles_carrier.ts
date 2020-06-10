@@ -37,7 +37,7 @@ carrier.setUp = function (creep) {
             null
         );
         if (act === ERR_NOT_FOUND) {
-            moveToTarget(creep, new RoomPosition(28, 40, creep.room.name));
+            moveToTarget(creep, new RoomPosition(25, 25, creep.room.name));
         }
     }
 };
