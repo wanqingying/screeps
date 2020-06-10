@@ -1,5 +1,5 @@
-import {creep_cfg_body, role_name} from './config';
-import {getBodyCost, getEnergyLevel} from './lib_base';
+import { creep_cfg_body, role_name } from './config';
+import { getBodyCost, getEnergyLevel } from './lib_base';
 
 export function checkCreep(room: Room) {
     killCreepByConfig(room);
@@ -129,7 +129,13 @@ function spawnCreep(room: Room, role: role_name_key, code?) {
             room.memory.spawnRole = role;
             che.spawnFailTick++;
             room.spawning = true;
-            console.log(`spawn ${name} ` + w_utils.get_code_msg(act), ' need ', cost, ' current ',room.energyAvailable);
+            console.log(
+                `spawn ${name} ` + w_utils.get_code_msg(act),
+                ' need ',
+                cost,
+                ' current ',
+                room.energyAvailable
+            );
         }
         che.spawnCode = act;
         w_rooms.set(room.name, che);
@@ -171,7 +177,6 @@ function killCreepByCost(room: Room) {
     if (shouldStopKillCreep(room)) {
         return;
     }
-    console.log('kill by cost');
 
     const cs = room
         .findBy(FIND_CREEPS, c => {
@@ -186,7 +191,7 @@ function killCreepByCost(room: Room) {
         });
     let tg = cs.shift();
     if (tg && !room.spawning) {
-        tg.log('die auto ');
+        console.log('kill by cost ', tg?.name, tg?.memory?.cost);
         tg.suicide();
         return;
     }
@@ -196,7 +201,6 @@ function killCreepByConfig(room: Room) {
     if (shouldStopKillCreep(room)) {
         return;
     }
-    console.log('kill by config');
     const creeps = room.findBy(FIND_CREEPS).sort((a, b) => {
         return a.memory?.cost - b.memory?.cost;
     });
@@ -214,6 +218,7 @@ function killCreepByConfig(room: Room) {
             for (let i = 0; i < creeps.length; i++) {
                 let creep = creeps[i];
                 if (creep.memory?.role === role) {
+                    console.log(`kill by config cur/max ${exist}/${max} ${creep.name}`);
                     creep.suicide();
                     return;
                 }
