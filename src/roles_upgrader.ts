@@ -16,7 +16,10 @@ upgrader.setUp = function (creep: Creep) {
         moveToTarget(creep, creep.room.controller.pos);
     } else {
         creep.say('g');
-        let f = [STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_EXTENSION];
+        // online
+        // let f = [STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_EXTENSION];
+        // local
+        let f = [STRUCTURE_STORAGE];
         getEnergyUpgrader(creep, f);
     }
 };
