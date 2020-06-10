@@ -94,42 +94,39 @@ export function find_spawn(creep: Creep): StructureSpawn {
     return target as any;
 }
 
-// 捡最大的垃圾
-export function pickUpMaxDropEnergy(creep: Creep, min?: number) {
-    let pick_min = min || 0;
-    // 如果捡垃圾的目标已经有多个人去捡，重新分配
-    let target_id = creep.memory.target_drop_source_id;
-
+// 捡最大的垃圾 // 返回捡垃圾是否成功
+export function pickUpDropEnergy(creep: Creep): boolean {
+    let { target, unLock } = getActionLockTarget(creep, 'pick_up_builder_drop', () => {
+        let targets = creep.room.dropResources.filter(d => d.cap < d.resource.amount);
+        let target = find_nearby_target<any>(
+            creep,
+            targets.map(t => t.resource)
+        );
+        console.log('find_near_by', target?.resource?.pos);
+        console.log('count ', targets.length);
+        if (target) {
+            target.cap += creep.store.getFreeCapacity(RESOURCE_ENERGY);
+            return target.resource;
+        }
+    });
     // 垃圾被捡完重新分配
-    if (target_id) {
-        let gbg: Resource = Game.getObjectById(creep.memory.target_drop_source_id);
-        if (!gbg || gbg.amount < 10) {
-            creep.memory.target_drop_source_id = undefined;
-        }
-    }
-
-    let target: Resource;
-    if (creep.memory.target_drop_source_id) {
-        target = Game.getObjectById(creep.memory.target_drop_source_id);
-    } else {
-        let room = creep.room;
-        let targets = room.find(FIND_DROPPED_RESOURCES).filter(a => a?.amount);
-        target = targets
-            .sort((a, b) => {
-                return a.amount - b.amount;
-            })
-            .pop();
-    }
-    if (target && target.amount > pick_min) {
-        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
-        } else {
-            creep.memory.target_drop_source_id = undefined;
-        }
-        return true;
-    } else {
+    if (!target || target.amount === 0) {
+        unLock();
         return false;
     }
+    if (isFull(creep)) {
+        unLock();
+        return true;
+    }
+    let code = creep.pickup(target);
+    if (code === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target);
+        return true;
+    }
+    if (code === OK) {
+        return true;
+    }
+    return false;
 }
 
 // 捡垃圾
@@ -384,9 +381,9 @@ function findSource(creep: Creep) {
     });
     return Array.from(sourceH).shift();
 }
-export function moveToTarget(creep: Creep, target: RoomPosition) {
+export function moveToTarget(creep: Creep, target: RoomPosition, dis?: number) {
     const far = w_utils.count_distance(creep.pos, target);
-    if (far > 0) {
+    if (far > (dis || 0)) {
         return creep.moveTo(target);
     }
     return OK;

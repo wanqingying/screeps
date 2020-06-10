@@ -10,11 +10,11 @@ global.w_role_name = role_name;
 //=============1==2====3====4=====5=====6
 // body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
 export const creep_cfg_body = {
-    [role_name.carrier]: { [MOVE]: 3, [CARRY]: 4 },
+    [role_name.carrier]: { [MOVE]: 5, [CARRY]: 6 },
     [role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
-    [role_name.harvester]: { [MOVE]: 1, [WORK]: 3, [CARRY]: 0 },
-    [role_name.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
-    [role_name.upgrader]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
+    [role_name.harvester]: { [MOVE]: 1, [WORK]: 5, [CARRY]: 0 },
+    [role_name.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+    [role_name.upgrader]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
     [role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
 };
 
