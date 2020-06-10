@@ -7,4 +7,6 @@ harvester.setUp = function (creep) {
     harvestSource(creep);
 };
 
-w_roles.harvester = harvester as any;
+w_roles.harvester = harvester;
+
+
