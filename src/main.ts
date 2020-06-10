@@ -1,6 +1,7 @@
 import './bootstrap';
 
 function main() {
+    console.log('tick');
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {

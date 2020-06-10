@@ -26,7 +26,6 @@ function log(px, msg,force=false) {
         x = msg.pop();
     }
     if (force){
-       return  console.log(px);
     }
     if (w_config.enable_log) {
         console.log(px);
@@ -34,11 +33,13 @@ function log(px, msg,force=false) {
 }
 
 global.log = function (k) {
-    switch (k) {
-        case 1:
-            return log_W2N8();
-    }
+    require('./z_module_findPath').print()
+    // switch (k) {
+    //     case 1:
+    //         return log_W2N8();
+    // }
 };
+
 
 function log_W2N8() {
     const room = Game.rooms['W2N8'];

@@ -22,6 +22,7 @@ declare interface ConfigGlobal {
 declare interface W_Utils {
     count_distance: count_distance;
     get_code_msg: get_code_msg_screeps;
+    print:any
 }
 
 declare type W_CODE = {

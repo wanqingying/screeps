@@ -339,7 +339,6 @@ function isObstacleStructure(room, pos, ignoreStructures) {
  */
 function addObTask(path, idx) {
     let roomName = path.posArray[idx].roomName;
-    //console.log('准备ob ' + roomName);
     for (let obData of observers) {
         if (Game.map.getRoomLinearDistance(obData.roomName, roomName) <= 10) {
             obData.taskQueue.push({ path: path, idx: idx, roomName: roomName });
@@ -359,7 +358,6 @@ function doObTask() {
             let roomName = task.roomName;
             if (roomName in costMatrixCache) {  // 有过视野不用再ob
                 if (!task.path.directionArray[task.idx]) {
-                    //console.log(roomName + ' 有视野了无需ob');
                     checkRoom({ name: roomName }, task.path, task.idx - 1);
                 }
                 queue.pop();
@@ -368,7 +366,6 @@ function doObTask() {
             /** @type {StructureObserver} */
             let ob = Game.getObjectById(obData.id);
             if (ob) {
-                //console.log('ob ' + roomName);
                 ob.observeRoom(roomName);
                 if (!(Game.time + 1 in obTimer)) {
                     obTimer[Game.time + 1] = [];
@@ -393,7 +390,6 @@ function checkObResult() {
         } else if (tick == Game.time) {
             for (let result of obTimer[tick]) {
                 if (result.roomName in Game.rooms) {
-                    //console.log('ob得到 ' + result.roomName);
                     checkRoom(Game.rooms[result.roomName], result.path, result.idx - 1);    // checkRoom要传有direction的idx
                 }
             }
@@ -512,7 +508,6 @@ function generateCostMatrix(room, pos) {
             avoids: avoids  // 因新手墙导致的avoidRooms需要更新
         });   // 记录清理时间
     }
-    //console.log('生成costMat ' + room.name);
 
 }
 
@@ -624,7 +619,6 @@ function bypassRouteCallback(nextRoomName, fromRoomName) {
  * @param {boolean} bypass
  */
 function findRoute(fromRoomName, toRoomName, bypass) {  // TODO 以后跨shard寻路也放在这个函数里
-    //console.log('findRoute', fromRoomName, toRoomName, bypass);
     return Game.map.findRoute(fromRoomName, toRoomName, { routeCallback: bypass ? bypassRouteCallback : routeCallback });
 }
 
@@ -852,7 +846,6 @@ function findPath(fromPos, toPos, ops) {
         PathFinderOpts.maxOps = ops.maxOps || 2000 + route.length ** 2 * 100;  // 跨10room则有2000+10*10*50=7000
         PathFinderOpts.maxRooms = PathFinderOpts.maxRooms || route.length + 1;
         route = route.reduce(routeReduce, { [fromPos.roomName]: 1 });   // 因为 key in Object 比 Array.includes(value) 快，但不知道值不值得reduce
-        //console.log(fromPos + ' using route ' + JSON.stringify(route));
         PathFinderOpts.roomCallback = roomCallbackWithRoute;
     } else {
         PathFinderOpts.maxOps = ops.maxOps;
@@ -1152,7 +1145,6 @@ function clearUnused() {
         if (time > Game.time) {
             break;
         }
-        //console.log('clear path');
         for (let path of pathCacheTimer[time]) {
             if (path.lastTime == time - pathClearDelay) {
                 deletePath(path);
@@ -1164,7 +1156,6 @@ function clearUnused() {
         if (time > Game.time) {
             break;
         }
-        //console.log('clear costMat');
         for (let data of costMatrixCacheTimer[time]) {
             delete costMatrixCache[data.roomName];
             for (let avoidRoomName of data.avoids) {
@@ -1259,10 +1250,8 @@ function betterMoveTo(firstArg, secondArg, opts) {
                     if (!path.directionArray[idx + 2]) {  // 第一次见到该房则检查房间
                         if (checkRoom(this.room, path, creepCache.idx)) {   // 传creep所在位置的idx
                             //this.say('新房 可走');
-                            //console.log(`${Game.time}: ${this.name} check room ${this.pos.roomName} OK`);
                             return moveOneStep(this, ops.visualizePathStyle, toPos);  // 路径正确，继续走
                         }   // else 检查中发现房间里有建筑挡路，重新寻路
-                        //console.log(`${Game.time}: ${this.name} check room ${this.pos.roomName} failed`);
                         deletePath(path);
                     } else {
                         //this.say('这个房间见过了');
@@ -1307,7 +1296,6 @@ function betterMoveTo(firstArg, secondArg, opts) {
                             return ERR_NO_PATH;
                         }
                     } else if (code == ERR_NOT_FOUND && isObstacleStructure(this.room, posArray[idx], ops.ignoreDestructibleStructures)) {   // 发现出现新建筑物挡路，删除costMatrix和path缓存，重新寻路
-                        //console.log(`${Game.time}: ${this.name} find obstacles at ${this.pos}`);
                         delete costMatrixCache[this.pos.roomName];
                         deletePath(path);
                     } // else 上tick移动失败但也不是建筑物和creep/pc挡路。有2个情况：1.下一格路本来是穿墙路并碰巧消失了；2.下一格是房间出口，有另一个creep抢路了然后它被传送到隔壁了。不处理第1个情况，按第2个情况对待。
@@ -1351,7 +1339,6 @@ function betterMoveTo(firstArg, secondArg, opts) {
     found = this.pos.roomName == toPos.roomName ? findShortPathInCache(formalize(this.pos), formalize(toPos), this.pos, creepCache, ops) : findLongPathInCache(formalize(this.pos), formalize(toPos), creepCache, ops);
     if (found) {
         //this.say('cached');
-        //console.log(this, this.pos, 'hit');
         testCacheHits++;
     } else {  // 没找到缓存路
         testCacheMiss++;
@@ -1380,7 +1367,6 @@ function betterMoveTo(firstArg, secondArg, opts) {
         }
         generateDirectionArray(newPath);
         addPathIntoCache(newPath);
-        //console.log(this, this.pos, 'miss');
         creepCache.path = newPath;
     }
 

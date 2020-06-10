@@ -31,4 +31,6 @@ global.w_utils = {
         ];
         return ScreepsReturnCodeMsg[0 - code];
     },
+    print(){
+    }
 };

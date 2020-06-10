@@ -1,7 +1,13 @@
-import {find_nearby_target, findRepairTarget, findTargetAttack, getCreepsRoleAbility, ListA} from './lib_base';
+import {
+    find_nearby_target,
+    findRepairTarget,
+    findTargetAttack,
+    getCreepsRoleAbility,
+    ListA,
+} from './lib_base';
 import { checkCreep } from './prototype_room_spawn';
 import { role_name } from './config';
-import {checkRenewCount} from "./lib_room";
+import { checkRenewCount } from './lib_room';
 
 Room.prototype.start = function () {
     const room = this;
@@ -20,7 +26,7 @@ function refresh(room: Room) {
     refreshEnergyData(room);
     refreshHotData(room);
     prepareMemory(room);
-    checkRenewCount(room)
+    checkRenewCount(room);
 }
 
 function checkTower(room: Room) {
@@ -31,23 +37,17 @@ function checkTower(room: Room) {
     for (let i = 0; i < towers.length; i++) {
         const tower = towers[i];
         const targetHeal = findHealTarget(room);
-        console.log('tower');
         if (targetHeal) {
-            console.log('tower heal');
-
             tower.heal(targetHeal);
             continue;
         }
-        // const targetRepair = findRepairTarget(room,null,[STRUCTURE_WALL,STRUCTURE_RAMPART]);
-        // if (targetRepair) {
-        //     console.log('tower repair');
-        //
-        //     tower.repair(targetRepair);
-        //     continue;
-        // }
+        const targetRepair = findRepairTarget(room, null, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
+        if (targetRepair) {
+            tower.repair(targetRepair);
+            continue;
+        }
         const targetAttack = findTargetAttack(room);
         if (targetAttack) {
-            console.log('tower attack');
             tower.attack(targetAttack);
             continue;
         }
@@ -75,11 +75,7 @@ Room.prototype.findByFilter = function (type, property, propertyIn, filter) {
 Room.prototype.findByCacheKey = function (type, property, propertyIn = []) {
     const room = this;
     const key = `${room.name}_${type}_${property || ''}_${propertyIn.join('#')}`;
-    const cache_res = w_cache.get(key);
     let res: any[];
-    // if (cache_res) {
-    //     res = cache_res;
-    // }
     const opt = { filter: undefined };
     if (property) {
         opt.filter = item => {
@@ -130,16 +126,18 @@ function refreshHotData(room: Room) {
                 }
             });
         });
-        let info={
+        let info = {
             source: source,
             container: undefined,
+            containerCap: 0,
             harvesters: target_creeps,
             speed: 0,
+        };
+        if (far === 1 && near) {
+            info.container = near;
+            info.containerCap = near.store.energy;
         }
-        if (far === 1) {
-            info.container=near;
-        }
-        room.sourceInfo.push(info)
+        room.sourceInfo.push(info);
     });
     // 初始化房间状态
     room.spawning = room.spawns.some(s => s.spawning);
@@ -196,7 +194,7 @@ Room.prototype.getCache = function () {
             spawnFailTick: 0,
             spawnIndex: 0,
             sources: [],
-            stopKill:0
+            stopKill: 0,
         };
     }
     if (typeof che.spawnIndex !== 'number') {

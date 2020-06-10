@@ -7,45 +7,24 @@ export const role_name = {
     scout: 'scout',
 };
 global.w_role_name = role_name;
-
+//=============1==2====3====4=====5=====6
 // body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
 export const creep_cfg_body = {
-    [role_name.carrier]: [
-        { [MOVE]: 3, [CARRY]: 3 },
-        { [MOVE]: 3, [CARRY]: 8 },
-        { [MOVE]: 4, [CARRY]: 12 },
-        { [MOVE]: 4, [CARRY]: 22 },
-    ],
-    [role_name.starter]: [
-        { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
-        { [MOVE]: 2, [CARRY]: 2, [WORK]: 3 },
-        { [MOVE]: 3, [CARRY]: 15 },
-        { [MOVE]: 3, [CARRY]: 15 },
-    ],
-    [role_name.harvester]: [
-        { [MOVE]: 2, [WORK]: 2 },
-        { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
-        { [MOVE]: 2, [WORK]: 7 },
-        { [MOVE]: 4, [WORK]: 10, [CARRY]: 2 },
-    ],
-    [role_name.builder]: [
-        { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
-        { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
-        { [MOVE]: 3, [WORK]: 4, [CARRY]: 5 },
-        { [MOVE]: 4, [WORK]: 5, [CARRY]: 12 },
-    ],
-    [role_name.upgrader]: [
-        { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
-        { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
-        { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
-        { [MOVE]: 5, [WORK]: 8, [CARRY]: 5 },
-    ],
-    [role_name.scout]: [
-        { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
-        { [MOVE]: 2, [CARRY]: 2, [WORK]: 3 },
-        { [MOVE]: 3, [CARRY]: 15 },
-        { [MOVE]: 3, [CARRY]: 15 },
-    ],
+    [role_name.carrier]: { [MOVE]: 3, [CARRY]: 3 },
+    [role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
+    [role_name.harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
+    [role_name.builder]: { [MOVE]: 8, [WORK]: 5, [CARRY]: 8 },
+    [role_name.upgrader]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
+    [role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
+};
+
+export const creep_cfg_num = {
+    [role_name.starter]: 0,
+    [role_name.carrier]: 2,
+    [role_name.scout]: 0,
+    [role_name.builder]: 0,
+    [role_name.harvester]: 2,
+    [role_name.upgrader]: 1,
 };
 export const body_cost = {
     [MOVE]: 50,
@@ -58,17 +37,9 @@ export const body_cost = {
     [TOUGH]: 10,
 };
 
-export const creep_cfg_num = {
-    [role_name.starter]: 0,
-    [role_name.carrier]: 3,
-    [role_name.scout]: 0,
-    [role_name.builder]: 1,
-    [role_name.harvester]: 2,
-    [role_name.upgrader]: 2,
-};
+
 
 global.w_roles = {} as Roles;
-
 
 global.w_cache = new Map<any, any>();
 

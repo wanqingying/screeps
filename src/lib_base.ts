@@ -18,17 +18,29 @@ export function getActionLockTarget<T>(
     let target;
     let key = `lock_${lock_key}`;
     let cache_key = creep.memory[key];
+
     if (cache_key) {
         target = Game.getObjectById(cache_key);
     } else {
         target = getTarget();
+        cache_key = target?.id;
         creep.memory[key] = target?.id;
     }
-
     function reset() {
         creep.memory[key] = undefined;
-        creep.log_one(' reset ', key);
+        let cache_k = key + cache_key + creep.name;
+        w_cache.set(cache_k, 0);
     }
+
+    if (target) {
+        let cache_k = key + cache_key + creep.name;
+        let count = w_cache.get(cache_k) || 0;
+        w_cache.set(cache_k, count + 1);
+        if (count > 100) {
+            reset();
+        }
+    }
+
     return { target, unLock: reset };
 }
 
@@ -55,7 +67,6 @@ export class ListA<T> {
     public _get_array = () => this.array;
 }
 
-
 // 获取等级
 export function getEnergyLevel(energyMax: number) {
     // 每等级扩展提供的数量 0-300=>1 300-550=>2
@@ -63,8 +74,8 @@ export function getEnergyLevel(energyMax: number) {
     let min = 0;
     let max = 0;
     for (let i = 1; i < energy_ext.length; i++) {
-        min = 300 + energy_ext[i - 1];
-        max = 300 + energy_ext[i];
+        min = 300 + energy_ext[i];
+        max = 300 + energy_ext[i + 1];
         if (min < energyMax && energyMax <= max) {
             return i;
         }
@@ -178,15 +189,18 @@ export function findByOrder<K extends FindConstant>(
 }
 
 // 能量矿边上的container不能drop
-export function isTargetNearSource(creep: Creep, target: any) {
+export function isTargetNearSource(room: Room, target: StructureContainer) {
     if (target.structureType !== STRUCTURE_CONTAINER) {
         return false;
     }
-    return creep.room.sourceInfo.find(s => s.container?.id === target?.id);
+    if (!room?.sourceInfo?.length) {
+        return false;
+    }
+    console.log(room.sourceInfo.length);
+    return room.sourceInfo?.find(s => s.container?.id === target?.id);
 }
 
 export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
-    console.log('find ss');
     let targets = room
         .findBy(FIND_STRUCTURES, t => {
             if (types && !types.includes(t.structureType)) {
@@ -198,7 +212,6 @@ export function findRepairTarget(room: Room, types?: any[] | null, excludes?: an
             return t.hits < (t.hitsMax * 4) / 5;
         })
         .sort((a, b) => {
-            console.log('hits', a.hits, a.hitsMax);
             return a.hits - b.hits;
         });
     return targets.shift();

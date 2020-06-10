@@ -1,4 +1,4 @@
-import { pickUpMaxDropEnergy, findMaxEnergyWithDraw, moveToTarget, checkRepair } from './lib_creep';
+import { pickUpMaxDropEnergy, getEnergyUpgrader, moveToTarget, checkRepair } from './lib_creep';
 import { findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_base';
 
 const builder = {} as Role;
@@ -18,7 +18,6 @@ builder.setUp = function (creep) {
 
     if (creep.memory.building) {
         // 建筑,维修,
-
         let { target, unLock } = getActionLockTarget<any>(creep, 'builder_find', () => {
             let targets = creep.room.find(FIND_CONSTRUCTION_SITES).sort((a, b) => {
                 return a.progress - b.progress;
@@ -29,27 +28,22 @@ builder.setUp = function (creep) {
         });
         if (target) {
             let act = creep.build(target);
-
-            if (act === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target);
-            } else if (act !== OK) {
+            moveToTarget(creep, target);
+            if (act !== OK) {
                 unLock();
             }
         } else {
             unLock();
-            console.log('rp');
-            let act = checkRepair(creep);
-            console.log(w_utils.get_code_msg(act));
+            let act = checkRepair(creep,[STRUCTURE_WALL,STRUCTURE_RAMPART]);
             if (act === ERR_NOT_FOUND) {
                 moveToTarget(creep, new RoomPosition(24, 41, creep.room.name));
             }
         }
-        console.log('build');
     } else {
         if (pickUpMaxDropEnergy(creep, creep.store.getFreeCapacity() / 3)) {
             return;
         }
-        findMaxEnergyWithDraw(creep, [STRUCTURE_CONTAINER]);
+        getEnergyUpgrader(creep, [STRUCTURE_CONTAINER]);
     }
 };
 

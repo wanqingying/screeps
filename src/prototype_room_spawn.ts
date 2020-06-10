@@ -1,10 +1,10 @@
-import { creep_cfg_body, role_name } from './config';
-import { getBodyCost, getEnergyLevel } from './lib_base';
+import {creep_cfg_body, role_name} from './config';
+import {getBodyCost, getEnergyLevel} from './lib_base';
 
 export function checkCreep(room: Room) {
     killCreepByConfig(room);
     killCreepByCost(room);
-    killCreepByAuto(room);
+    // killCreepByAuto(room);
     checkSpawnCreep(room);
 }
 
@@ -138,7 +138,6 @@ function spawnCreep(room: Room, role: role_name_key, code?) {
 
 function getCreepBody(room: Room, role: role_name_key, code?: number) {
     let energy_max = room.energyCapacityAvailable;
-    const energy_lack = room.energyLack;
     const che = room.getCache();
     // if (energy_lack) {
     //     energy_max = getPossibleMaxEnergy(room);
@@ -155,8 +154,7 @@ function getCreepBody(room: Room, role: role_name_key, code?: number) {
         index = getEnergyLevel(energy_max) - 1;
     }
 
-    const cfg_role = creep_cfg_body[role];
-    const cfg = cfg_role[index];
+    const cfg = creep_cfg_body[role];
     let body = [];
     Object.keys(cfg).forEach(b => {
         body = body.concat(new Array(cfg[b]).fill(b));
@@ -173,6 +171,8 @@ function killCreepByCost(room: Room) {
     if (shouldStopKillCreep(room)) {
         return;
     }
+    console.log('kill by cost');
+
     const cs = room
         .findBy(FIND_CREEPS, c => {
             if (!c.memory?.role) {
@@ -194,8 +194,9 @@ function killCreepByCost(room: Room) {
 // 杀死过多的单位
 function killCreepByConfig(room: Room) {
     if (shouldStopKillCreep(room)) {
-        // return;
+        return;
     }
+    console.log('kill by config');
     const creeps = room.findBy(FIND_CREEPS).sort((a, b) => {
         return a.memory?.cost - b.memory?.cost;
     });
