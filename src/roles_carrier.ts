@@ -13,15 +13,15 @@ carrier.setUp = function (creep) {
     }
 
     if (creep.memory.process === 'pick') {
+        console.log('pick');
         let code = pickUpDropOrFromMineContainer(creep);
-        if (code === ERR_NOT_FOUND) {
-        }
     } else {
+        console.log('drop');
         let act = transfer_nearby(
             creep,
             [
-                STRUCTURE_SPAWN,
                 STRUCTURE_EXTENSION,
+                STRUCTURE_SPAWN,
                 STRUCTURE_TOWER,
                 STRUCTURE_CONTAINER,
                 STRUCTURE_STORAGE,

@@ -22,9 +22,9 @@ export const creep_cfg_num = {
     [role_name.starter]: 0,
     [role_name.carrier]: 2,
     [role_name.scout]: 0,
-    [role_name.builder]: 4,
-    [role_name.harvester]: 3,
-    [role_name.upgrader]: 1,
+    [role_name.builder]: 3,
+    [role_name.harvester]: 2,
+    [role_name.upgrader]: 2,
 };
 export const body_cost = {
     [MOVE]: 50,

@@ -1,7 +1,6 @@
 import './bootstrap';
 
 function main() {
-    console.log('tick4');
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
@@ -22,6 +21,7 @@ function main() {
     });
 
     Object.values(Game.rooms).forEach(room => {
+        console.log('energy ', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
         room.start();
     });
     Object.values(Game.creeps).forEach(creep => {
