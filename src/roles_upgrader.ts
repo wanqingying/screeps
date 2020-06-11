@@ -1,4 +1,4 @@
-import { getEnergyUpgrader, moveToTarget, pickUpDropEnergy } from './lib_creep';
+import {getEnergyUpgrader, moveToTarget, pickUpDropEnergy, pickUpDropOrFromStructure} from './lib_creep';
 import { find_nearby_target, isEmpty, isFull } from './lib_base';
 
 const upgrader = {} as Role;
@@ -16,8 +16,8 @@ upgrader.setUp = function (creep: Creep) {
         moveToTarget(creep, creep.room.controller.pos);
     } else {
         creep.say('g');
-        let f = [STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_CONTAINER, STRUCTURE_EXTENSION];
-        getEnergyUpgrader(creep, f);
+        // let f = [STRUCTURE_STORAGE];
+        pickUpDropOrFromStructure(creep);
     }
 };
 

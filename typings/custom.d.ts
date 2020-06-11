@@ -15,7 +15,7 @@ declare interface SourceCache {
     // 开采速度,等于 work*2
     speed?: number;
     container: StructureContainer;
-    // 矿边上的容器余量，用于搬运单位选择目标
+    // 矿边上的容器余量，用于搬运单位选择目标,初始为container资源量
     containerCap:number
 }
 

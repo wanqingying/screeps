@@ -1,5 +1,6 @@
 declare interface DropResource {
     resource: Resource;
+    // 初始=0
     cap: number;
 }
 declare interface CacheRoom {

@@ -1,10 +1,4 @@
-import {
-    findDropTargetSync,
-    moveToTarget,
-    pickEnergyDrop,
-    pickUpEnergyFromMine,
-    transfer_nearby,
-} from './lib_creep';
+import { moveToTarget, pickUpDropOrFromMineContainer, transfer_nearby } from './lib_creep';
 import { isEmpty, isFull } from './lib_base';
 
 const carrier = {} as Role;
@@ -19,10 +13,8 @@ carrier.setUp = function (creep) {
     }
 
     if (creep.memory.process === 'pick') {
-        const code = pickEnergyDrop(creep);
-        // const code = false
-        if (!code) {
-            pickUpEnergyFromMine(creep);
+        let code = pickUpDropOrFromMineContainer(creep);
+        if (code === ERR_NOT_FOUND) {
         }
     } else {
         let act = transfer_nearby(
@@ -37,7 +29,8 @@ carrier.setUp = function (creep) {
             null
         );
         if (act === ERR_NOT_FOUND) {
-            moveToTarget(creep, new RoomPosition(25, 25, creep.room.name));
+            let { x, y } = w_config.freePlace.carrier;
+            moveToTarget(creep, new RoomPosition(x, y, creep.room.name));
         }
     }
 };

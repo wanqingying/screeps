@@ -37,7 +37,7 @@ export const body_cost = {
     [TOUGH]: 10,
 };
 
-
+const freePlace = { [role_name.carrier]: { x: 24, y: 25 }, [role_name.builder]: { x: 24, y: 27 } };
 
 global.w_roles = {} as Roles;
 
@@ -60,6 +60,7 @@ export const config_global: ConfigGlobal = {
     creep_cfg_body: creep_cfg_body as any,
     creep_cfg_num: creep_cfg_num as any,
     role_auto: [],
+    freePlace: freePlace as any,
 };
 
 global.w_config = config_global;

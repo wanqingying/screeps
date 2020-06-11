@@ -1,4 +1,10 @@
-import { pickUpDropEnergy, getEnergyUpgrader, moveToTarget, checkRepair } from './lib_creep';
+import {
+    pickUpDropEnergy,
+    getEnergyUpgrader,
+    moveToTarget,
+    checkRepair,
+    pickUpDropOrFromStructure,
+} from './lib_creep';
 import { findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_base';
 
 const builder = {} as Role;
@@ -40,10 +46,7 @@ builder.setUp = function (creep) {
             }
         }
     } else {
-        if (!pickUpDropEnergy(creep)) {
-        } else {
-            getEnergyUpgrader(creep, [STRUCTURE_CONTAINER, STRUCTURE_STORAGE]);
-        }
+        pickUpDropOrFromStructure(creep);
     }
 };
 
