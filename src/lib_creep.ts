@@ -186,13 +186,20 @@ export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConst
         creep,
         'pick_drop_or_mine',
         () => {
-            let drops = Array.from(creep.room.dropResources).filter(
-                a => a?.cap > 0 && a?.resource?.amount
+            let drops = Array.from(creep.room.dropResources).filter(a => {
+                return a?.cap < a.resource.amount && a?.resource?.amount;
+            });
+            let drop = find_nearby_target<Resource>(
+                creep,
+                drops.map(d => d.resource)
             );
-            let drop = find_nearby_target<DropResource>(creep, drops);
             if (drop) {
-                drop.cap += creep.store.getFreeCapacity(h);
-                return drop.resource;
+                drops.forEach(d => {
+                    if (d.resource.id === drop.id) {
+                        d.cap += creep.store.getFreeCapacity(h);
+                    }
+                });
+                return drop;
             } else {
                 for (let sh of sources) {
                     if (sh.container && isNotEmpty(sh.container) && sh.containerCap > 0) {
@@ -204,6 +211,7 @@ export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConst
         }
     );
 
+    console.log('target', target?.id);
     if (!target) {
         unLock();
         return ERR_NOT_FOUND;
@@ -247,13 +255,20 @@ export function pickUpDropOrFromStructure(
         creep,
         'pick_drop_or_mine',
         () => {
-            let drops = Array.from(creep.room.dropResources).filter(
-                a => a?.cap > 0 && a?.resource?.amount
+            let drops = Array.from(creep.room.dropResources).filter(a => {
+                return a?.cap < a.resource.amount && a?.resource?.amount;
+            });
+            let drop = find_nearby_target<Resource>(
+                creep,
+                drops.map(d => d.resource)
             );
-            let drop = find_nearby_target<DropResource>(creep, drops);
             if (drop) {
-                drop.cap += creep.store.getFreeCapacity(h);
-                return drop.resource;
+                drops.forEach(d => {
+                    if (d.resource.id === drop.id) {
+                        d.cap += creep.store.getFreeCapacity(h);
+                    }
+                });
+                return drop;
             } else {
                 let targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure: StructureContainer) => {
