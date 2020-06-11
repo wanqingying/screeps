@@ -5,7 +5,6 @@ declare interface DropResource {
 }
 declare interface CacheRoom {
     energyCount: ListA<number>;
-    energyRate: ListA<number>;
     spawnCode: any;
     spawnIndex: number;
     spawnFailTick: number;
@@ -22,26 +21,11 @@ declare interface Room {
     creepCount: number;
     // 存在需要生产的单位
     spawning: boolean;
-    // 是否持续 n tik 缺能量
-    energyLack: boolean;
-    // 是否持续 n tik 没有能量收入
     energyStop: boolean;
     energy_lack_tick: 50;
-    // 是否持续 10 tik 能量达到上限
-    energyFull: boolean;
-    // 过去 n tik 的饱和度
-    energyRate: ListA<number>;
-    // 过去 n tik 的存量
-    energyExist: ListA<number>;
-    // 上一次更新半持久化数据的时间
-    refreshTick: number;
     // 维护掉在地上的垃圾队列，用于carrier捡垃圾策略 cap:有多少空间被预定
     dropResources: DropResource[];
     maxCreepCount: number;
-    //  carrier CARRY count
-    abilityCarry: number;
-    //  miner WORK count
-    abilityMine: number;
     findBy<K extends FindConstant>(type: K, filter?: FilterFunction<K>): Array<FindTypes[K]>;
     findByFilter<K extends FindConstant>(
         type: K,
@@ -73,7 +57,6 @@ declare interface Room {
     findTargetAttack(): any;
     findSourceMinHarvester(): any;
     checkSpawnCreep(): any;
-    checkSources(): any;
     start(): void;
     getCache(): CacheRoom;
     refreshDropEnergy(): void;

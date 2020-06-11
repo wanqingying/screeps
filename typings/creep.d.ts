@@ -1,9 +1,8 @@
 declare interface Creep {
     // renew 持续时间 过长则停止
     renewTime: number;
-    getRenewFailTime(): number;
-    increaseRenewFailTime();
-    resetRenewFailTime(): void;
+    // spawn cost
+    cost: number;
     log(...p: any): void;
     log_one(...p: any): void;
     say_one(...p: any): void;
@@ -13,7 +12,5 @@ declare interface Creep {
     refresh(): void;
     getCache(): CacheCreep;
     findSourceHarvester(): Source;
-    harvestSource(): boolean;
     findAndMoveToSourcePos(target: Source): ScreepsReturnCode;
-    findSource(): SourceCache | undefined;
 }

@@ -1,3 +1,5 @@
+import { clearTickOut, setTickOut } from './lib_tick_out';
+
 export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
     const tt = targets.sort((a, b) => {
@@ -10,22 +12,32 @@ export function findNearTarget<T>(base, targets: any[]): T {
 export function getActionLockTarget<T>(
     creep: Creep,
     lock_key: string,
-    getTarget
+    getTarget,
+    // 锁定的 tick 限制
+    // 有的目标限制 tick 会导致浪费
+    tickLimit?
 ): { target: T | any; unLock: () => void } {
     let target;
     let key = `lock_${lock_key}`;
-    let cache_id = creep.memory?.[key];
+    let cache_key = key + creep.name;
+    let cache_id = w_cache.get(cache_key);
+
+    function reset() {
+        w_cache.delete(cache_key);
+        w_cache.delete(cache_key + 'tickOut');
+    }
 
     if (cache_id) {
         target = Game.getObjectById(cache_id);
     } else {
         target = getTarget();
-        cache_id = target?.id;
-        creep.memory[key] = target?.id;
+        if (tickLimit && target) {
+            let fn_id = setTickOut(tickLimit, reset);
+            w_cache.set(cache_key + 'tickOut', fn_id);
+        }
+        w_cache.set(cache_key, cache_id);
     }
-    function reset() {
-        creep.memory[key] = undefined;
-    }
+
     return { target, unLock: reset };
 }
 
@@ -109,7 +121,7 @@ export function getCreepsRoleAbility(creeps: Creep[], role: role_name_key) {
     }
 }
 
-export function getBodyCost(body: BodyPartConstant[]) {
+export function getBodyCost(body: BodyPartConstant[]): number {
     let cost = 0;
     body.forEach(b => {
         cost += w_config.internal.body_cost[b];

@@ -10,10 +10,7 @@ function lock(fn) {
     return {name,log}
 }
 
-function main() {
-    let {name,log}=lock((n)=>{
-        log()
-    })
+function test() {
+    let m=new Map();
+    // m.set('fn',()=>)
 }
-
-main()

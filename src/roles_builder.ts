@@ -13,7 +13,6 @@ builder.setUp = function (creep) {
     if (creep.memory.building && isEmpty(creep)) {
         creep.memory.building = false;
         creep.memory.process = 'get';
-        creep.memory.target_id = undefined;
         creep.say('store');
     }
     if (!creep.memory.building && isFull(creep)) {

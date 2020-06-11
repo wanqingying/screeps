@@ -8,5 +8,16 @@ export function checkRenewCount(room: Room) {
     room.memory.renew_count = room.findBy(FIND_CREEPS, c => c.memory?.renew).length;
 }
 
-// 房间生成单位时不允许
-export function f() {}
+// 房间是否可以开外矿
+export function canReservation(room: Room): boolean {
+    if (room.controller) {
+        return false;
+    }
+    if (room.controller.owner.username) {
+        return false;
+    }
+    if (!room.controller.reservation.username) {
+        return true;
+    }
+    return room.controller.reservation.username === w_my_name;
+}

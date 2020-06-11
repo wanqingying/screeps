@@ -1,13 +1,11 @@
 import { cfg_local } from './config_b_local';
 import { cfg_online } from './config_b_online';
 
-let creep_cfg_body, creep_cfg_num;
+let cfg: typeof cfg_local;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
-    creep_cfg_body = cfg_local.creep_cfg_body;
-    creep_cfg_num = cfg_local.creep_cfg_num;
+    cfg = cfg_local;
 } else {
-    creep_cfg_body = cfg_online.creep_cfg_body;
-    creep_cfg_num = cfg_online.creep_cfg_num;
+    cfg = cfg_online;
 }
 
 export const body_cost = {
@@ -48,10 +46,11 @@ export const config_global: ConfigGlobal = {
         w_role_name.upgrader,
     ],
     upgrader_only_container: true,
-    creep_cfg_body: creep_cfg_body as any,
-    creep_cfg_num: creep_cfg_num as any,
+    creep_cfg_body: cfg.creep_cfg_body as any,
+    creep_cfg_num: cfg.creep_cfg_num as any,
     role_auto: [],
     freePlace: freePlace as any,
+    reserve_rooms: cfg.reserve_rooms,
 };
 
 global.w_config = config_global;

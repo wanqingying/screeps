@@ -18,6 +18,7 @@ declare interface ConfigGlobal {
     creep_cfg_body: CreepCfgBody;
     // auto spawn role
     role_auto: role_name_key[];
+    reserve_rooms: string[];
 }
 
 declare interface W_Utils {
@@ -82,7 +83,10 @@ declare namespace NodeJS {
         w_code: W_CODE;
         w_utils: W_Utils;
         w_debug_creep: string;
-        log(...p: any): void;
+        w_log(...p: any): void;
+        w_a_log(...p: any): void;
+        w_my_name: string;
+        w_set_tick_out(tick: number, fn: Function): void;
     }
 }
 
@@ -95,3 +99,5 @@ declare const w_creeps: W_Creep;
 declare const w_code: W_CODE;
 declare const w_utils: W_Utils;
 declare const w_debug_creep: string;
+declare const w_my_name: string;
+declare const w_set_tick_out: (tick: number, fn: Function) => void;

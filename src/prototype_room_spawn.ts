@@ -57,15 +57,10 @@ function checkSpawnCreepByCurrent(room: Room): role_name_key | undefined {
 
     const current_harvester = current_exist[w_role_name.harvester];
     const current_carrier = current_exist[w_role_name.carrier];
-    const cs = current_exist[w_role_name.starter];
     const count = room.creepCount;
-    let many_other = current_harvester === 0 && current_carrier === 0 && count > 3 && cs < 3;
     if (count < w_config.creep_cfg_num.starter) {
         return w_role_name.starter;
     }
-    // if (many_other) {
-    //     return w_role_name.starter;
-    // }
     if (current_harvester < 1) {
         return w_role_name.harvester;
     }
@@ -77,34 +72,6 @@ function checkSpawnCreepByCurrent(room: Room): role_name_key | undefined {
     }
     if (current_carrier < 2) {
         return w_role_name.carrier;
-    }
-}
-
-function checkSpawnCreepByAuto(room: Room): role_name_key | undefined {
-    // 重生时间
-    const tick = 300;
-    // 所有的矿之和
-    const source_count = room.sourceInfo.reduce((a, b) => a + b.source.energyCapacity, 0);
-    // 需要的挖矿能力
-    const ability = source_count / tick;
-    // 实际需要达到的挖矿能力与房间发展状况相关,最小值保证冷启动,最大值可用于超频工作
-    let min = 0.3;
-    let max = 1;
-    let rate = Math.min(max, Math.max(min, room.creepCount / room.maxCreepCount));
-    let target = ability * rate;
-
-    const carry = room.abilityCarry;
-    const dig = room.abilityMine;
-    let min_one = [
-        { role: w_role_name.carrier, cur: carry },
-        { role: w_role_name.harvester, cur: dig },
-    ]
-        .sort((a, b) => a.cur - b.cur)
-        .shift();
-
-    if (min_one.cur < target) {
-        // 最小的一个小于目标值则生产此目标
-        return min_one.role;
     }
 }
 
@@ -144,10 +111,6 @@ function spawnCreep(room: Room, role: role_name_key, code?) {
 function getCreepBody(room: Room, role: role_name_key, code?: number) {
     let energy_max = room.energyCapacityAvailable;
     const che = room.getCache();
-    // if (energy_lack) {
-    //     energy_max = getPossibleMaxEnergy(room);
-    //     return [WORK, MOVE, CARRY];
-    // }
     if (room.energyStop) {
         energy_max = 300;
     }
@@ -168,9 +131,6 @@ function getCreepBody(room: Room, role: role_name_key, code?: number) {
     return body;
 }
 
-function killCreepByAuto(room: Room) {
-    //todo
-}
 // 单位更新换代
 function killCreepByCost(room: Room) {
     if (shouldStopKillCreep(room)) {
@@ -258,14 +218,4 @@ export function getCreepIndex() {
 export function getCurrentSpawnCost(room: Room, role: role_name_key) {
     const body = getCreepBody(room, role);
     return getBodyCost(body);
-}
-
-export function getPossibleMaxEnergy(room: Room): number {
-    let max = 0;
-    (room.memory.energyExist || []).forEach(n => {
-        if (n > max) {
-            max = n;
-        }
-    });
-    return max;
 }

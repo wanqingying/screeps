@@ -1,4 +1,5 @@
 import './bootstrap';
+import { executeTickOut } from './lib_tick_out';
 
 function main() {
     Object.values(Game.creeps).forEach(creep => {
@@ -30,6 +31,8 @@ function main() {
         // } catch (e) {
         // }
     });
+    // 放在最后执行可支持 setTickOut(0,fn)
+    executeTickOut();
 }
 
 module.exports.loop = main;

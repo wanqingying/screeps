@@ -32,13 +32,14 @@ function log(px, msg, force = false) {
     }
 }
 
-global.log = function (k) {
+global.w_log = function (k) {
     require('./z_module_findPath').print();
     // switch (k) {
     //     case 1:
     //         return log_W2N8();
     // }
 };
+global.w_a_log = function () {};
 
 function log_W2N8() {
     const room = Game.rooms['W2N8'];

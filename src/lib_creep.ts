@@ -6,7 +6,6 @@ import {
     getActionLockTarget,
     getCreepBodyNum,
     findByOrder,
-    isNotFull,
     isTargetNearSource,
     findRepairTarget,
 } from './lib_base';
@@ -81,24 +80,6 @@ export function transferNearby(
     return code;
 }
 
-export function find_spawn(creep: Creep): StructureSpawn {
-    const spawns = creep.room.spawns;
-    let target;
-    if (spawns.length > 0) {
-        // 房间内回复
-        target = findNearTarget(creep, spawns);
-    } else {
-        // 房间外回复
-        const spw = [];
-        Object.values(Game.rooms).forEach(room => {
-            const sp = room.findBy(FIND_STRUCTURES, c => c.structureType === STRUCTURE_SPAWN);
-            spw.push(sp);
-        });
-        target = findNearTarget(creep, spw);
-    }
-    return target as any;
-}
-
 // 捡最大的垃圾 // 返回捡垃圾是否成功
 export function pickUpDropEnergy(creep: Creep): boolean {
     let { target, unLock } = getActionLockTarget(creep, 'pick_up_builder_drop', () => {
@@ -135,9 +116,7 @@ export function pickUpDropEnergy(creep: Creep): boolean {
 }
 // 从矿区拿资源
 export function pickUpFromMine(creep: Creep, type?: ResourceConstant) {
-    const sources = creep.room.sourceInfo;
     const h = type || RESOURCE_ENERGY;
-
     let { target, unLock } = getActionLockTarget<ResourceConstant>(
         creep,
         'pick_drop_or_mine',
@@ -150,24 +129,17 @@ export function pickUpFromMine(creep: Creep, type?: ResourceConstant) {
             }
         }
     );
-
     if (!target) {
         unLock();
         return ERR_NOT_FOUND;
     }
-    {
-        let container = target as StructureContainer;
-        if (container?.store && isEmpty(container)) {
-            unLock();
-            return ERR_NOT_FOUND;
-        }
+    if ((target as StructureContainer)?.store && isEmpty(target)) {
+        unLock();
+        return ERR_NOT_FOUND;
     }
-    {
-        let dropResource = target as Resource;
-        if (typeof dropResource?.amount === 'number' && dropResource?.amount === 0) {
-            unLock();
-            return ERR_NOT_FOUND;
-        }
+    if (typeof (target as Resource)?.amount === 'number' && target?.amount === 0) {
+        unLock();
+        return ERR_NOT_FOUND;
     }
 
     let code;
@@ -230,7 +202,7 @@ export function pickUpDropOrFromStructure(
 
     let { target, unLock } = getActionLockTarget<ResourceConstant>(
         creep,
-        'pick_drop_or_mine',
+        'pickUpDropOrFromStructure',
         () => {
             let targets = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure: StructureContainer) => {
@@ -250,7 +222,6 @@ export function pickUpDropOrFromStructure(
             if (m) {
                 return m;
             }
-
             let drops = Array.from(creep.room.dropResources).filter(a => {
                 return a?.cap < a.resource.amount && a?.resource?.amount;
             });
@@ -273,19 +244,13 @@ export function pickUpDropOrFromStructure(
         unLock();
         return ERR_NOT_FOUND;
     }
-    {
-        let g = target as StructureContainer;
-        if (g.store && isEmpty(g)) {
-            unLock();
-            return;
-        }
+    if ((target as StructureContainer).store && isEmpty(target)) {
+        unLock();
+        return;
     }
-    {
-        let g = target as Resource;
-        if (g?.amount === 0) {
-            unLock();
-            return;
-        }
+    if ((target as Resource)?.amount === 0) {
+        unLock();
+        return;
     }
     let code;
     if (target?.store) {
@@ -327,89 +292,6 @@ export function getEnergyUpgrader(creep: Creep, types?: any[]) {
 
     moveToTarget(creep, target);
     return creep.withdraw(target, RESOURCE_ENERGY);
-}
-
-export function renewCreep(creep: Creep) {
-    let target: StructureSpawn;
-    if (creep.memory.renew_spawn_id) {
-        target = Game.getObjectById(creep.memory.renew_spawn_id as Id<StructureSpawn>);
-    } else {
-        target = find_spawn(creep);
-        creep.memory.renew_spawn_id = target.id;
-    }
-    if (!target.renewCreep) {
-        creep.log('renew err ', target);
-        return;
-    }
-    const act = target.renewCreep(creep);
-    if (act === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
-    }
-    if (act === OK) {
-        creep.resetRenewFailTime();
-    }
-    if (act === ERR_NOT_ENOUGH_ENERGY) {
-        creep.increaseRenewFailTime();
-    }
-    return act;
-}
-export function checkRenewCreep(creep: Creep) {
-    // 能量回复策略
-    const life = creep.ticksToLive;
-    if (creep.memory?.renew) {
-        // 正常回到 1450
-        if (creep.ticksToLive >= 1450) {
-            return stop_renew(creep);
-        }
-        // 缺能量时只需要回到400
-        if (creep.ticksToLive >= 400 && creep.room.energyLack) {
-            return stop_renew(creep);
-        }
-        if (creep.getRenewFailTime() > 15) {
-            return stop_renew(creep);
-        }
-        if (creep.room.spawning) {
-            // return stop_renew(creep);
-        }
-        return renewCreep(creep);
-    } else {
-        // 大于 250 tick 不考虑
-        let rt_a = life >= 250;
-        // 两次间隔 200 tick
-        let rt_b = Game.time - creep.memory.renew_tick < 200;
-        // 缺能量不考虑
-        let rt_c = creep.room.energyLack;
-        // 同时回能量人数不能超过上限
-        let rt_d = creep.room.memory.renew_count > 3;
-        if ([rt_a, rt_b, rt_d].some(rt => rt)) {
-            return;
-        }
-
-        const spawn = findNearTarget<StructureSpawn>(
-            creep,
-            creep.room.spawns.map(a => a.pos)
-        );
-        if (!spawn) {
-            return;
-        }
-        const far = w_utils.count_distance(spawn.pos, creep.pos);
-        const danger = far + (250 - life) / 10;
-        if (danger > 25) {
-            start_renew(creep);
-        }
-    }
-}
-
-function stop_renew(creep: Creep) {
-    creep.memory.renew_tick = Game.time;
-    creep.memory.renew = false;
-    creep.room.memory.renew_count--;
-    creep.memory.renew_spawn_id = undefined;
-    creep.resetRenewFailTime();
-}
-function start_renew(creep: Creep) {
-    creep.memory.renew = true;
-    creep.room.memory.renew_count++;
 }
 
 export function harvestSource(creep: Creep): ScreepsReturnCode {
@@ -477,37 +359,18 @@ export function getCache(creep: Creep) {
     return che;
 }
 
-export function checkRepair(creep: Creep, include?: any, exclude?: any): ScreepsReturnCode {
-    let target;
-    let key = 'key_repair';
-    let cacheKey = creep.memory[key];
-
-    if (cacheKey) {
-        let k = w_cache.get(cacheKey + creep.name + target?.id);
-        w_cache.set(cacheKey + creep.name + target?.id, k + 1 || 0);
-        if (k > 50) {
-            w_cache.set(cacheKey + creep.name + target?.id, 0);
-            creep.memory[key] = undefined;
-
-            target = null;
-        } else {
-            target = Game.getObjectById(cacheKey);
-        }
-    } else {
-        target = findRepairTarget(creep.room, include, exclude);
-        w_cache.set(cacheKey + creep.name + target?.id, 0);
-        creep.memory[key] = target?.id;
-    }
+export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): ScreepsReturnCode {
+    const { target, unLock } = getActionLockTarget(creep, 'check_repair_creep', () => {
+        return findRepairTarget(creep.room, include, exclude);
+    });
 
     if (!target) {
-        creep.memory[key] = undefined;
-
         return ERR_NOT_FOUND;
     }
     moveToTarget(creep, target);
     let act = creep.repair(target);
     if (isEmpty(creep)) {
-        creep.memory[key] = undefined;
+        unLock();
     }
     return act;
 }

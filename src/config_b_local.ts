@@ -17,4 +17,5 @@ export const cfg_local = {
         [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 11, [CARRY]: 2 },
         [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
     },
+    reserve_rooms: [],
 };
