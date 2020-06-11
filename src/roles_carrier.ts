@@ -1,8 +1,6 @@
 import {
-    findDropTargetSync,
     moveToTarget,
-    pickEnergyDrop,
-    pickUpEnergyFromMine,
+    pickUpDropOrFromMineContainer,
     transfer_nearby,
 } from './lib_creep';
 import { isEmpty, isFull } from './lib_base';
@@ -19,11 +17,7 @@ carrier.setUp = function (creep) {
     }
 
     if (creep.memory.process === 'pick') {
-        const code = pickEnergyDrop(creep);
-        // const code = false
-        if (!code) {
-            pickUpEnergyFromMine(creep);
-        }
+        pickUpDropOrFromMineContainer(creep);
     } else {
         let act = transfer_nearby(
             creep,

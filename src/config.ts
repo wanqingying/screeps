@@ -24,7 +24,7 @@ export const creep_cfg_num = {
     [role_name.scout]: 0,
     [role_name.builder]: 1,
     [role_name.harvester]: 2,
-    [role_name.upgrader]: 2,
+    [role_name.upgrader]: 1,
 };
 export const body_cost = {
     [MOVE]: 50,

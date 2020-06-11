@@ -150,33 +150,159 @@ export function pickEnergyDrop(creep: Creep, min?: number): boolean {
     }
     return false;
 }
+export function pickUpEnergyFromMine2(creep: Creep, type?: ResourceConstant): ScreepsReturnCode {
+    const sources = creep.room.sourceInfo;
+    const h = type || RESOURCE_ENERGY;
 
-function pickUpEnergyDropSync(creep: Creep, target: Resource): ScreepsReturnCode {
-    const eng = creep.room.dropResources.find(d => d.resource.id === target.id);
-    if (eng) {
-        eng.cap += creep.store.getFreeCapacity(RESOURCE_ENERGY);
-    }
-    moveToTarget(creep, target.pos);
-    return creep.pickup(target);
-}
-
-function findMaxEnergyStructure(creep: Creep, types?: any[]): AnyStructure {
-    let filter_types = types || [STRUCTURE_EXTENSION, STRUCTURE_CONTAINER, STRUCTURE_SPAWN];
-    let targets = creep.room.find(FIND_STRUCTURES, {
-        filter: (structure: StructureContainer) => {
-            if (!structure.store) {
-                return false;
+    let { target, unLock } = getActionLockTarget(creep, 'pick_up_mine', () => {
+        for (let sh of sources) {
+            if (sh.container && isNotEmpty(sh.container) && sh.containerCap > 0) {
+                sh.containerCap = sh.containerCap - creep.store.getFreeCapacity(type);
+                return sh.container;
             }
-            let type = structure.structureType;
-            let cap = structure.store.getUsedCapacity(RESOURCE_ENERGY);
-            return filter_types.includes(type) && cap > 0;
-        },
+        }
     });
-    // 到能量最多的地方补充
-    targets = targets.sort((a: StructureExtension, b: StructureExtension) => {
-        return a.store.getUsedCapacity(RESOURCE_ENERGY) - b.store.getUsedCapacity(RESOURCE_ENERGY);
-    });
-    return targets.pop();
+
+    if (!target || isEmpty(target)) {
+        unLock();
+        return ERR_NOT_FOUND;
+    }
+    if (isEmpty(creep)) {
+        // unLock();
+        // return
+    }
+    const code = creep.withdraw(target, h);
+    if (code === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target.pos);
+    }
+    return code;
+}
+// 从矿区拿资源
+export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConstant) {
+    const sources = creep.room.sourceInfo;
+    const h = type || RESOURCE_ENERGY;
+
+    let { target, unLock } = getActionLockTarget<ResourceConstant>(
+        creep,
+        'pick_drop_or_mine',
+        () => {
+            let drops = Array.from(creep.room.dropResources).filter(
+                a => a?.cap > 0 && a?.resource?.amount
+            );
+            let drop = find_nearby_target<DropResource>(creep, drops);
+            if (drop) {
+                drop.cap += creep.store.getFreeCapacity(h);
+                return drop.resource;
+            } else {
+                for (let sh of sources) {
+                    if (sh.container && isNotEmpty(sh.container) && sh.containerCap > 0) {
+                        sh.containerCap = sh.containerCap - creep.store.getFreeCapacity(h);
+                        return sh.container;
+                    }
+                }
+            }
+        }
+    );
+
+    if (!target) {
+        unLock();
+        return ERR_NOT_FOUND;
+    }
+    {
+        let g = target as StructureContainer;
+        if (g.store && isEmpty(g)) {
+            unLock();
+            return;
+        }
+    }
+    {
+        let g = target as Resource;
+        if (g?.amount === 0) {
+            unLock();
+            return;
+        }
+    }
+
+    let code;
+    if (target.structureType === STRUCTURE_CONTAINER) {
+        code = creep.withdraw(target, h);
+    } else {
+        code = creep.pickup(target);
+    }
+    if (code === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target);
+    }
+    return code;
+}
+// 拿资源 垃圾或者建筑,builder,upgrader 等
+export function pickUpDropOrFromStructure(
+    creep: Creep,
+    structures?: StructureConstant[],
+    type?: ResourceConstant
+) {
+    const h = type || RESOURCE_ENERGY;
+    let structureFilters = structures || [STRUCTURE_STORAGE, STRUCTURE_CONTAINER];
+
+    let { target, unLock } = getActionLockTarget<ResourceConstant>(
+        creep,
+        'pick_drop_or_mine',
+        () => {
+            let drops = Array.from(creep.room.dropResources).filter(
+                a => a?.cap > 0 && a?.resource?.amount
+            );
+            let drop = find_nearby_target<DropResource>(creep, drops);
+            if (drop) {
+                drop.cap += creep.store.getFreeCapacity(h);
+                return drop.resource;
+            } else {
+                let targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure: StructureContainer) => {
+                        if (!structure.store) {
+                            return false;
+                        }
+                        if (!structureFilters.includes(structure?.structureType)) {
+                            return false;
+                        }
+                        if (structure.store && isEmpty(structure)) {
+                            return false;
+                        }
+                        return true;
+                    },
+                });
+                return find_nearby_target(creep, targets);
+            }
+        }
+    );
+
+    if (!target) {
+        unLock();
+        return ERR_NOT_FOUND;
+    }
+    {
+        let g = target as StructureContainer;
+        if (g.store && isEmpty(g)) {
+            unLock();
+            return;
+        }
+    }
+    {
+        let g = target as Resource;
+        if (g?.amount === 0) {
+            unLock();
+            return;
+        }
+    }
+
+    let code;
+    if (target?.store) {
+        code = creep.withdraw(target, h);
+    } else {
+        code = creep.pickup(target);
+    }
+    if (code === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target);
+    }
+    return code;
 }
 
 // upgrader获取能量
@@ -306,6 +432,9 @@ export function checkRenewCreep(creep: Creep) {
             creep,
             creep.room.spawns.map(a => a.pos)
         );
+        if (!spawn) {
+            return;
+        }
         const far = w_utils.count_distance(spawn.pos, creep.pos);
         const danger = far + (250 - life) / 10;
         if (danger > 25) {
