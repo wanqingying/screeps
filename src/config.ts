@@ -22,7 +22,7 @@ export const creep_cfg_num = {
     [role_name.starter]: 0,
     [role_name.carrier]: 3,
     [role_name.scout]: 0,
-    [role_name.builder]: 2,
+    [role_name.builder]: 1,
     [role_name.harvester]: 2,
     [role_name.upgrader]: 3,
 };

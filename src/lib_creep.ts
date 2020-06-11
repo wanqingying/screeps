@@ -600,5 +600,9 @@ export function checkRepair(creep: Creep, include?: any, exclude?: any): Screeps
         return ERR_NOT_FOUND;
     }
     moveToTarget(creep, target);
-    return creep.repair(target);
+    let act = creep.repair(target);
+    if (isEmpty(creep)) {
+        creep.memory[key] = undefined;
+    }
+    return act;
 }
