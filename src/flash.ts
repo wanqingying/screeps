@@ -1,4 +1,4 @@
-import { find_nearby_target } from './lib_base';
+import { findNearTarget } from './lib_base';
 
 // 不执行任何操作，只更新数据，用于之后的工作
 

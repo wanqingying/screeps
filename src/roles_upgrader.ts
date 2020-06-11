@@ -1,5 +1,10 @@
-import {getEnergyUpgrader, moveToTarget, pickUpDropEnergy, pickUpDropOrFromStructure} from './lib_creep';
-import { find_nearby_target, isEmpty, isFull } from './lib_base';
+import {
+    getEnergyUpgrader,
+    moveToTarget,
+    pickUpDropEnergy,
+    pickUpDropOrFromStructure,
+} from './lib_creep';
+import { findNearTarget, isEmpty, isFull } from './lib_base';
 
 const upgrader = {} as Role;
 

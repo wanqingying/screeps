@@ -6,4 +6,4 @@ import './roles';
 import './log';
 import './prototype';
 import './flash';
-import './z_module_findPath'
+import './z_module_findPath';

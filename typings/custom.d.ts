@@ -7,7 +7,14 @@
 //CLAIM 600
 //TOUGH 10
 
-declare type role_name_key = 'carrier' | 'harvester' | 'starter' | 'upgrader' | 'builder' | 'scout'|string;
+declare type role_name_key =
+    | 'carrier'
+    | 'harvester'
+    | 'starter'
+    | 'upgrader'
+    | 'builder'
+    | 'scout'
+    | string;
 
 declare interface SourceCache {
     source: Source;
@@ -15,8 +22,8 @@ declare interface SourceCache {
     // 开采速度,等于 work*2
     speed?: number;
     container: StructureContainer;
-    // 矿边上的容器余量，用于搬运单位选择目标,初始为container资源量
-    containerCap:number
+    // 矿边上的容器余量，用于搬运单位选择目标,初始为0
+    containerCap: number;
 }
 
 declare interface StructureHasStore extends Structure<any> {

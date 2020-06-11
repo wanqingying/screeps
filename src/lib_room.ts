@@ -9,6 +9,4 @@ export function checkRenewCount(room: Room) {
 }
 
 // 房间生成单位时不允许
-export function f() {
-
-}
+export function f() {}

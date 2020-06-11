@@ -4,15 +4,14 @@ import './roles_harvester';
 import './roles_starter';
 import './roles_upgrader';
 
-function work(creep:Creep) {
+function work(creep: Creep) {
     let target;
-    let key='key'
-    let cacheKey=creep.memory[key];
+    let key = 'key';
+    let cacheKey = creep.memory[key];
 
-    if (cacheKey){
-        target=Game.getObjectById(cacheKey);
-    }else{
-
-        creep.memory[key]=target?.id;
+    if (cacheKey) {
+        target = Game.getObjectById(cacheKey);
+    } else {
+        creep.memory[key] = target?.id;
     }
 }

@@ -1,5 +1,5 @@
 import {
-    find_nearby_target,
+    findNearTarget,
     findRepairTarget,
     findTargetAttack,
     getCreepsRoleAbility,
@@ -61,8 +61,6 @@ function findHealTarget(room: Room): AnyCreep {
             return a.hits - b.hits;
         })[0];
 }
-function findSourceMinHarvester(room: Room) {}
-
 Room.prototype.findByFilter = function (type, property, propertyIn, filter) {
     const room = this;
     const res = room.findByCacheKey(type, property, propertyIn);
@@ -116,7 +114,7 @@ function refreshHotData(room: Room) {
                 }
             })
             .filter(k => k && k.name);
-        const near = find_nearby_target(source, containers) as StructureContainer;
+        const near = findNearTarget(source, containers) as StructureContainer;
         const far = w_utils.count_distance(near?.pos, source?.pos);
         let speed = 0;
         target_creeps.forEach(a => {
@@ -135,7 +133,7 @@ function refreshHotData(room: Room) {
         };
         if (far === 1 && near) {
             info.container = near;
-            info.containerCap = near.store.energy;
+            info.containerCap = 0;
         }
         room.sourceInfo.push(info);
     });

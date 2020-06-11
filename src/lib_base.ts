@@ -1,6 +1,4 @@
-// 不能引用其他模块
-
-export function find_nearby_target<T>(base, targets: any[]): T {
+export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
     const tt = targets.sort((a, b) => {
         return w_utils.count_distance(c, a.pos || a) - w_utils.count_distance(c, b.pos || b);
@@ -8,39 +6,26 @@ export function find_nearby_target<T>(base, targets: any[]): T {
     return tt.shift();
 }
 
-let seed = 0;
+// 锁定当前单位的目标
 export function getActionLockTarget<T>(
     creep: Creep,
     lock_key: string,
     getTarget
 ): { target: T | any; unLock: () => void } {
-    seed += 1;
     let target;
     let key = `lock_${lock_key}`;
-    let cache_key = creep.memory[key];
+    let cache_id = creep.memory?.[key];
 
-    if (cache_key) {
-        target = Game.getObjectById(cache_key);
+    if (cache_id) {
+        target = Game.getObjectById(cache_id);
     } else {
         target = getTarget();
-        cache_key = target?.id;
+        cache_id = target?.id;
         creep.memory[key] = target?.id;
     }
     function reset() {
         creep.memory[key] = undefined;
-        let cache_k = key + cache_key + creep.name;
-        w_cache.set(cache_k, 0);
     }
-
-    if (target) {
-        let cache_k = key + cache_key + creep.name;
-        let count = w_cache.get(cache_k) || 0;
-        w_cache.set(cache_k, count + 1);
-        if (count > 100) {
-            reset();
-        }
-    }
-
     return { target, unLock: reset };
 }
 
@@ -98,16 +83,6 @@ export function getCreepBodyNum(creep: Creep, type: BodyPartConstant): number {
     let body = getCreepBody(creep);
     return body[type] || 0;
 }
-// carry ability
-export function getCreepsCarry(creeps: Creep[]) {
-    let carry = 0;
-    creeps.forEach(creep => {
-        if (creep.memory.role === 'carrier') {
-            let bd = getCreepBody(creep);
-            carry += getCreepBodyNum(creep, CARRY);
-        }
-    });
-}
 
 export function getCreepsRoleAbility(creeps: Creep[], role: role_name_key) {
     let carry = 0;
@@ -157,23 +132,21 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
 
 // 按照优先级顺序找到建筑
 export function findByOrder<K extends FindConstant>(
-    creep: Creep,
+    room: Room,
     filter?: FilterFunction<K>,
-    types?: StructureConstant[]
+    structureTypesOrder?: StructureConstant[]
 ): Array<FindTypes[K]> {
-    let _types = [
+    let structureFilters = structureTypesOrder || [
         STRUCTURE_SPAWN,
         STRUCTURE_EXTENSION,
         STRUCTURE_TOWER,
         STRUCTURE_CONTAINER,
         STRUCTURE_STORAGE,
     ];
-    let struct = types || _types;
-    const targets = creep.room.find(FIND_STRUCTURES);
-
-    for (let i = 0; i < struct.length; i++) {
+    const targets = room.find(FIND_STRUCTURES);
+    for (let i = 0; i < structureFilters.length; i++) {
         let ck = targets.filter(t => {
-            let meet_type = t.structureType === struct[i];
+            let meet_type = t.structureType === structureFilters[i];
             let meet_filter = true;
             if (filter) {
                 meet_filter = filter(t as any);

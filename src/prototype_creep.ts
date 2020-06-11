@@ -1,11 +1,11 @@
-import {checkRenewCreep, getCache} from './lib_creep';
+import { checkRenewCreep, getCache } from './lib_creep';
 import { getActionLockTarget } from './lib_base';
 
 Creep.prototype.run = function () {
     const creep = this;
-    let che=getCache(creep);
-    creep.log_one(che.tick)
-    che.tick++
+    let che = getCache(creep);
+    creep.log_one(che.tick);
+    che.tick++;
     checkRenewCreep(creep);
     if (!creep.memory.renew) {
         const rs = w_roles[creep.memory?.role];
@@ -36,22 +36,13 @@ Creep.prototype.resetRenewFailTime = function () {
 
 Creep.prototype.getCache = function () {
     const creep = this;
-    let che: CacheCreep = w_creeps.get(creep.name);
-    if (!che) {
-        che = { renewTime: 0, lockSeed: 0,tick:0 };
-        w_creeps.set(creep.name, che);
-    }
-    if (typeof che.renewTime !== 'number') {
-        che.renewTime = 0;
-        w_creeps.set(creep.name, che);
-    }
-    return che;
+    return getCache(creep);
 };
 
 Creep.prototype.harvestSource = function () {
     const creep = this;
 
-    let { target, unLock } = getActionLockTarget<Source>(creep, 'hs',() => {
+    let { target, unLock } = getActionLockTarget<Source>(creep, 'hs', () => {
         const target = creep.findSource();
         return target?.source;
     });
@@ -87,18 +78,4 @@ Creep.prototype.findSource = function () {
         return a.speed - b.speed;
     });
     return sourceH.shift();
-};
-Creep.prototype.moveToTarget = function (target: RoomPosition) {
-    const creep = this;
-    const far = w_utils.count_distance(creep, target);
-    if (far > 1) {
-        return creep.moveTo(target);
-    }
-    return OK;
-};
-Creep.prototype.isEmpty = function (type = RESOURCE_ENERGY) {
-    return this.store.getFreeCapacity(type) === 0;
-};
-Creep.prototype.isFull = function (type = RESOURCE_ENERGY) {
-    return this.store.getUsedCapacity(type) === 0;
 };

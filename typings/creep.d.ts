@@ -14,9 +14,6 @@ declare interface Creep {
     getCache(): CacheCreep;
     findSourceHarvester(): Source;
     harvestSource(): boolean;
-    moveToTarget(target: RoomPosition): ScreepsReturnCode;
     findAndMoveToSourcePos(target: Source): ScreepsReturnCode;
     findSource(): SourceCache | undefined;
-    isEmpty(type?: ResourceConstant): boolean;
-    isFull(type?: ResourceConstant): boolean;
 }

@@ -73,45 +73,67 @@ require('超级移动优化').deletePathInRoom(roomName);
 // 初始化参数
 let config = {
     地图房号最大数字超过100: false,
-    changeMove: true,   // 【未启用】为creep.move增加对穿能力
+    changeMove: true, // 【未启用】为creep.move增加对穿能力
     changeMoveTo: true, // 全面优化creep.moveTo，跨房移动也可以一个moveTo解决问题
-    changeFindClostestByPath: true,     // 【未启用】轻度修改findClosestByPath，使得默认按照ignoreCreeps寻找最短
-    autoVisual: false,  // 【未启用】
-    enableFlee: false   // 【未启用】是否添加flee()函数，注意这会在Creep.prototype上添加官方未有键值，flee()用法见最底下module.exports处
-}
+    changeFindClostestByPath: true, // 【未启用】轻度修改findClosestByPath，使得默认按照ignoreCreeps寻找最短
+    autoVisual: false, // 【未启用】
+    enableFlee: false, // 【未启用】是否添加flee()函数，注意这会在Creep.prototype上添加官方未有键值，flee()用法见最底下module.exports处
+};
 // 运行时参数
-let pathClearDelay = 5000;  // 清理相应时间内都未被再次使用的路径，同时清理死亡creep的缓存，设为undefined表示不清除缓存
+let pathClearDelay = 5000; // 清理相应时间内都未被再次使用的路径，同时清理死亡creep的缓存，设为undefined表示不清除缓存
 let hostileCostMatrixClearDelay = 500; // 自动清理相应时间前创建的其他玩家房间的costMatrix
 let coreLayoutRange = 3; // 核心布局半径，在离storage这个范围内频繁检查对穿（减少堵路的等待
-let avoidRooms = ['E18S8', 'E19S9', 'E21S9', 'E24S8', 'E35N6', 'E25S9',
-    'E19N2', 'E18N3', 'E29N5', 'E29N3', 'E28N8', 'E33N9', 'E34N8',
-    'E37N6', 'E41N8', 'E39N11', 'E39N12', 'E39N13', 'E17S9']      // 永不踏入这些房间
+let avoidRooms = [
+    'E18S8',
+    'E19S9',
+    'E21S9',
+    'E24S8',
+    'E35N6',
+    'E25S9',
+    'E19N2',
+    'E18N3',
+    'E29N5',
+    'E29N3',
+    'E28N8',
+    'E33N9',
+    'E34N8',
+    'E37N6',
+    'E41N8',
+    'E39N11',
+    'E39N12',
+    'E39N13',
+    'E17S9',
+]; // 永不踏入这些房间
 let avoidExits = {
-    'E35N7': 'E35N6',
-    'fromRoom': 'toRoom'
-}   // 【未启用】单向屏蔽房间的一些出口，永不从fromRoom踏入toRoom
+    E35N7: 'E35N6',
+    fromRoom: 'toRoom',
+}; // 【未启用】单向屏蔽房间的一些出口，永不从fromRoom踏入toRoom
 /** @type {{id:string, roomName:string, taskQueue:{path:MyPath, idx:number, roomName:string}[]}[]} */
-let observers = ['5e3646219c6dc78024fd7097', '5e55e9b8673548d9468a2d3d', '5e36372d00fab883d281d95e'];  // 如果想用ob寻路，把ob的id放这里
+let observers = [
+    '5e3646219c6dc78024fd7097',
+    '5e55e9b8673548d9468a2d3d',
+    '5e36372d00fab883d281d95e',
+]; // 如果想用ob寻路，把ob的id放这里
 
 /***************************************
  *  局部缓存
  */
 /** @type {{ [time: number]:{path:MyPath, idx:number, roomName:string}[] }} */
-let obTimer = {};   // 【未启用】用于登记ob调用，在相应的tick查看房间对象
+let obTimer = {}; // 【未启用】用于登记ob调用，在相应的tick查看房间对象
 let obTick = Game.time;
 /** @type {Paths} */
-let globalPathCache = {};     // 缓存path
+let globalPathCache = {}; // 缓存path
 /** @type {MoveTimer} */
 let pathCacheTimer = {}; // 用于记录path被使用的时间，清理长期未被使用的path
 /** @type {CreepPaths} */
-let creepPathCache = {};    // 缓存每个creep使用path的情况
-let creepMoveCache = {};    // 缓存每个creep最后一次移动的tick
-let emptyCostMatrix = new PathFinder.CostMatrix;
+let creepPathCache = {}; // 缓存每个creep使用path的情况
+let creepMoveCache = {}; // 缓存每个creep最后一次移动的tick
+let emptyCostMatrix = new PathFinder.CostMatrix();
 /** @type {CMs} */
-let costMatrixCache = {};    // true存ignoreDestructibleStructures==true的，false同理
+let costMatrixCache = {}; // true存ignoreDestructibleStructures==true的，false同理
 /** @type {{ [time: number]:{roomName:string, avoids:string[]}[] }} */
 let costMatrixCacheTimer = {}; // 用于记录costMatrix的创建时间，清理过期costMatrix
-let autoClearTick = Game.time;  // 用于避免重复清理缓存
+let autoClearTick = Game.time; // 用于避免重复清理缓存
 
 const obstacles = new Set(OBSTACLE_OBJECT_TYPES);
 const originMove = Creep.prototype.move;
@@ -122,10 +144,11 @@ const originFindClosestByPath = RoomPosition.prototype.findClosestByPath;
 let startTime;
 let endTime;
 let startCacheSearch;
-let analyzeCPU = { // 统计相关函数总耗时
+let analyzeCPU = {
+    // 统计相关函数总耗时
     move: { sum: 0, calls: 0 },
     moveTo: { sum: 0, calls: 0 },
-    findClosestByPath: { sum: 0, calls: 0 }
+    findClosestByPath: { sum: 0, calls: 0 },
 };
 let pathCounter = 0;
 let testCacheHits = 0;
@@ -142,7 +165,7 @@ let cacheMissCost = 0;
 /***************************************
  *  util functions
  */
-let reg1 = /^([WE])([0-9]+)([NS])([0-9]+)$/;    // parse得到['E28N7','E','28','N','7']
+let reg1 = /^([WE])([0-9]+)([NS])([0-9]+)$/; // parse得到['E28N7','E','28','N','7']
 /**
  *  统一到大地图坐标，平均单次开销0.00005
  * @param {RoomPosition} pos
@@ -150,12 +173,13 @@ let reg1 = /^([WE])([0-9]+)([NS])([0-9]+)$/;    // parse得到['E28N7','E','28',
 function formalize(pos) {
     let splited = reg1.exec(pos.roomName);
     if (splited && splited.length == 5) {
-        return { // 如果这里出现类型错误，那么意味着房间名字不是正确格式但通过了parse，小概率事件
+        return {
+            // 如果这里出现类型错误，那么意味着房间名字不是正确格式但通过了parse，小概率事件
             x: (splited[1] === 'W' ? -splited[2] : +splited[2] + 1) * 50 + pos.x,
-            y: (splited[3] === 'N' ? -splited[4] : +splited[4] + 1) * 50 + pos.y
-        }
+            y: (splited[3] === 'N' ? -splited[4] : +splited[4] + 1) * 50 + pos.y,
+        };
     } // else 房间名字不是正确格式
-    return {}
+    return {};
 }
 
 function getAdjacents(pos) {
@@ -164,8 +188,8 @@ function getAdjacents(pos) {
         for (let j = -1; j <= 1; j++) {
             posArray.push({
                 x: pos.x + i,
-                y: pos.y + j
-            })
+                y: pos.y + j,
+            });
         }
     }
     return posArray;
@@ -187,22 +211,39 @@ function isEqual(pos1, pos2) {
  * @param {RoomPosition} pos2
  */
 function isNear(pos1, pos2) {
-    if (pos1.roomName == pos2.roomName) {    // undefined == undefined 也成立
-        return -1 <= pos1.x - pos2.x && pos1.x - pos2.x <= 1 && -1 <= pos1.y - pos2.y && pos1.y - pos2.y <= 1;
-    } else if (pos1.roomName && pos2.roomName) {    // 是完整的RoomPosition
-        if (pos1.x + pos2.x != 49 && pos1.y + pos2.y != 49) return false;    // 肯定不是两个边界点, 0.00003 cpu
+    if (pos1.roomName == pos2.roomName) {
+        // undefined == undefined 也成立
+        return (
+            -1 <= pos1.x - pos2.x &&
+            pos1.x - pos2.x <= 1 &&
+            -1 <= pos1.y - pos2.y &&
+            pos1.y - pos2.y <= 1
+        );
+    } else if (pos1.roomName && pos2.roomName) {
+        // 是完整的RoomPosition
+        if (pos1.x + pos2.x != 49 && pos1.y + pos2.y != 49) return false; // 肯定不是两个边界点, 0.00003 cpu
         // start
         let splited1 = reg1.exec(pos1.roomName);
         let splited2 = reg1.exec(pos2.roomName);
         if (splited1 && splited1.length == 5 && splited2 && splited2.length == 5) {
             // 统一到大地图坐标
-            let formalizedEW = (splited1[1] === 'W' ? -splited1[2] : +splited1[2] + 1) * 50 + pos1.x - (splited2[1] === 'W' ? -splited2[2] : +splited2[2] + 1) * 50 - pos2.x;
-            let formalizedNS = (splited1[3] === 'N' ? -splited1[4] : +splited1[4] + 1) * 50 + pos1.y - (splited2[3] === 'N' ? -splited2[4] : +splited2[4] + 1) * 50 - pos2.y;
-            return -1 <= formalizedEW && formalizedEW <= 1 && -1 <= formalizedNS && formalizedNS <= 1;
+            let formalizedEW =
+                (splited1[1] === 'W' ? -splited1[2] : +splited1[2] + 1) * 50 +
+                pos1.x -
+                (splited2[1] === 'W' ? -splited2[2] : +splited2[2] + 1) * 50 -
+                pos2.x;
+            let formalizedNS =
+                (splited1[3] === 'N' ? -splited1[4] : +splited1[4] + 1) * 50 +
+                pos1.y -
+                (splited2[3] === 'N' ? -splited2[4] : +splited2[4] + 1) * 50 -
+                pos2.y;
+            return (
+                -1 <= formalizedEW && formalizedEW <= 1 && -1 <= formalizedNS && formalizedNS <= 1
+            );
         }
         // end - start = 0.00077 cpu
     }
-    return false
+    return false;
 }
 
 /**
@@ -211,7 +252,12 @@ function isNear(pos1, pos2) {
  */
 function inRange(pos1, pos2, range) {
     if (pos1.roomName == pos2.roomName) {
-        return -range <= pos1.x - pos2.x && pos1.x - pos2.x <= range && -range <= pos1.y - pos2.y && pos1.y - pos2.y <= range;
+        return (
+            -range <= pos1.x - pos2.x &&
+            pos1.x - pos2.x <= range &&
+            -range <= pos1.y - pos2.y &&
+            pos1.y - pos2.y <= range
+        );
     } else {
         pos1 = formalize(pos1);
         pos2 = formalize(pos2);
@@ -226,56 +272,75 @@ function inRange(pos1, pos2, range) {
  */
 function getDirection(fromPos, toPos) {
     if (fromPos.roomName == toPos.roomName) {
-        if (toPos.x > fromPos.x) {    // 下一步在右边
-            if (toPos.y > fromPos.y) {    // 下一步在下面
+        if (toPos.x > fromPos.x) {
+            // 下一步在右边
+            if (toPos.y > fromPos.y) {
+                // 下一步在下面
                 return BOTTOM_RIGHT;
-            } else if (toPos.y == fromPos.y) { // 下一步在正右
+            } else if (toPos.y == fromPos.y) {
+                // 下一步在正右
                 return RIGHT;
             }
-            return TOP_RIGHT;   // 下一步在上面
-        } else if (toPos.x == fromPos.x) { // 横向相等
-            if (toPos.y > fromPos.y) {    // 下一步在下面
+            return TOP_RIGHT; // 下一步在上面
+        } else if (toPos.x == fromPos.x) {
+            // 横向相等
+            if (toPos.y > fromPos.y) {
+                // 下一步在下面
                 return BOTTOM;
             } else if (toPos.y < fromPos.y) {
                 return TOP;
             }
-        } else {  // 下一步在左边
-            if (toPos.y > fromPos.y) {    // 下一步在下面
+        } else {
+            // 下一步在左边
+            if (toPos.y > fromPos.y) {
+                // 下一步在下面
                 return BOTTOM_LEFT;
             } else if (toPos.y == fromPos.y) {
                 return LEFT;
             }
             return TOP_LEFT;
         }
-    } else {  // 房间边界点
-        if (fromPos.x == 0 || fromPos.x == 49) {  // 左右相邻的房间，只需上下移动（左右边界会自动弹过去）
-            if (toPos.y > fromPos.y) {   // 下一步在下面
+    } else {
+        // 房间边界点
+        if (fromPos.x == 0 || fromPos.x == 49) {
+            // 左右相邻的房间，只需上下移动（左右边界会自动弹过去）
+            if (toPos.y > fromPos.y) {
+                // 下一步在下面
                 return BOTTOM;
-            } else if (toPos.y < fromPos.y) { // 下一步在上
-                return TOP
+            } else if (toPos.y < fromPos.y) {
+                // 下一步在上
+                return TOP;
             } // else 正左正右
             return fromPos.x ? RIGHT : LEFT;
-        } else if (fromPos.y == 0 || fromPos.y == 49) {    // 上下相邻的房间，只需左右移动（上下边界会自动弹过去）
-            if (toPos.x > fromPos.x) {    // 下一步在右边
+        } else if (fromPos.y == 0 || fromPos.y == 49) {
+            // 上下相邻的房间，只需左右移动（上下边界会自动弹过去）
+            if (toPos.x > fromPos.x) {
+                // 下一步在右边
                 return RIGHT;
             } else if (toPos.x < fromPos.x) {
                 return LEFT;
-            }// else 正上正下
+            } // else 正上正下
             return fromPos.y ? BOTTOM : TOP;
         }
     }
 }
 
-let reg2 = /^[WE]([0-9]+)[NS]([0-9]+)$/;    // parse得到['E28N7','28','7']
-let isHighWay = config.地图房号最大数字超过100 ?
-    (roomName) => {
-        let splited = reg2.exec(roomName);
-        return splited[1] % 10 == 0 || splited[2] % 10 == 0;
-    } :
-    (roomName) => {
-        // E0 || E10 || E1S0 || [E10S0|E1S10] || [E10S10] 比正则再除快
-        return roomName[1] == 0 || roomName[2] == 0 || roomName[3] == 0 || roomName[4] == 0 || roomName[5] == 0;
-    }
+let reg2 = /^[WE]([0-9]+)[NS]([0-9]+)$/; // parse得到['E28N7','28','7']
+let isHighWay = config.地图房号最大数字超过100
+    ? roomName => {
+          let splited = reg2.exec(roomName);
+          return splited[1] % 10 == 0 || splited[2] % 10 == 0;
+      }
+    : roomName => {
+          // E0 || E10 || E1S0 || [E10S0|E1S10] || [E10S10] 比正则再除快
+          return (
+              roomName[1] == 0 ||
+              roomName[2] == 0 ||
+              roomName[3] == 0 ||
+              roomName[4] == 0 ||
+              roomName[5] == 0
+          );
+      };
 
 /**
  *  缓存的路径和当前moveTo参数相同
@@ -283,9 +348,11 @@ let isHighWay = config.地图房号最大数字超过100 ?
  * @param {*} ops
  */
 function isSameOps(path, ops) {
-    return path.ignoreRoads == !!ops.ignoreRoads &&
+    return (
+        path.ignoreRoads == !!ops.ignoreRoads &&
         path.ignoreSwamps == !!ops.ignoreSwamps &&
-        path.ignoreStructures == !!ops.ignoreDestructibleStructures;
+        path.ignoreStructures == !!ops.ignoreDestructibleStructures
+    );
 }
 
 function hasActiveBodypart(body, type) {
@@ -294,14 +361,11 @@ function hasActiveBodypart(body, type) {
     }
 
     for (var i = body.length - 1; i >= 0; i--) {
-        if (body[i].hits <= 0)
-            break;
-        if (body[i].type === type)
-            return true;
+        if (body[i].hits <= 0) break;
+        if (body[i].type === type) return true;
     }
 
     return false;
-
 }
 
 function isClosedRampart(structure) {
@@ -316,14 +380,16 @@ function isClosedRampart(structure) {
  */
 function isObstacleStructure(room, pos, ignoreStructures) {
     let consSite = room.lookForAt(LOOK_CONSTRUCTION_SITES, pos);
-    if (0 in consSite && consSite[0].my && obstacles.has(consSite[0].structureType)) {  // 工地会挡路
+    if (0 in consSite && consSite[0].my && obstacles.has(consSite[0].structureType)) {
+        // 工地会挡路
         return true;
     }
     for (let s of room.lookForAt(LOOK_STRUCTURES, pos)) {
-        if (!s.hits || s.ticksToDeploy) {     // 是新手墙或者无敌中的invaderCore
+        if (!s.hits || s.ticksToDeploy) {
+            // 是新手墙或者无敌中的invaderCore
             return true;
         } else if (!ignoreStructures && (obstacles.has(s.structureType) || isClosedRampart(s))) {
-            return true
+            return true;
         }
     }
     return false;
@@ -351,12 +417,15 @@ function addObTask(path, idx) {
  *  尝试用ob检查路径
  */
 function doObTask() {
-    for (let obData of observers) { // 遍历所有ob
+    for (let obData of observers) {
+        // 遍历所有ob
         let queue = obData.taskQueue;
-        while (queue.length) {  // 没有task就pass
+        while (queue.length) {
+            // 没有task就pass
             let task = queue[queue.length - 1];
             let roomName = task.roomName;
-            if (roomName in costMatrixCache) {  // 有过视野不用再ob
+            if (roomName in costMatrixCache) {
+                // 有过视野不用再ob
                 if (!task.path.directionArray[task.idx]) {
                     checkRoom({ name: roomName }, task.path, task.idx - 1);
                 }
@@ -370,7 +439,7 @@ function doObTask() {
                 if (!(Game.time + 1 in obTimer)) {
                     obTimer[Game.time + 1] = [];
                 }
-                obTimer[Game.time + 1].push({ path: task.path, idx: task.idx, roomName: roomName });    // idx位置无direction
+                obTimer[Game.time + 1].push({ path: task.path, idx: task.idx, roomName: roomName }); // idx位置无direction
             } else {
                 observers.splice(observers.indexOf(obData), 1);
             }
@@ -386,16 +455,16 @@ function checkObResult() {
     for (let tick in obTimer) {
         if (tick < Game.time) {
             delete obTimer[tick];
-            continue;   // 后面可能还有要检查的
+            continue; // 后面可能还有要检查的
         } else if (tick == Game.time) {
             for (let result of obTimer[tick]) {
                 if (result.roomName in Game.rooms) {
-                    checkRoom(Game.rooms[result.roomName], result.path, result.idx - 1);    // checkRoom要传有direction的idx
+                    checkRoom(Game.rooms[result.roomName], result.path, result.idx - 1); // checkRoom要传有direction的idx
                 }
             }
             delete obTimer[tick];
         } // else 没有要检查的
-        break;  // 检查完了或者没有要检查的
+        break; // 检查完了或者没有要检查的
     }
 }
 
@@ -406,77 +475,101 @@ function checkObResult() {
  * @param {RoomPosition} pos
  */
 function generateCostMatrix(room, pos) {
-    let noStructureCostMat = new PathFinder.CostMatrix; // 不考虑可破坏的建筑，但是要考虑墙上资源点和无敌的3种建筑，可能还有其他不能走的？
-    let structureCostMat = new PathFinder.CostMatrix;   // 在noStructrue的基础上加上所有不可行走的建筑
+    let noStructureCostMat = new PathFinder.CostMatrix(); // 不考虑可破坏的建筑，但是要考虑墙上资源点和无敌的3种建筑，可能还有其他不能走的？
+    let structureCostMat = new PathFinder.CostMatrix(); // 在noStructrue的基础上加上所有不可行走的建筑
     let totalStructures = room.find(FIND_STRUCTURES);
-    let 修路也没用的墙点 = [].concat(room.find(FIND_SOURCES), room.find(FIND_MINERALS), room.find(FIND_DEPOSITS));
+    let 修路也没用的墙点 = [].concat(
+        room.find(FIND_SOURCES),
+        room.find(FIND_MINERALS),
+        room.find(FIND_DEPOSITS)
+    );
     let x, y, noviceWall, deployingCore, centralPortal;
     let clearDelay = Infinity;
     for (let object of 修路也没用的墙点) {
-        x = object.pos.x; y = object.pos.y;
+        x = object.pos.x;
+        y = object.pos.y;
         noStructureCostMat.set(x, y, 255);
     }
-    if (room.controller && (room.controller.my || room.controller.safeMode)) {  // 自己的工地不能踩
+    if (room.controller && (room.controller.my || room.controller.safeMode)) {
+        // 自己的工地不能踩
         for (let consSite of room.find(FIND_CONSTRUCTION_SITES)) {
             if (obstacles.has(consSite.structureType)) {
-                x = consSite.pos.x; y = consSite.pos.y;
+                x = consSite.pos.x;
+                y = consSite.pos.y;
                 noStructureCostMat.set(x, y, 255);
                 structureCostMat.set(x, y, 255);
             }
         }
     }
     for (let s of totalStructures) {
-        if (s.structureType == STRUCTURE_INVADER_CORE) {  // 第1种可能无敌的建筑
+        if (s.structureType == STRUCTURE_INVADER_CORE) {
+            // 第1种可能无敌的建筑
             if (s.ticksToDeploy) {
                 deployingCore = true;
                 clearDelay = clearDelay > s.ticksToDeploy ? s.ticksToDeploy : clearDelay;
                 noStructureCostMat.set(s.pos.x, s.pos.y, 255);
             }
             structureCostMat.set(s.pos.x, s.pos.y, 255);
-        } else if (s.structureType == STRUCTURE_PORTAL) {  // 第2种无敌建筑
+        } else if (s.structureType == STRUCTURE_PORTAL) {
+            // 第2种无敌建筑
             if (!isHighWay(room.name)) {
                 centralPortal = true;
                 clearDelay = clearDelay > s.ticksToDecay ? s.ticksToDecay : clearDelay;
             }
-            x = s.pos.x; y = s.pos.y;
+            x = s.pos.x;
+            y = s.pos.y;
             structureCostMat.set(x, y, 255);
             noStructureCostMat.set(x, y, 255);
-        } else if (s.structureType == STRUCTURE_WALL) {    // 第3种可能无敌的建筑
+        } else if (s.structureType == STRUCTURE_WALL) {
+            // 第3种可能无敌的建筑
             if (!s.hits) {
                 noviceWall = true;
                 noStructureCostMat.set(s.pos.x, s.pos.y, 255);
             }
             structureCostMat.set(s.pos.x, s.pos.y, 255);
-        } else if (s.structureType == STRUCTURE_ROAD) {    // 路的移动力损耗是1，此处设置能寻到墙上的路
-            x = s.pos.x; y = s.pos.y;
-            if (noStructureCostMat.get(x, y) == 0) {  // 不是在3种无敌建筑或墙中资源上
+        } else if (s.structureType == STRUCTURE_ROAD) {
+            // 路的移动力损耗是1，此处设置能寻到墙上的路
+            x = s.pos.x;
+            y = s.pos.y;
+            if (noStructureCostMat.get(x, y) == 0) {
+                // 不是在3种无敌建筑或墙中资源上
                 noStructureCostMat.set(x, y, 1);
-                if (structureCostMat.get(x, y) == 0) {     // 不是在不可行走的建筑上
+                if (structureCostMat.get(x, y) == 0) {
+                    // 不是在不可行走的建筑上
                     structureCostMat.set(x, y, 1);
                 }
             }
-        } else if (obstacles.has(s.structureType) || isClosedRampart(s)) {   // HELP：有没有遗漏其他应该设置 noStructureCostMat 的点
+        } else if (obstacles.has(s.structureType) || isClosedRampart(s)) {
+            // HELP：有没有遗漏其他应该设置 noStructureCostMat 的点
             structureCostMat.set(s.pos.x, s.pos.y, 255);
         }
     }
 
     costMatrixCache[room.name] = {
         roomName: room.name,
-        true: noStructureCostMat,   // 对应 ignoreDestructibleStructures = true
-        false: structureCostMat     // 对应 ignoreDestructibleStructures = false
+        true: noStructureCostMat, // 对应 ignoreDestructibleStructures = true
+        false: structureCostMat, // 对应 ignoreDestructibleStructures = false
     };
 
     let avoids = [];
-    if (room.controller && room.controller.owner && !room.controller.my && hostileCostMatrixClearDelay) {  // 他人房间，删除costMat才能更新被拆的建筑位置
+    if (
+        room.controller &&
+        room.controller.owner &&
+        !room.controller.my &&
+        hostileCostMatrixClearDelay
+    ) {
+        // 他人房间，删除costMat才能更新被拆的建筑位置
         if (!(Game.time + hostileCostMatrixClearDelay in costMatrixCacheTimer)) {
             costMatrixCacheTimer[Game.time + hostileCostMatrixClearDelay] = [];
         }
         costMatrixCacheTimer[Game.time + hostileCostMatrixClearDelay].push({
             roomName: room.name,
-            avoids: avoids
-        });   // 记录清理时间
-    } else if (noviceWall || deployingCore || centralPortal) { // 如果遇到可能消失的挡路建筑，这3种情况下clearDelay才可能被赋值为非Infinity
-        if (noviceWall) {    // 如果看见新手墙
+            avoids: avoids,
+        }); // 记录清理时间
+    } else if (noviceWall || deployingCore || centralPortal) {
+        // 如果遇到可能消失的挡路建筑，这3种情况下clearDelay才可能被赋值为非Infinity
+        if (noviceWall) {
+            // 如果看见新手墙
             let neighbors = Game.map.describeExits(room.name);
             for (let direction in neighbors) {
                 let status = Game.map.getRoomStatus(neighbors[direction]);
@@ -484,14 +577,24 @@ function generateCostMatrix(room, pos) {
                     avoidRooms[neighbors[direction]] = 1;
                 } else if (status.status != 'normal' && status.timestamp != null) {
                     let estimateTickToChange = (status.timestamp - new Date().getTime()) / 10000; // 10s per tick
-                    clearDelay = clearDelay > estimateTickToChange ? Math.ceil(estimateTickToChange) : clearDelay;
+                    clearDelay =
+                        clearDelay > estimateTickToChange
+                            ? Math.ceil(estimateTickToChange)
+                            : clearDelay;
                 }
             }
-            if (pos) {  // 如果知道自己的pos
+            if (pos) {
+                // 如果知道自己的pos
                 for (let direction in neighbors) {
                     if (!(neighbors[direction] in avoidRooms)) {
                         let exits = room.find(+direction);
-                        if (PathFinder.search(pos, exits, { maxRooms: 1, roomCallback: () => noStructureCostMat }).incomplete) {    // 此路不通
+                        if (
+                            PathFinder.search(pos, exits, {
+                                maxRooms: 1,
+                                roomCallback: () => noStructureCostMat,
+                            }).incomplete
+                        ) {
+                            // 此路不通
                             avoidRooms[neighbors[direction]] = 1;
                             avoids.push(neighbors[direction]);
                         }
@@ -505,10 +608,9 @@ function generateCostMatrix(room, pos) {
         }
         costMatrixCacheTimer[Game.time + clearDelay].push({
             roomName: room.name,
-            avoids: avoids  // 因新手墙导致的avoidRooms需要更新
-        });   // 记录清理时间
+            avoids: avoids, // 因新手墙导致的avoidRooms需要更新
+        }); // 记录清理时间
     }
-
 }
 
 /**
@@ -516,13 +618,15 @@ function generateCostMatrix(room, pos) {
  * @param {MyPath} path
  */
 function generateDirectionArray(path) {
-    let posArray = path.posArray
+    let posArray = path.posArray;
     let directionArray = new Array(posArray.length);
     let incomplete = false;
     for (let idx = 1; idx in posArray; idx++) {
-        if (posArray[idx - 1].roomName in costMatrixCache) {    // 有costMat，是准确路径，否则需要在有视野时checkRoom()
+        if (posArray[idx - 1].roomName in costMatrixCache) {
+            // 有costMat，是准确路径，否则需要在有视野时checkRoom()
             directionArray[idx] = getDirection(posArray[idx - 1], posArray[idx]);
-        } else if (!incomplete) {   // 记录第一个缺失准确路径的位置
+        } else if (!incomplete) {
+            // 记录第一个缺失准确路径的位置
             incomplete = idx;
         }
     }
@@ -542,14 +646,15 @@ function checkRoom(room, path, startIdx) {
     if (!(room.name in costMatrixCache)) {
         generateCostMatrix(room, path.posArray[startIdx]);
     }
-    let thisRoomName = room.name
+    let thisRoomName = room.name;
     /** @type {CostMatrix} */
     let costMat = costMatrixCache[thisRoomName][path.ignoreStructures];
     let posArray = path.posArray;
     let directionArray = path.directionArray;
     let i;
     for (i = startIdx; i + 1 in posArray && posArray[i].roomName == thisRoomName; i++) {
-        if (costMat.get(posArray[i].x, posArray[i].y) == 255) {   // 路上有东西挡路
+        if (costMat.get(posArray[i].x, posArray[i].y) == 255) {
+            // 路上有东西挡路
             return false;
         }
         directionArray[i + 1] = getDirection(posArray[i], posArray[i + 1]);
@@ -557,7 +662,7 @@ function checkRoom(room, path, startIdx) {
     if (observers.length && i + 1 in posArray) {
         while (i + 1 in posArray) {
             if (!directionArray[i + 1]) {
-                addObTask(path, i + 1);     // 这格没有direction
+                addObTask(path, i + 1); // 这格没有direction
                 break;
             }
             i += 1;
@@ -572,33 +677,46 @@ function checkRoom(room, path, startIdx) {
  * @param {RoomPosition} pos
  * @param {boolean} bypassHostileCreeps
  */
-function trySwap(creep, pos, bypassHostileCreeps, ignoreCreeps) {     // ERR_NOT_FOUND开销0.00063，否则开销0.0066
-    let obstacleCreeps = creep.room.lookForAt(LOOK_CREEPS, pos).concat(creep.room.lookForAt(LOOK_POWER_CREEPS, pos));
+function trySwap(creep, pos, bypassHostileCreeps, ignoreCreeps) {
+    // ERR_NOT_FOUND开销0.00063，否则开销0.0066
+    let obstacleCreeps = creep.room
+        .lookForAt(LOOK_CREEPS, pos)
+        .concat(creep.room.lookForAt(LOOK_POWER_CREEPS, pos));
     if (obstacleCreeps.length) {
         if (!ignoreCreeps) {
             return ERR_INVALID_TARGET;
         }
         for (let c of obstacleCreeps) {
             if (c.my) {
-                if (c.memory.dontPullMe) {    // 第1种不可穿情况：挡路的creep设置了不对穿
+                if (c.memory.dontPullMe) {
+                    // 第1种不可穿情况：挡路的creep设置了不对穿
                     return ERR_INVALID_TARGET;
                 }
-                if (creepMoveCache[c.name] != Game.time && originMove.call(c, getDirection(pos, creep.pos)) == ERR_NO_BODYPART && creep.pull) {
+                if (
+                    creepMoveCache[c.name] != Game.time &&
+                    originMove.call(c, getDirection(pos, creep.pos)) == ERR_NO_BODYPART &&
+                    creep.pull
+                ) {
                     creep.pull(c);
                     originMove.call(c, creep);
                 }
-            } else if (bypassHostileCreeps && (!c.room.controller || !c.room.controller.my || !c.room.controller.safeMode)) {  // 第二种不可穿情况：希望绕过敌对creep
+            } else if (
+                bypassHostileCreeps &&
+                (!c.room.controller || !c.room.controller.my || !c.room.controller.safeMode)
+            ) {
+                // 第二种不可穿情况：希望绕过敌对creep
                 return ERR_INVALID_TARGET;
             }
         }
         testTrySwap++;
-        return OK;    // 或者全部操作成功
+        return OK; // 或者全部操作成功
     }
-    return ERR_NOT_FOUND // 没有creep
+    return ERR_NOT_FOUND; // 没有creep
 }
 
 let temporalAvoidFrom, temporalAvoidTo;
-function routeCallback(nextRoomName, fromRoomName) {    // 避开avoidRooms设置了的
+function routeCallback(nextRoomName, fromRoomName) {
+    // 避开avoidRooms设置了的
     if (nextRoomName in avoidRooms) {
         //console.log('Infinity at ' + nextRoomName);
         return Infinity;
@@ -618,8 +736,11 @@ function bypassRouteCallback(nextRoomName, fromRoomName) {
  * @param {string} toRoomName
  * @param {boolean} bypass
  */
-function findRoute(fromRoomName, toRoomName, bypass) {  // TODO 以后跨shard寻路也放在这个函数里
-    return Game.map.findRoute(fromRoomName, toRoomName, { routeCallback: bypass ? bypassRouteCallback : routeCallback });
+function findRoute(fromRoomName, toRoomName, bypass) {
+    // TODO 以后跨shard寻路也放在这个函数里
+    return Game.map.findRoute(fromRoomName, toRoomName, {
+        routeCallback: bypass ? bypassRouteCallback : routeCallback,
+    });
 }
 
 /**
@@ -627,17 +748,21 @@ function findRoute(fromRoomName, toRoomName, bypass) {  // TODO 以后跨shard�
  * @param {Room} room
  * @param {CostMatrix} costMat
  */
-function checkTemporalAvoidExit(pos, room, costMat) {    // 用于记录因creep堵路导致的房间出口临时封闭
+function checkTemporalAvoidExit(pos, room, costMat) {
+    // 用于记录因creep堵路导致的房间出口临时封闭
     let neighbors = Game.map.describeExits(room.name);
-    temporalAvoidFrom = temporalAvoidTo = '';   // 清空旧数据
+    temporalAvoidFrom = temporalAvoidTo = ''; // 清空旧数据
     for (let direction in neighbors) {
         if (!(neighbors[direction] in avoidRooms)) {
             for (let direction in neighbors) {
                 let exits = room.find(+direction);
-                if (PathFinder.search(pos, exits, {
-                    maxRooms: 1,
-                    roomCallback: () => costMat
-                }).incomplete) {    // 此路不通
+                if (
+                    PathFinder.search(pos, exits, {
+                        maxRooms: 1,
+                        roomCallback: () => costMat,
+                    }).incomplete
+                ) {
+                    // 此路不通
                     temporalAvoidFrom = room.name;
                     temporalAvoidTo = neighbors[direction];
                 }
@@ -660,14 +785,21 @@ function bypassRoomCallback(roomName) {
     if (roomName in avoidRooms) {
         return false;
     }
-    if (roomName == bypassRoomName) {     // 在findTemporalRoute函数里刚刚建立了costMatrix
+    if (roomName == bypassRoomName) {
+        // 在findTemporalRoute函数里刚刚建立了costMatrix
         costMat = bypassCostMat;
     } else {
-        costMat = roomName in costMatrixCache ? costMatrixCache[roomName][findPathIgnoreCondition] : emptyCostMatrix;
+        costMat =
+            roomName in costMatrixCache
+                ? costMatrixCache[roomName][findPathIgnoreCondition]
+                : emptyCostMatrix;
     }
 
     if (userCostCallback) {
-        let resultCostMat = userCostCallback(roomName, roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix);
+        let resultCostMat = userCostCallback(
+            roomName,
+            roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix()
+        );
         if (resultCostMat instanceof PathFinder.CostMatrix) {
             costMat = resultCostMat;
         }
@@ -676,14 +808,21 @@ function bypassRoomCallback(roomName) {
 }
 function bypassRoomCallbackWithRoute(roomName) {
     if (roomName in route) {
-        if (roomName == bypassRoomName) {     // 在findTemporalRoute函数里刚刚建立了costMatrix
+        if (roomName == bypassRoomName) {
+            // 在findTemporalRoute函数里刚刚建立了costMatrix
             costMat = bypassCostMat;
         } else {
-            costMat = roomName in costMatrixCache ? costMatrixCache[roomName][findPathIgnoreCondition] : emptyCostMatrix;
+            costMat =
+                roomName in costMatrixCache
+                    ? costMatrixCache[roomName][findPathIgnoreCondition]
+                    : emptyCostMatrix;
         }
 
         if (userCostCallback) {
-            let resultCostMat = userCostCallback(roomName, roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix);
+            let resultCostMat = userCostCallback(
+                roomName,
+                roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix()
+            );
             if (resultCostMat instanceof PathFinder.CostMatrix) {
                 costMat = resultCostMat;
             }
@@ -701,18 +840,25 @@ function bypassRoomCallbackWithRoute(roomName) {
  */
 function findTemporalPath(creep, toPos, ops) {
     let nearbyCreeps;
-    if (ops.ignoreCreeps) { // 有ignoreCreep，只绕过无法对穿的creep
-        nearbyCreeps = creep.pos.findInRange(FIND_CREEPS, ops.bypassRange, {
-            filter: ops.bypassHostileCreeps ? bypassHostile : bypassMy
-        }).concat(creep.pos.findInRange(FIND_POWER_CREEPS, ops.bypassRange, {
-            filter: ops.bypassHostileCreeps ? bypassHostile : bypassMy
-        }));
-    } else {    // 绕过所有creep
-        nearbyCreeps = creep.pos.findInRange(FIND_CREEPS, ops.bypassRange).concat(
-            creep.pos.findInRange(FIND_POWER_CREEPS, ops.bypassRange)
-        )
+    if (ops.ignoreCreeps) {
+        // 有ignoreCreep，只绕过无法对穿的creep
+        nearbyCreeps = creep.pos
+            .findInRange(FIND_CREEPS, ops.bypassRange, {
+                filter: ops.bypassHostileCreeps ? bypassHostile : bypassMy,
+            })
+            .concat(
+                creep.pos.findInRange(FIND_POWER_CREEPS, ops.bypassRange, {
+                    filter: ops.bypassHostileCreeps ? bypassHostile : bypassMy,
+                })
+            );
+    } else {
+        // 绕过所有creep
+        nearbyCreeps = creep.pos
+            .findInRange(FIND_CREEPS, ops.bypassRange)
+            .concat(creep.pos.findInRange(FIND_POWER_CREEPS, ops.bypassRange));
     }
-    if (!(creep.room.name in costMatrixCache)) { // 这个房间的costMatrix已经被删了
+    if (!(creep.room.name in costMatrixCache)) {
+        // 这个房间的costMatrix已经被删了
         generateCostMatrix(creep.room, creep.pos);
     }
     bypassIgnoreCondition = !!ops.ignoreDestructibleStructures;
@@ -728,9 +874,10 @@ function findTemporalPath(creep, toPos, ops) {
     let PathFinderOpts = {
         maxRooms: ops.maxRooms,
         maxCost: ops.maxCost,
-        heuristicWeight: ops.heuristicWeight || 1.2
-    }
-    if (ops.ignoreSwamps) {   // HELP 这里有没有什么不增加计算量的简短写法
+        heuristicWeight: ops.heuristicWeight || 1.2,
+    };
+    if (ops.ignoreSwamps) {
+        // HELP 这里有没有什么不增加计算量的简短写法
         PathFinderOpts.plainCost = ops.plainCost;
         PathFinderOpts.swampCost = ops.swampCost || 1;
     } else if (ops.ignoreRoads) {
@@ -741,29 +888,32 @@ function findTemporalPath(creep, toPos, ops) {
         PathFinderOpts.swampCost = ops.swampCost || 10;
     }
 
-    if (creep.pos.roomName != toPos.roomName) { // findRoute会导致非最优path的问题
-        checkTemporalAvoidExit(creep.pos, creep.room, bypassCostMat);   // 因为creep挡路导致的无法通行的出口
+    if (creep.pos.roomName != toPos.roomName) {
+        // findRoute会导致非最优path的问题
+        checkTemporalAvoidExit(creep.pos, creep.room, bypassCostMat); // 因为creep挡路导致的无法通行的出口
         route = findRoute(creep.pos.roomName, toPos.roomName, true);
         if (route == ERR_NO_PATH) {
             return false;
         }
         PathFinderOpts.maxRooms = PathFinderOpts.maxRooms || route.length + 1;
-        PathFinderOpts.maxOps = ops.maxOps || 2000 + route.length ** 2 * 100;  // 跨10room则有2000+10*10*100=12000
-        route = route.reduce(routeReduce, { [creep.pos.roomName]: 1 });     // 因为 key in Object 比 Array.includes(value) 快，但不知道值不值得reduce
+        PathFinderOpts.maxOps = ops.maxOps || 2000 + route.length ** 2 * 100; // 跨10room则有2000+10*10*100=12000
+        route = route.reduce(routeReduce, { [creep.pos.roomName]: 1 }); // 因为 key in Object 比 Array.includes(value) 快，但不知道值不值得reduce
         PathFinderOpts.roomCallback = bypassRoomCallbackWithRoute;
     } else {
         PathFinderOpts.maxOps = ops.maxOps;
         PathFinderOpts.roomCallback = bypassRoomCallback;
     }
 
-    let result = PathFinder.search(creep.pos, { pos: toPos, range: ops.range }, PathFinderOpts).path;
+    let result = PathFinder.search(creep.pos, { pos: toPos, range: ops.range }, PathFinderOpts)
+        .path;
     if (result.length) {
         let creepCache = creepPathCache[creep.name];
-        creepCache.path = {     // 弄个新的自己走，不修改公用的缓存路，只会用于正向走所以也不需要start属性，idx属性会在startRoute中设置
+        creepCache.path = {
+            // 弄个新的自己走，不修改公用的缓存路，只会用于正向走所以也不需要start属性，idx属性会在startRoute中设置
             end: formalize(result[result.length - 1]),
             posArray: result,
-            ignoreStructures: !!ops.ignoreDestructibleStructures
-        }
+            ignoreStructures: !!ops.ignoreDestructibleStructures,
+        };
         generateDirectionArray(creepCache.path);
         return true;
     }
@@ -781,9 +931,15 @@ function roomCallback(roomName) {
         return false;
     }
 
-    costMat = roomName in costMatrixCache ? costMatrixCache[roomName][findPathIgnoreCondition] : emptyCostMatrix;
+    costMat =
+        roomName in costMatrixCache
+            ? costMatrixCache[roomName][findPathIgnoreCondition]
+            : emptyCostMatrix;
     if (userCostCallback) {
-        let resultCostMat = userCostCallback(roomName, roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix);
+        let resultCostMat = userCostCallback(
+            roomName,
+            roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix()
+        );
         if (resultCostMat instanceof PathFinder.CostMatrix) {
             costMat = resultCostMat;
         }
@@ -792,10 +948,16 @@ function roomCallback(roomName) {
 }
 function roomCallbackWithRoute(roomName) {
     if (roomName in route) {
-        costMat = roomName in costMatrixCache ? costMatrixCache[roomName][findPathIgnoreCondition] : emptyCostMatrix;
+        costMat =
+            roomName in costMatrixCache
+                ? costMatrixCache[roomName][findPathIgnoreCondition]
+                : emptyCostMatrix;
         //console.log('in route ' + roomName);
         if (userCostCallback) {
-            let resultCostMat = userCostCallback(roomName, roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix);
+            let resultCostMat = userCostCallback(
+                roomName,
+                roomName in costMatrixCache ? costMat.clone() : new PathFinder.CostMatrix()
+            );
             if (resultCostMat instanceof PathFinder.CostMatrix) {
                 costMat = resultCostMat;
             }
@@ -803,7 +965,7 @@ function roomCallbackWithRoute(roomName) {
         return costMat;
     }
     //console.log('out route ' + roomName);
-    return false;   // 不在route上的不搜索
+    return false; // 不在route上的不搜索
 }
 /**
  *  影响参数：ignoreRoads, ignoreDestructibleStructures, ignoreSwamps, costCallback, range
@@ -813,8 +975,8 @@ function roomCallbackWithRoute(roomName) {
  * @param {MoveToOpts} ops
  */
 function findPath(fromPos, toPos, ops) {
-
-    if (!(fromPos.roomName in costMatrixCache) && fromPos.roomName in Game.rooms) {   // 有视野没costMatrix
+    if (!(fromPos.roomName in costMatrixCache) && fromPos.roomName in Game.rooms) {
+        // 有视野没costMatrix
         generateCostMatrix(Game.rooms[fromPos.roomName], fromPos);
     }
 
@@ -825,9 +987,10 @@ function findPath(fromPos, toPos, ops) {
     let PathFinderOpts = {
         maxRooms: ops.maxRooms,
         maxCost: ops.maxCost,
-        heuristicWeight: ops.heuristicWeight || 1.2
-    }
-    if (ops.ignoreSwamps) {   // HELP 这里有没有什么不增加计算量的简短写法
+        heuristicWeight: ops.heuristicWeight || 1.2,
+    };
+    if (ops.ignoreSwamps) {
+        // HELP 这里有没有什么不增加计算量的简短写法
         PathFinderOpts.plainCost = ops.plainCost;
         PathFinderOpts.swampCost = ops.swampCost || 1;
     } else if (ops.ignoreRoads) {
@@ -838,14 +1001,15 @@ function findPath(fromPos, toPos, ops) {
         PathFinderOpts.swampCost = ops.swampCost || 10;
     }
 
-    if (fromPos.roomName != toPos.roomName) {   // findRoute会导致非最优path的问题
+    if (fromPos.roomName != toPos.roomName) {
+        // findRoute会导致非最优path的问题
         route = findRoute(fromPos.roomName, toPos.roomName);
         if (route == ERR_NO_PATH) {
             return { path: [] };
         }
-        PathFinderOpts.maxOps = ops.maxOps || 2000 + route.length ** 2 * 100;  // 跨10room则有2000+10*10*50=7000
+        PathFinderOpts.maxOps = ops.maxOps || 2000 + route.length ** 2 * 100; // 跨10room则有2000+10*10*50=7000
         PathFinderOpts.maxRooms = PathFinderOpts.maxRooms || route.length + 1;
-        route = route.reduce(routeReduce, { [fromPos.roomName]: 1 });   // 因为 key in Object 比 Array.includes(value) 快，但不知道值不值得reduce
+        route = route.reduce(routeReduce, { [fromPos.roomName]: 1 }); // 因为 key in Object 比 Array.includes(value) 快，但不知道值不值得reduce
         PathFinderOpts.roomCallback = roomCallbackWithRoute;
     } else {
         PathFinderOpts.maxOps = ops.maxOps;
@@ -864,10 +1028,10 @@ function addPathIntoCache(newPath) {
     combinedY = newPath.end.x + newPath.end.y;
     if (!(combinedX in globalPathCache)) {
         globalPathCache[combinedX] = {
-            [combinedY]: []  // 数组里放不同ops的及其他start、end与此对称的
+            [combinedY]: [], // 数组里放不同ops的及其他start、end与此对称的
         };
     } else if (!(combinedY in globalPathCache[combinedX])) {
-        globalPathCache[combinedX][combinedY] = []      // 数组里放不同ops的及其他start、end与此对称的
+        globalPathCache[combinedX][combinedY] = []; // 数组里放不同ops的及其他start、end与此对称的
     }
     globalPathCache[combinedX][combinedY].push(newPath);
 }
@@ -879,7 +1043,8 @@ function invalidate() {
  * @param {MyPath} path
  */
 function deletePath(path) {
-    if (path.start) {     // 有start属性的不是临时路
+    if (path.start) {
+        // 有start属性的不是临时路
         let pathArray = globalPathCache[path.start.x + path.start.y][path.end.x + path.end.y];
         pathArray.splice(pathArray.indexOf(path), 1);
         path.posArray = path.posArray.map(invalidate);
@@ -895,7 +1060,8 @@ let minX, maxX, minY, maxY;
  * @param {CreepPaths} creepCache
  * @param {MoveToOpts} ops
  */
-function findShortPathInCache(formalFromPos, formalToPos, fromPos, creepCache, ops) {     // ops.range设置越大找的越慢
+function findShortPathInCache(formalFromPos, formalToPos, fromPos, creepCache, ops) {
+    // ops.range设置越大找的越慢
     startCacheSearch = Game.cpu.getUsed();
     minX = formalFromPos.x + formalFromPos.y - 2;
     maxX = formalFromPos.x + formalFromPos.y + 2;
@@ -905,9 +1071,16 @@ function findShortPathInCache(formalFromPos, formalToPos, fromPos, creepCache, o
         if (combinedX in globalPathCache) {
             for (combinedY = minY; combinedY <= maxY; combinedY++) {
                 if (combinedY in globalPathCache[combinedX]) {
-                    for (let path of globalPathCache[combinedX][combinedY]) {     // 这个数组应该会很短
+                    for (let path of globalPathCache[combinedX][combinedY]) {
+                        // 这个数组应该会很短
                         pathCounter++;
-                        if (isNear(path.start, formalFromPos) && isNear(fromPos, path.posArray[1]) && inRange(path.end, formalToPos, ops.range) && isSameOps(path, ops)) {     // 找到路了
+                        if (
+                            isNear(path.start, formalFromPos) &&
+                            isNear(fromPos, path.posArray[1]) &&
+                            inRange(path.end, formalToPos, ops.range) &&
+                            isSameOps(path, ops)
+                        ) {
+                            // 找到路了
                             creepCache.path = path;
                             return true;
                         }
@@ -926,7 +1099,8 @@ function findShortPathInCache(formalFromPos, formalToPos, fromPos, creepCache, o
  * @param {CreepPaths} creepCache
  * @param {MoveToOpts} ops
  */
-function findLongPathInCache(formalFromPos, formalToPos, creepCache, ops) {     // ops.range设置越大找的越慢
+function findLongPathInCache(formalFromPos, formalToPos, creepCache, ops) {
+    // ops.range设置越大找的越慢
     startCacheSearch = Game.cpu.getUsed();
     minX = formalFromPos.x + formalFromPos.y - 2;
     maxX = formalFromPos.x + formalFromPos.y + 2;
@@ -936,9 +1110,15 @@ function findLongPathInCache(formalFromPos, formalToPos, creepCache, ops) {     
         if (combinedX in globalPathCache) {
             for (combinedY = minY; combinedY <= maxY; combinedY++) {
                 if (combinedY in globalPathCache[combinedX]) {
-                    for (let path of globalPathCache[combinedX][combinedY]) {     // 这个数组应该会很短
+                    for (let path of globalPathCache[combinedX][combinedY]) {
+                        // 这个数组应该会很短
                         pathCounter++;
-                        if (isNear(path.start, formalFromPos) && inRange(path.end, formalToPos, ops.range) && isSameOps(path, ops)) {     // 找到路了
+                        if (
+                            isNear(path.start, formalFromPos) &&
+                            inRange(path.end, formalToPos, ops.range) &&
+                            isSameOps(path, ops)
+                        ) {
+                            // 找到路了
                             creepCache.path = path;
                             return true;
                         }
@@ -960,7 +1140,13 @@ function setPathTimer(creepCache) {
         let posArray = creepCache.path.posArray;
         startRoomName = posArray[0].roomName;
         endRoomName = posArray[posArray.length - 1].roomName;
-        if (startRoomName != endRoomName || (startRoomName in Game.rooms && Game.rooms[startRoomName].controller && !Game.rooms[startRoomName].controller.my)) {    // 跨房路或者敌方房间路
+        if (
+            startRoomName != endRoomName ||
+            (startRoomName in Game.rooms &&
+                Game.rooms[startRoomName].controller &&
+                !Game.rooms[startRoomName].controller.my)
+        ) {
+            // 跨房路或者敌方房间路
             if (!(Game.time + pathClearDelay in pathCacheTimer)) {
                 pathCacheTimer[Game.time + pathClearDelay] = [];
             }
@@ -1013,7 +1199,8 @@ function moveOneStep(creep, visualStyle, toPos) {
     creepMoveCache[creep.name] = Game.time;
     testNormal++;
     let t = Game.cpu.getUsed() - startTime;
-    if (t > 0.2) {  // 对穿导致的另一个creep的0.2不计在内
+    if (t > 0.2) {
+        // 对穿导致的另一个creep的0.2不计在内
         normalLogicalCost += t - 0.2;
     } else {
         normalLogicalCost += t;
@@ -1028,7 +1215,8 @@ function moveOneStep(creep, visualStyle, toPos) {
  * @param {PolyStyle} visualStyle
  * @param {RoomPosition} toPos
  */
-function moveOneStepReverse(creep, visualStyle, toPos) {    // deprecated
+function moveOneStepReverse(creep, visualStyle, toPos) {
+    // deprecated
     let creepCache = creepPathCache[creep.name];
     if (visualStyle) {
         showVisual(creep, toPos, creepCache.path.posArray, creepCache.idx, -1, visualStyle);
@@ -1038,7 +1226,7 @@ function moveOneStepReverse(creep, visualStyle, toPos) {    // deprecated
     }
     creepMoveCache[creep.name] = Game.time;
     //creep.room.visual.circle(creepCache.path.posArray[creepCache.idx]);
-    return originMove.call(creep, (creepCache.path.directionArray[creepCache.idx--] + 3) % 8 + 1);
+    return originMove.call(creep, ((creepCache.path.directionArray[creepCache.idx--] + 3) % 8) + 1);
 }
 
 /**
@@ -1081,28 +1269,28 @@ function startRoute(creep, pathCache, visualStyle, toPos, ignoreCreeps) {
  * @param {DirectionConstant} target
  */
 function direction2Pos(pos, target) {
-    if (typeof target != "number") {
+    if (typeof target != 'number') {
         // target 不是方向常数
         return undefined;
     }
 
-    const direction = +target;  // 如果是string则由此运算转换成number
+    const direction = +target; // 如果是string则由此运算转换成number
     let tarpos = {
         x: pos.x,
         y: pos.y,
-    }
+    };
     if (direction !== 7 && direction !== 3) {
         if (direction > 7 || direction < 3) {
-            --tarpos.y
+            --tarpos.y;
         } else {
-            ++tarpos.y
+            ++tarpos.y;
         }
     }
     if (direction !== 1 && direction !== 5) {
         if (direction < 5) {
-            ++tarpos.x
+            ++tarpos.x;
         } else {
-            --tarpos.x
+            --tarpos.x;
         }
     }
     if (tarpos.x < 0 || tarpos.y > 49 || tarpos.x > 49 || tarpos.y < 0) {
@@ -1117,7 +1305,7 @@ function direction2Pos(pos, target) {
  */
 function wrapFn(fn, name) {
     return function () {
-        startTime = Game.cpu.getUsed();     // 0.0015cpu
+        startTime = Game.cpu.getUsed(); // 0.0015cpu
         if (obTick < Game.time) {
             obTick = Game.time;
             checkObResult();
@@ -1130,11 +1318,12 @@ function wrapFn(fn, name) {
             analyzeCPU[name].calls++;
         }
         return code;
-    }
+    };
 }
 
 function clearUnused() {
-    if (Game.time % pathClearDelay == 0) { // 随机清一次已死亡creep
+    if (Game.time % pathClearDelay == 0) {
+        // 随机清一次已死亡creep
         for (let name in creepPathCache) {
             if (!(name in Game.creeps)) {
                 delete creepPathCache[name];
@@ -1170,7 +1359,13 @@ function clearUnused() {
  *  功能实现
  */
 
-const defaultVisualizePathStyle = { fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: .15, opacity: .1 };
+const defaultVisualizePathStyle = {
+    fill: 'transparent',
+    stroke: '#fff',
+    lineStyle: 'dashed',
+    strokeWidth: 0.15,
+    opacity: 0.1,
+};
 /**@type {[MoveToOpts, RoomPosition, CreepPaths['1'], MyPath, number, RoomPosition[], boolean]}
  */
 let [ops, toPos, creepCache, path, idx, posArray, found] = [];
@@ -1197,20 +1392,24 @@ function betterMoveTo(firstArg, secondArg, opts) {
         toPos = { x: firstArg, y: secondArg, roomName: this.room.name };
         ops = opts || {};
     }
-    ops.bypassHostileCreeps = ops.bypassHostileCreeps === undefined || ops.bypassHostileCreeps;    // 设置默认值为true
+    ops.bypassHostileCreeps = ops.bypassHostileCreeps === undefined || ops.bypassHostileCreeps; // 设置默认值为true
     ops.ignoreCreeps = ops.ignoreCreeps === undefined || ops.ignoreCreeps;
 
-    if (typeof toPos.x != "number" || typeof toPos.y != "number") {   // 房名无效或目的坐标不是数字，不合法
+    if (typeof toPos.x != 'number' || typeof toPos.y != 'number') {
+        // 房名无效或目的坐标不是数字，不合法
         //this.say('no tar');
         return ERR_INVALID_TARGET;
-    } else if (inRange(this.pos, toPos, ops.range || 1)) {   // 已到达
-        if (isEqual(toPos, this.pos) || ops.range) {  // 已到达
+    } else if (inRange(this.pos, toPos, ops.range || 1)) {
+        // 已到达
+        if (isEqual(toPos, this.pos) || ops.range) {
+            // 已到达
             return OK;
         } // else 走一步
-        if (this.pos.roomName == toPos.roomName && ops.ignoreCreeps) {    // 同房间考虑一下对穿
+        if (this.pos.roomName == toPos.roomName && ops.ignoreCreeps) {
+            // 同房间考虑一下对穿
             trySwap(this, toPos, false, true);
         }
-        creepMoveCache[this.name] = Game.time;      // 用于防止自己移动后被误对穿
+        creepMoveCache[this.name] = Game.time; // 用于防止自己移动后被误对穿
         testNormal++;
         let t = Game.cpu.getUsed() - startTime;
         normalLogicalCost += t > 0.2 ? t - 0.2 : t;
@@ -1223,21 +1422,37 @@ function betterMoveTo(firstArg, secondArg, opts) {
     }
 
     if (this.fatigue) {
-        if (!ops.visualizePathStyle) {    // 不用画路又走不动，直接return
+        if (!ops.visualizePathStyle) {
+            // 不用画路又走不动，直接return
             return ERR_TIRED;
         } // else 要画路，画完再return
     }
 
     // HELP：感兴趣的帮我检查这里的核心逻辑orz
     creepCache = creepPathCache[this.name];
-    if (creepCache) {  // 有缓存
+    if (creepCache) {
+        // 有缓存
         path = creepCache.path;
         idx = creepCache.idx;
-        if (path && idx in path.posArray && path.ignoreStructures == !!ops.ignoreDestructibleStructures) {  // 缓存路条件相同
+        if (
+            path &&
+            idx in path.posArray &&
+            path.ignoreStructures == !!ops.ignoreDestructibleStructures
+        ) {
+            // 缓存路条件相同
             posArray = path.posArray;
-            if (isEqual(toPos, creepCache.dst) || inRange(posArray[posArray.length - 1], toPos, ops.range)) {   // 正向走，目的地没变
-                if (isEqual(this.pos, posArray[idx])) {    // 正常
-                    if ('storage' in this.room && inRange(this.room.storage.pos, this.pos, coreLayoutRange) && ops.ignoreCreeps) {
+            if (
+                isEqual(toPos, creepCache.dst) ||
+                inRange(posArray[posArray.length - 1], toPos, ops.range)
+            ) {
+                // 正向走，目的地没变
+                if (isEqual(this.pos, posArray[idx])) {
+                    // 正常
+                    if (
+                        'storage' in this.room &&
+                        inRange(this.room.storage.pos, this.pos, coreLayoutRange) &&
+                        ops.ignoreCreeps
+                    ) {
                         testNearStorageCheck++;
                         if (trySwap(this, posArray[idx + 1], false, true) == OK) {
                             testNearStorageSwap++;
@@ -1245,35 +1460,61 @@ function betterMoveTo(firstArg, secondArg, opts) {
                     }
                     //this.say('正常');
                     return moveOneStep(this, ops.visualizePathStyle, toPos);
-                } else if (idx + 1 in posArray && idx + 2 in posArray && isEqual(this.pos, posArray[idx + 1])) {  // 跨房了
+                } else if (
+                    idx + 1 in posArray &&
+                    idx + 2 in posArray &&
+                    isEqual(this.pos, posArray[idx + 1])
+                ) {
+                    // 跨房了
                     creepCache.idx++;
-                    if (!path.directionArray[idx + 2]) {  // 第一次见到该房则检查房间
-                        if (checkRoom(this.room, path, creepCache.idx)) {   // 传creep所在位置的idx
+                    if (!path.directionArray[idx + 2]) {
+                        // 第一次见到该房则检查房间
+                        if (checkRoom(this.room, path, creepCache.idx)) {
+                            // 传creep所在位置的idx
                             //this.say('新房 可走');
-                            return moveOneStep(this, ops.visualizePathStyle, toPos);  // 路径正确，继续走
-                        }   // else 检查中发现房间里有建筑挡路，重新寻路
+                            return moveOneStep(this, ops.visualizePathStyle, toPos); // 路径正确，继续走
+                        } // else 检查中发现房间里有建筑挡路，重新寻路
                         deletePath(path);
                     } else {
                         //this.say('这个房间见过了');
-                        return moveOneStep(this, ops.visualizePathStyle, toPos);  // 路径正确，继续走
+                        return moveOneStep(this, ops.visualizePathStyle, toPos); // 路径正确，继续走
                     }
-                } else if (isNear(this.pos, posArray[idx])) {  // 堵路了
-                    let code = trySwap(this, posArray[idx], ops.bypassHostileCreeps, ops.ignoreCreeps);  // 检查挡路creep
+                } else if (isNear(this.pos, posArray[idx])) {
+                    // 堵路了
+                    let code = trySwap(
+                        this,
+                        posArray[idx],
+                        ops.bypassHostileCreeps,
+                        ops.ignoreCreeps
+                    ); // 检查挡路creep
                     if (code == OK) {
-                        let posString = posArray[idx].roomName + '-' + posArray[idx].x + '-' + posArray[idx].y;
+                        let posString =
+                            posArray[idx].roomName + '-' + posArray[idx].x + '-' + posArray[idx].y;
                         if (creepCache.jamPos[0] == posString) {
                             creepCache.jamPos[1]++;
-                            if (creepCache.jamPos[1] > 3) { // 异常堵路，一律绕行
+                            if (creepCache.jamPos[1] > 3) {
+                                // 异常堵路，一律绕行
                                 testBypass++;
                                 ops.bypassRange = ops.bypassRange || 5; // 默认值
-                                ops.ignoreCreeps = false;   // 强制绕路
-                                if (typeof ops.bypassRange != "number" || typeof ops.range != 'number') {
+                                ops.ignoreCreeps = false; // 强制绕路
+                                if (
+                                    typeof ops.bypassRange != 'number' ||
+                                    typeof ops.range != 'number'
+                                ) {
                                     return ERR_INVALID_ARGS;
                                 }
-                                if (findTemporalPath(this, toPos, ops)) { // 有路，creepCache的内容会被这个函数更新
+                                if (findTemporalPath(this, toPos, ops)) {
+                                    // 有路，creepCache的内容会被这个函数更新
                                     this.say('强制绕路');
-                                    return startRoute(this, creepCache, ops.visualizePathStyle, toPos, ops.ignoreCreeps);
-                                } else {  // 没路
+                                    return startRoute(
+                                        this,
+                                        creepCache,
+                                        ops.visualizePathStyle,
+                                        toPos,
+                                        ops.ignoreCreeps
+                                    );
+                                } else {
+                                    // 没路
                                     //this.say('没路啦');
                                     return ERR_NO_PATH;
                                 }
@@ -1282,20 +1523,37 @@ function betterMoveTo(firstArg, secondArg, opts) {
                             creepCache.jamPos = [posString, 1];
                         }
                         // 让这个逻辑掉下去，正常对穿
-                    } else if (code == ERR_INVALID_TARGET) {   // 是被设置了不可对穿的creep或者敌对creep挡路，临时绕路
+                    } else if (code == ERR_INVALID_TARGET) {
+                        // 是被设置了不可对穿的creep或者敌对creep挡路，临时绕路
                         testBypass++;
                         ops.bypassRange = ops.bypassRange || 5; // 默认值
-                        if (typeof ops.bypassRange != "number" || typeof ops.range != 'number') {
+                        if (typeof ops.bypassRange != 'number' || typeof ops.range != 'number') {
                             return ERR_INVALID_ARGS;
                         }
-                        if (findTemporalPath(this, toPos, ops)) { // 有路，creepCache的内容会被这个函数更新
+                        if (findTemporalPath(this, toPos, ops)) {
+                            // 有路，creepCache的内容会被这个函数更新
                             //this.say('开始绕路');
-                            return startRoute(this, creepCache, ops.visualizePathStyle, toPos, ops.ignoreCreeps);
-                        } else {  // 没路
+                            return startRoute(
+                                this,
+                                creepCache,
+                                ops.visualizePathStyle,
+                                toPos,
+                                ops.ignoreCreeps
+                            );
+                        } else {
+                            // 没路
                             //this.say('没路啦');
                             return ERR_NO_PATH;
                         }
-                    } else if (code == ERR_NOT_FOUND && isObstacleStructure(this.room, posArray[idx], ops.ignoreDestructibleStructures)) {   // 发现出现新建筑物挡路，删除costMatrix和path缓存，重新寻路
+                    } else if (
+                        code == ERR_NOT_FOUND &&
+                        isObstacleStructure(
+                            this.room,
+                            posArray[idx],
+                            ops.ignoreDestructibleStructures
+                        )
+                    ) {
+                        // 发现出现新建筑物挡路，删除costMatrix和path缓存，重新寻路
                         delete costMatrixCache[this.pos.roomName];
                         deletePath(path);
                     } // else 上tick移动失败但也不是建筑物和creep/pc挡路。有2个情况：1.下一格路本来是穿墙路并碰巧消失了；2.下一格是房间出口，有另一个creep抢路了然后它被传送到隔壁了。不处理第1个情况，按第2个情况对待。
@@ -1304,28 +1562,31 @@ function betterMoveTo(firstArg, secondArg, opts) {
                         showVisual(this, toPos, posArray, idx, 1, ops.visualizePathStyle);
                     }
                     creepMoveCache[this.name] = Game.time;
-                    return originMove.call(this, getDirection(this.pos, posArray[idx]));  // 有可能是第一步就没走上路or通过略过moveTo的move操作偏离路线，直接call可兼容
-                } else if (idx - 1 >= 0 && isNear(this.pos, posArray[idx - 1])) {  // 因为堵路而被自动传送反向跨房了
+                    return originMove.call(this, getDirection(this.pos, posArray[idx])); // 有可能是第一步就没走上路or通过略过moveTo的move操作偏离路线，直接call可兼容
+                } else if (idx - 1 >= 0 && isNear(this.pos, posArray[idx - 1])) {
+                    // 因为堵路而被自动传送反向跨房了
                     //this.say('偏离一格');
-                    if (this.pos.roomName == posArray[idx - 1].roomName && ops.ignoreCreeps) {    // 不是跨房而是偏离，检查对穿
+                    if (this.pos.roomName == posArray[idx - 1].roomName && ops.ignoreCreeps) {
+                        // 不是跨房而是偏离，检查对穿
                         trySwap(this, posArray[idx - 1], false, true);
                     }
                     if (ops.visualizePathStyle) {
                         showVisual(this, toPos, posArray, idx, 1, ops.visualizePathStyle);
                     }
                     creepMoveCache[this.name] = Game.time;
-                    return originMove.call(this, getDirection(this.pos, posArray[idx - 1]));    // 同理兼容略过moveTo的move
+                    return originMove.call(this, getDirection(this.pos, posArray[idx - 1])); // 同理兼容略过moveTo的move
                 } // else 彻底偏离，重新寻路
             } // else 目的地变了
         } // else 缓存中没路或者条件变了
     } // else 需要重新寻路，先找缓存路，找不到就寻路
 
-    if (!creepCache) {    // 初始化cache
+    if (!creepCache) {
+        // 初始化cache
         creepCache = {
             dst: { x: NaN, y: NaN },
             path: undefined,
             idx: 0,
-            jamPos: []
+            jamPos: [],
         };
         creepPathCache[this.name] = creepCache;
     } else {
@@ -1333,23 +1594,29 @@ function betterMoveTo(firstArg, secondArg, opts) {
     }
 
     if (typeof ops.range != 'number') {
-        return ERR_INVALID_ARGS
+        return ERR_INVALID_ARGS;
     }
 
-    found = this.pos.roomName == toPos.roomName ? findShortPathInCache(formalize(this.pos), formalize(toPos), this.pos, creepCache, ops) : findLongPathInCache(formalize(this.pos), formalize(toPos), creepCache, ops);
+    found =
+        this.pos.roomName == toPos.roomName
+            ? findShortPathInCache(formalize(this.pos), formalize(toPos), this.pos, creepCache, ops)
+            : findLongPathInCache(formalize(this.pos), formalize(toPos), creepCache, ops);
     if (found) {
         //this.say('cached');
         testCacheHits++;
-    } else {  // 没找到缓存路
+    } else {
+        // 没找到缓存路
         testCacheMiss++;
 
-        if (autoClearTick < Game.time) {  // 自动清理
+        if (autoClearTick < Game.time) {
+            // 自动清理
             autoClearTick = Game.time;
             clearUnused();
         }
 
         let result = findPath(this.pos, toPos, ops);
-        if (!result.path.length || (result.incomplete && result.path.length == 1)) {     // 一步也动不了了
+        if (!result.path.length || (result.incomplete && result.path.length == 1)) {
+            // 一步也动不了了
             //this.say('no path')
             return ERR_NO_PATH;
         }
@@ -1363,8 +1630,8 @@ function betterMoveTo(firstArg, secondArg, opts) {
             posArray: result,
             ignoreRoads: !!ops.ignoreRoads,
             ignoreStructures: !!ops.ignoreDestructibleStructures,
-            ignoreSwamps: !!ops.ignoreSwamps
-        }
+            ignoreSwamps: !!ops.ignoreSwamps,
+        };
         generateDirectionArray(newPath);
         addPathIntoCache(newPath);
         creepCache.path = newPath;
@@ -1373,7 +1640,9 @@ function betterMoveTo(firstArg, secondArg, opts) {
     creepCache.dst = toPos;
     setPathTimer(creepCache);
 
-    found ? cacheHitCost += Game.cpu.getUsed() - startCacheSearch : cacheMissCost += Game.cpu.getUsed() - startCacheSearch;
+    found
+        ? (cacheHitCost += Game.cpu.getUsed() - startCacheSearch)
+        : (cacheMissCost += Game.cpu.getUsed() - startCacheSearch);
 
     return startRoute(this, creepCache, ops.visualizePathStyle, toPos, ops.ignoreCreeps);
 }
@@ -1383,18 +1652,14 @@ function betterMoveTo(firstArg, secondArg, opts) {
  * @param {Creep} this 写好后删这个参数
  * @param {DirectionConstant | Creep} target
  */
-function betterMove(target) {
-
-}
+function betterMove(target) {}
 
 /**
  * @param {RoomPosition} this 写好后删这个参数
  * @param {FindConstant} type
  * @param {FindPathOpts & FilterOptions<FIND_STRUCTURES> & { algorithm?: string }} opts
  */
-function betterFindClosestByPath(type, opts) {
-
-}
+function betterFindClosestByPath(type, opts) {}
 
 /**
  *  opts: memberPos:relativePos[], avoidTowersHigherThan:number, avoidObstaclesHigherThan:number
@@ -1402,9 +1667,7 @@ function betterFindClosestByPath(type, opts) {
  * @param {RoomPosition} toPos
  * @param {*} opts
  */
-function findSquadPathTo(toPos, opts) {
-
-}
+function findSquadPathTo(toPos, opts) {}
 
 /***************************************
  *  初始化
@@ -1458,7 +1721,7 @@ module.exports = {
         return OK;
     },
     setPathClearDelay: function (number) {
-        if (typeof number == "number" && number > 0) {
+        if (typeof number == 'number' && number > 0) {
             pathClearDelay = Math.ceil(number);
             return OK;
         } else if (number === undefined) {
@@ -1467,7 +1730,7 @@ module.exports = {
         return ERR_INVALID_ARGS;
     },
     setHostileCostMatrixClearDelay: function (number) {
-        if (typeof number == "number" && number > 0) {
+        if (typeof number == 'number' && number > 0) {
             hostileCostMatrixClearDelay = Math.ceil(number);
             return OK;
         } else if (number === undefined) {
@@ -1480,9 +1743,10 @@ module.exports = {
         delete costMatrixCache[roomName];
         return OK;
     },
-    deltePath: function (fromPos, toPos, opts) {   // TODO
+    deltePath: function (fromPos, toPos, opts) {
+        // TODO
         //if(!(fromPos instanceof RoomPosition))
-        return 'not implemented'
+        return 'not implemented';
     },
     addAvoidRooms: function (roomName) {
         let splited = reg1.exec(roomName);
@@ -1515,9 +1779,14 @@ module.exports = {
                 if (combinedX in globalPathCache) {
                     for (combinedY = minY; combinedY <= maxY; combinedY++) {
                         if (combinedY in globalPathCache[combinedX]) {
-                            for (let path of globalPathCache[combinedX][combinedY]) {     // 这个数组应该会很短
+                            for (let path of globalPathCache[combinedX][combinedY]) {
+                                // 这个数组应该会很短
                                 let posArray = path.posArray;
-                                if (posArray[0].roomName == roomName && posArray[posArray.length - 1].roomName == roomName) {     // 是这个房间的路
+                                if (
+                                    posArray[0].roomName == roomName &&
+                                    posArray[posArray.length - 1].roomName == roomName
+                                ) {
+                                    // 是这个房间的路
                                     deletePath(path);
                                 }
                             }
@@ -1530,17 +1799,21 @@ module.exports = {
             return ERR_INVALID_ARGS;
         }
     },
-    addAvoidExits: function (fromRoomName, toRoomName) {    // 【未启用】
+    addAvoidExits: function (fromRoomName, toRoomName) {
+        // 【未启用】
         let splited1 = reg1.exec(fromRoomName);
         let splited2 = reg1.exec(toRoomName);
         if (splited1 && splited1.length == 5 && splited2 && splited2.length == 5) {
-            avoidExits[fromRoomName] ? avoidExits[fromRoomName][toRoomName] = 1 : avoidExits[fromRoomName] = { [toRoomName]: 1 };
+            avoidExits[fromRoomName]
+                ? (avoidExits[fromRoomName][toRoomName] = 1)
+                : (avoidExits[fromRoomName] = { [toRoomName]: 1 });
             return OK;
         } else {
             return ERR_INVALID_ARGS;
         }
     },
-    deleteAvoidExits: function (fromRoomName, toRoomName) { // 【未启用】
+    deleteAvoidExits: function (fromRoomName, toRoomName) {
+        // 【未启用】
         let splited1 = reg1.exec(fromRoomName);
         let splited2 = reg1.exec(toRoomName);
         if (splited1 && splited1.length == 5 && splited2 && splited2.length == 5) {
@@ -1555,17 +1828,38 @@ module.exports = {
     print: function () {
         let text = '\navarageTime\tcalls\tFunctionName';
         for (let fn in analyzeCPU) {
-            text += `\n${(analyzeCPU[fn].sum / analyzeCPU[fn].calls).toFixed(5)}\t\t${analyzeCPU[fn].calls}\t\t${fn}`;
+            text += `\n${(analyzeCPU[fn].sum / analyzeCPU[fn].calls).toFixed(5)}\t\t${
+                analyzeCPU[fn].calls
+            }\t\t${fn}`;
         }
         let hitCost = cacheHitCost / testCacheHits;
         let missCost = cacheMissCost / testCacheMiss;
         let missRate = testCacheMiss / (testCacheMiss + testCacheHits);
-        text += `\nnormal logical cost: ${(normalLogicalCost / testNormal).toFixed(5)}, total cross rate: ${(testTrySwap / analyzeCPU.moveTo.calls).toFixed(4)}, total bypass rate:  ${(testBypass / analyzeCPU.moveTo.calls).toFixed(4)}`
-        text += `\nnear storage check rate: ${(testNearStorageCheck / analyzeCPU.moveTo.calls).toFixed(4)}, near storage cross rate: ${(testNearStorageSwap / testNearStorageCheck).toFixed(4)}`
-        text += `\ncache search rate: ${((testCacheMiss + testCacheHits) / analyzeCPU.moveTo.calls).toFixed(4)}, total hit rate: ${(1 - missRate).toFixed(4)}, avg check paths: ${(pathCounter / (testCacheMiss + testCacheHits)).toFixed(3)}`;
-        text += `\ncache hit avg cost: ${(hitCost).toFixed(5)}, cache miss avg cost: ${(missCost).toFixed(5)}, total avg cost: ${(hitCost * (1 - missRate) + missCost * missRate).toFixed(5)}`;
+        text += `\nnormal logical cost: ${(normalLogicalCost / testNormal).toFixed(
+            5
+        )}, total cross rate: ${(testTrySwap / analyzeCPU.moveTo.calls).toFixed(
+            4
+        )}, total bypass rate:  ${(testBypass / analyzeCPU.moveTo.calls).toFixed(4)}`;
+        text += `\nnear storage check rate: ${(
+            testNearStorageCheck / analyzeCPU.moveTo.calls
+        ).toFixed(4)}, near storage cross rate: ${(
+            testNearStorageSwap / testNearStorageCheck
+        ).toFixed(4)}`;
+        text += `\ncache search rate: ${(
+            (testCacheMiss + testCacheHits) /
+            analyzeCPU.moveTo.calls
+        ).toFixed(4)}, total hit rate: ${(1 - missRate).toFixed(4)}, avg check paths: ${(
+            pathCounter /
+            (testCacheMiss + testCacheHits)
+        ).toFixed(3)}`;
+        text += `\ncache hit avg cost: ${hitCost.toFixed(
+            5
+        )}, cache miss avg cost: ${missCost.toFixed(5)}, total avg cost: ${(
+            hitCost * (1 - missRate) +
+            missCost * missRate
+        ).toFixed(5)}`;
         return text;
     },
-    clear: () => { }
+    clear: () => {},
     // clear: clearUnused
-}
+};

@@ -1,8 +1,7 @@
-import { harvestSource, transfer_nearby } from './lib_creep';
+import { harvestSource, transferNearby } from './lib_creep';
 import { isEmpty, isFull } from './lib_base';
 
 const starter = {} as Role;
-
 
 starter.setUp = function (creep) {
     if (isFull(creep)) {
@@ -13,12 +12,12 @@ starter.setUp = function (creep) {
     }
 
     if (creep.memory.process !== 'drop') {
-        creep.say_one(w_debug_creep,'dig')
+        creep.say_one(w_debug_creep, 'dig');
         harvestSource(creep);
     }
     if (creep.memory.process === 'drop') {
-        creep.say_one(w_debug_creep,'drop')
-        const empty = transfer_nearby(creep);
+        creep.say_one(w_debug_creep, 'drop');
+        const empty = transferNearby(creep);
         if (empty) {
             creep.memory.process = 'dig';
         }

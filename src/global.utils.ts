@@ -1,9 +1,9 @@
 global.w_utils = {
     count_distance(a, b) {
-        a=(a as any)?.pos||a;
-        b=(b as any)?.pos||b;
-        if (!a||!b){
-            return 999
+        a = (a as any)?.pos || a;
+        b = (b as any)?.pos || b;
+        if (!a || !b) {
+            return 999;
         }
         let dx = a.x - b.x;
         let dy = a.y - b.y;
@@ -31,6 +31,5 @@ global.w_utils = {
         ];
         return ScreepsReturnCodeMsg[0 - code];
     },
-    print(){
-    }
+    print() {},
 };
