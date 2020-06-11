@@ -211,7 +211,6 @@ export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConst
         }
     );
 
-    console.log('target', target?.id);
     if (!target) {
         unLock();
         return ERR_NOT_FOUND;
@@ -240,9 +239,12 @@ export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConst
     if (code === ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
     }
+    if (code === OK) {
+        unLock();
+    }
     return code;
 }
-// 拿资源 垃圾或者建筑,builder,upgrader 等
+// 拿资源 builder,upgrader 等,优先建筑
 export function pickUpDropOrFromStructure(
     creep: Creep,
     structures?: StructureConstant[],
@@ -255,6 +257,25 @@ export function pickUpDropOrFromStructure(
         creep,
         'pick_drop_or_mine',
         () => {
+            let targets = creep.room.find(FIND_STRUCTURES, {
+                filter: (structure: StructureContainer) => {
+                    if (!structure.store) {
+                        return false;
+                    }
+                    if (!structureFilters.includes(structure?.structureType)) {
+                        return false;
+                    }
+                    if (structure.store && isEmpty(structure)) {
+                        return false;
+                    }
+                    return true;
+                },
+            });
+            let m = find_nearby_target(creep, targets);
+            if (m) {
+                return m;
+            }
+
             let drops = Array.from(creep.room.dropResources).filter(a => {
                 return a?.cap < a.resource.amount && a?.resource?.amount;
             });
@@ -269,22 +290,6 @@ export function pickUpDropOrFromStructure(
                     }
                 });
                 return drop;
-            } else {
-                let targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure: StructureContainer) => {
-                        if (!structure.store) {
-                            return false;
-                        }
-                        if (!structureFilters.includes(structure?.structureType)) {
-                            return false;
-                        }
-                        if (structure.store && isEmpty(structure)) {
-                            return false;
-                        }
-                        return true;
-                    },
-                });
-                return find_nearby_target(creep, targets);
             }
         }
     );
@@ -307,7 +312,6 @@ export function pickUpDropOrFromStructure(
             return;
         }
     }
-
     let code;
     if (target?.store) {
         code = creep.withdraw(target, h);
@@ -316,6 +320,10 @@ export function pickUpDropOrFromStructure(
     }
     if (code === ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
+    }
+    if (code === OK) {
+        unLock();
+        return;
     }
     return code;
 }

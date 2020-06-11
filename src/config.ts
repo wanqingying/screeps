@@ -13,8 +13,8 @@ export const creep_cfg_body = {
     [role_name.carrier]: { [MOVE]: 5, [CARRY]: 6 },
     [role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
     [role_name.harvester]: { [MOVE]: 1, [WORK]: 5, [CARRY]: 0 },
-    [role_name.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
-    [role_name.upgrader]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+    [role_name.builder]: { [MOVE]: 5, [WORK]: 1, [CARRY]: 4 },
+    [role_name.upgrader]: { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
     [role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
 };
 
@@ -22,7 +22,7 @@ export const creep_cfg_num = {
     [role_name.starter]: 0,
     [role_name.carrier]: 2,
     [role_name.scout]: 0,
-    [role_name.builder]: 3,
+    [role_name.builder]: 2,
     [role_name.harvester]: 2,
     [role_name.upgrader]: 2,
 };
