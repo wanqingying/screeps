@@ -1,4 +1,4 @@
-// 不能引入其他模块
+import './config_c_global_utils';
 global.w_roles = {} as Roles;
 global.w_cache = new Map<any, any>();
 global.w_rooms = new Map();

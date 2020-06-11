@@ -6,7 +6,6 @@ import {
     ListA,
 } from './lib_base';
 import { checkCreep } from './prototype_room_spawn';
-import { role_name } from './config';
 import { checkRenewCount } from './lib_room';
 
 Room.prototype.start = function () {
@@ -96,8 +95,8 @@ function refreshHotData(room: Room) {
         const exists = creepsIn.filter(c => c.memory?.role === role);
         room.roleExist[role] = exists.length;
     });
-    room.abilityCarry = getCreepsRoleAbility(creepsIn, role_name.carrier);
-    room.abilityMine = getCreepsRoleAbility(creepsIn, role_name.harvester);
+    room.abilityCarry = getCreepsRoleAbility(creepsIn, w_role_name.carrier);
+    room.abilityMine = getCreepsRoleAbility(creepsIn, w_role_name.harvester);
     // 初始化基地
     room.spawns = room.findByFilter(FIND_STRUCTURES, 'structureType', [
         STRUCTURE_SPAWN,

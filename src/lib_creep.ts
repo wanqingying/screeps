@@ -142,11 +142,11 @@ export function pickUpFromMine(creep: Creep, type?: ResourceConstant) {
         creep,
         'pick_drop_or_mine',
         () => {
-            let drop = getMineDropNeedPick(creep,h)
+            let drop = getMineDropNeedPick(creep, h);
             if (drop) {
                 return drop;
             } else {
-                return getMineContainerNeedWithdraw(creep)
+                return getMineContainerNeedWithdraw(creep);
             }
         }
     );
@@ -185,7 +185,7 @@ export function pickUpFromMine(creep: Creep, type?: ResourceConstant) {
     return code;
 }
 
-export function getMineDropNeedPick(creep:Creep, type?: ResourceConstant) {
+export function getMineDropNeedPick(creep: Creep, type?: ResourceConstant) {
     let drops = Array.from(creep.room.dropResources).filter(a => {
         return a.cap < a.resource?.amount && a.resource?.amount;
     });
@@ -202,8 +202,8 @@ export function getMineDropNeedPick(creep:Creep, type?: ResourceConstant) {
         return drop;
     }
 }
-export function getMineContainerNeedWithdraw(creep:Creep,type?: ResourceConstant) {
-    let sources=creep.room.sourceInfo;
+export function getMineContainerNeedWithdraw(creep: Creep, type?: ResourceConstant) {
+    let sources = creep.room.sourceInfo;
     for (let sh of sources) {
         if (isMineContainerNeedWithdraw(sh)) {
             sh.containerCap = sh.containerCap - creep.store.getFreeCapacity(type);

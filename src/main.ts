@@ -26,11 +26,9 @@ function main() {
     });
     Object.values(Game.creeps).forEach(creep => {
         creep.run();
-
-        try {
-        } catch (e) {
-            // console.t('err start creep ', creep.name, e);
-        }
+        // try {
+        // } catch (e) {
+        // }
     });
 }
 

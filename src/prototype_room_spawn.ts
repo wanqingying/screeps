@@ -1,4 +1,3 @@
-import { creep_cfg_body, role_name } from './config';
 import { getBodyCost, getEnergyLevel } from './lib_base';
 
 export function checkCreep(room: Room) {
@@ -97,8 +96,8 @@ function checkSpawnCreepByAuto(room: Room): role_name_key | undefined {
     const carry = room.abilityCarry;
     const dig = room.abilityMine;
     let min_one = [
-        { role: role_name.carrier, cur: carry },
-        { role: role_name.harvester, cur: dig },
+        { role: w_role_name.carrier, cur: carry },
+        { role: w_role_name.harvester, cur: dig },
     ]
         .sort((a, b) => a.cur - b.cur)
         .shift();
@@ -153,14 +152,14 @@ function getCreepBody(room: Room, role: role_name_key, code?: number) {
         energy_max = 300;
     }
     let index: number;
-    if (code === w_code.SPAWN_BY_FORCE || che.spawnFailTick > 50 || role === role_name.starter) {
+    if (code === w_code.SPAWN_BY_FORCE || che.spawnFailTick > 50 || role === w_role_name.starter) {
         // 用于错误恢复
         index = 0;
     } else {
         index = getEnergyLevel(energy_max) - 1;
     }
 
-    const cfg = creep_cfg_body[role];
+    const cfg = w_config.creep_cfg_body[role];
     let body = [];
     Object.keys(cfg).forEach(b => {
         body = body.concat(new Array(cfg[b]).fill(b));
