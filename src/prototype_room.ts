@@ -160,7 +160,6 @@ Room.prototype.getCache = function () {
             spawnFailTick: 0,
             spawnIndex: 0,
             sources: [],
-            stopKill: 0,
         };
     }
     if (typeof che.spawnIndex !== 'number') {
@@ -168,9 +167,6 @@ Room.prototype.getCache = function () {
     }
     if (typeof che.spawnFailTick !== 'number') {
         che.spawnFailTick = 0;
-    }
-    if (typeof che.stopKill !== 'number') {
-        che.stopKill = 0;
     }
     if (!Array.isArray(che.sources)) {
         che.sources = [];

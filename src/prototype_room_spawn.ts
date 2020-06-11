@@ -1,8 +1,8 @@
 import { getBodyCost, getEnergyLevel } from './lib_base';
 
 export function checkCreep(room: Room) {
-    killCreepByConfig(room);
-    killCreepByCost(room);
+    // killCreepByConfig(room);
+    // killCreepByCost(room);
     // killCreepByAuto(room);
     checkSpawnCreep(room);
 }
@@ -187,22 +187,14 @@ function killCreepByConfig(room: Room) {
 }
 // 挽救自杀行为
 function shouldStopKillCreep(room: Room): boolean {
-    const che = room.getCache();
-    if (che.stopKill > 80) {
-        // che.stopKill=0
-        // return false
-    }
     if (room.energyAvailable < room.energyCapacityAvailable) {
         // 能量未满不执行自杀
-        che.stopKill++;
         return true;
     }
     if (room.creepCount < room.maxCreepCount) {
-        che.stopKill++;
         // 数量未满不执行自杀
         return true;
     }
-    che.stopKill = 0;
     return false;
 }
 // 用于 creep name

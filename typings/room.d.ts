@@ -9,7 +9,6 @@ declare interface CacheRoom {
     spawnIndex: number;
     spawnFailTick: number;
     sources: SourceWithContainer[];
-    stopKill: number;
 }
 declare interface Room {
     sourceInfo: SourceCache[];
