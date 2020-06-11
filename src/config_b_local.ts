@@ -3,7 +3,7 @@
 export const cfg_local = {
     creep_cfg_num: {
         [w_role_name.starter]: 0,
-        [w_role_name.carrier]: 3,
+        [w_role_name.carrier]: 2,
         [w_role_name.scout]: 0,
         [w_role_name.builder]: 1,
         [w_role_name.harvester]: 2,
@@ -18,4 +18,8 @@ export const cfg_local = {
         [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
     },
     reserve_rooms: [],
+    freePlace : {
+        [w_role_name.carrier]: { x: 23, y: 40 },
+        [w_role_name.builder]: { x: 24, y: 27 },
+    }
 };

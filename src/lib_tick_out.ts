@@ -23,17 +23,17 @@ export function setTickOut(tick: number, callback: Function): number {
 }
 // clearTimeout
 export function clearTickOut(fn_id: number) {
-    fnCache.delete(fn_id)
+    fnCache.delete(fn_id);
 }
 // setTimeout
 export function setTickInterval(tick: number, callback: Function, fn_id?: number): number {
     if (!fn_id) {
         fnCount++;
         fn_id = fnCount;
+        fnCache.set(fn_id, callback);
     }
     const triggerTick = tick + Game.time;
     const prev = cache.get(triggerTick);
-    fnCache.set(fn_id, callback);
     const task: FnType = { fn_id: fn_id, interval: true, tick: tick };
     if (Array.isArray(prev)) {
         prev.push(task);
@@ -43,7 +43,7 @@ export function setTickInterval(tick: number, callback: Function, fn_id?: number
     return fn_id;
 }
 export function clearTickInterval(fn_id: number) {
-    fnCache.delete(fn_id)
+    fnCache.delete(fn_id);
 }
 
 export function executeTickOut() {
@@ -59,7 +59,7 @@ export function executeTickOut() {
             try {
                 fn();
             } catch (e) {
-                console.log('execute tick out task err');
+                w_utils.print('execute tick out task err');
             }
 
             if (interval) {
@@ -70,3 +70,8 @@ export function executeTickOut() {
         });
     }
 }
+
+let cp = Object.values(Game.creeps).find(c => c.memory.role === 'carrier');
+setTickInterval(3, () => {
+    console.log(' cp ', cp.name, cp.say('hi_free_' + cp.store.getFreeCapacity()), cp.id);
+});

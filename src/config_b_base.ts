@@ -49,7 +49,7 @@ export const config_global: ConfigGlobal = {
     creep_cfg_body: cfg.creep_cfg_body as any,
     creep_cfg_num: cfg.creep_cfg_num as any,
     role_auto: [],
-    freePlace: freePlace as any,
+    freePlace: cfg.freePlace as any,
     reserve_rooms: cfg.reserve_rooms,
 };
 

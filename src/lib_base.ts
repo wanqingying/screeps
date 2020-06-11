@@ -1,4 +1,4 @@
-import { clearTickOut, setTickOut } from './lib_tick_out';
+import { setTickOut } from './lib_tick_out';
 
 export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
@@ -24,7 +24,6 @@ export function getActionLockTarget<T>(
 
     function reset() {
         w_cache.delete(cache_key);
-        w_cache.delete(cache_key + 'tickOut');
     }
 
     if (cache_id) {
@@ -32,10 +31,11 @@ export function getActionLockTarget<T>(
     } else {
         target = getTarget();
         if (tickLimit && target) {
-            let fn_id = setTickOut(tickLimit, reset);
-            w_cache.set(cache_key + 'tickOut', fn_id);
+            setTickOut(tickLimit, reset);
         }
-        w_cache.set(cache_key, cache_id);
+        if (target){
+            w_cache.set(cache_key, target?.id);
+        }
     }
 
     return { target, unLock: reset };
@@ -94,31 +94,6 @@ export function getCreepBody(creep: Creep): { [type in BodyPartConstant]: number
 export function getCreepBodyNum(creep: Creep, type: BodyPartConstant): number {
     let body = getCreepBody(creep);
     return body[type] || 0;
-}
-
-export function getCreepsRoleAbility(creeps: Creep[], role: role_name_key) {
-    let carry = 0;
-    let mine = 0;
-    creeps.forEach(creep => {
-        if (creep.memory?.role === w_role_name.carrier) {
-            carry += getCreepBodyNum(creep, CARRY);
-        }
-        if (creep.memory?.role === w_role_name.harvester) {
-            mine += getCreepBodyNum(creep, WORK);
-        }
-        if (creep.memory?.role === w_role_name.starter) {
-            carry += getCreepBodyNum(creep, CARRY) / 2;
-            mine += getCreepBodyNum(creep, WORK) / 2;
-        }
-    });
-    switch (role) {
-        case w_role_name.harvester:
-            return mine;
-        case w_role_name.carrier:
-            return carry;
-        default:
-            return 0;
-    }
 }
 
 export function getBodyCost(body: BodyPartConstant[]): number {
@@ -181,7 +156,6 @@ export function isTargetNearSource(room: Room, target: StructureContainer) {
     if (!room?.sourceInfo?.length) {
         return false;
     }
-    console.log(room.sourceInfo.length);
     return room.sourceInfo?.find(s => s.container?.id === target?.id);
 }
 

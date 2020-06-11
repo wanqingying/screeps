@@ -18,4 +18,8 @@ export const cfg_online = {
         [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
     },
     reserve_rooms: [],
+    freePlace : {
+        [w_role_name.carrier]: { x: 23, y: 40 },
+        [w_role_name.builder]: { x: 24, y: 27 },
+    }
 };

@@ -1,21 +1,20 @@
 import { getCache } from './lib_creep';
+import { setTickInterval } from './lib_tick_out';
 
 Creep.prototype.run = function () {
     const creep: Creep = this;
     if (creep.spawning) {
-        return;
+        // return;
     }
     let che = getCache(creep);
     creep.log_one(che.tick);
     che.tick++;
     // checkRenewCreep(creep);
-    if (!creep.memory.renew) {
-        const rs = w_roles[creep.memory?.role];
-        if (rs && rs.setUp) {
-            rs.setUp(creep);
-        } else {
-            creep.log('no role', creep.memory?.role);
-        }
+    const rs = w_roles[creep.memory?.role];
+    if (rs && rs.setUp) {
+        rs.setUp(creep);
+    } else {
+        creep.log('no role', creep.memory?.role);
     }
 };
 

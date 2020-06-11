@@ -10,6 +10,12 @@ import { findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_ba
 const builder = {} as Role;
 
 builder.setUp = function (creep) {
+    if (creep.room.find(FIND_HOSTILE_CREEPS).length > 0) {
+        const pos = w_config.freePlace.builder;
+        moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
+        return
+    }
+
     if (creep.memory.building && isEmpty(creep)) {
         creep.memory.building = false;
         creep.memory.process = 'get';
@@ -40,9 +46,6 @@ builder.setUp = function (creep) {
         } else {
             unLock();
             let act = checkRepair(creep, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
-            if (act === ERR_NOT_FOUND) {
-                moveToTarget(creep, new RoomPosition(24, 41, creep.room.name));
-            }
         }
     } else {
         pickUpDropOrFromStructure(creep);

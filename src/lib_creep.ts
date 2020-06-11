@@ -88,8 +88,6 @@ export function pickUpDropEnergy(creep: Creep): boolean {
             creep,
             targets.map(t => t.resource)
         );
-        console.log('find_near_by', target?.resource?.pos);
-        console.log('count ', targets.length);
         if (target) {
             target.cap += creep.store.getFreeCapacity(RESOURCE_ENERGY);
             return target.resource;
