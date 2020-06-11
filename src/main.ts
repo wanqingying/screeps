@@ -22,7 +22,7 @@ function main() {
     });
 
     Object.values(Game.rooms).forEach(room => {
-        console.log('energy-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log('energy--', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
         room.start();
     });
     Object.values(Game.creeps).forEach(creep => {
