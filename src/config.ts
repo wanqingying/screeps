@@ -12,8 +12,8 @@ global.w_role_name = role_name;
 export const creep_cfg_body = {
     [role_name.carrier]: { [MOVE]: 13, [CARRY]: 13 },
     [role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
-    [role_name.harvester]: { [MOVE]: 4, [WORK]: 11, [CARRY]: 0 },
-    [role_name.builder]: { [MOVE]: 6, [WORK]: 7, [CARRY]: 6 },
+    [role_name.harvester]: { [MOVE]: 3, [WORK]: 6, [CARRY]: 0 },
+    [role_name.builder]: { [MOVE]: 12, [WORK]: 6, [CARRY]: 12 },
     [role_name.upgrader]: { [MOVE]: 2, [WORK]: 11, [CARRY]: 2 },
     [role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
 };
@@ -37,7 +37,7 @@ export const body_cost = {
     [TOUGH]: 10,
 };
 
-
+const freePlace = { [role_name.carrier]: { x: 23, y: 40 }, [role_name.builder]: { x: 24, y: 27 } };
 
 global.w_roles = {} as Roles;
 
@@ -60,6 +60,7 @@ export const config_global: ConfigGlobal = {
     creep_cfg_body: creep_cfg_body as any,
     creep_cfg_num: creep_cfg_num as any,
     role_auto: [],
+    freePlace: freePlace as any,
 };
 
 global.w_config = config_global;

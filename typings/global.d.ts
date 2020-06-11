@@ -14,6 +14,7 @@ declare interface ConfigGlobal {
     creep_order: any[];
     upgrader_only_container: boolean;
     creep_cfg_num: CreepCfgNum;
+    freePlace: FreePlace;
     creep_cfg_body: CreepCfgBody;
     // auto spawn role
     role_auto: role_name_key[];
@@ -55,6 +56,7 @@ declare interface SourceWithContainer {
 }
 
 declare type CreepCfgNum = { [role in role_name_key]: number };
+declare type FreePlace = { [role in role_name_key]: any };
 declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } };
 
 declare interface CacheCreep {

@@ -48,7 +48,7 @@ function checkTower(room: Room) {
         }
         const targetAttack = findTargetAttack(room);
         if (targetAttack) {
-            tower.attack(targetAttack);
+            // tower.attack(targetAttack);
             continue;
         }
         room.log('tower no target');

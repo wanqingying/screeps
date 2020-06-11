@@ -52,7 +52,7 @@ export function transfer_nearby(
     }
     if (isFull(target)) {
         unLock();
-        return ERR_FULL;
+        return ERR_NOT_FOUND;
     }
     if (isEmpty(creep)) {
         unLock();
@@ -210,21 +210,21 @@ export function pickUpDropOrFromMineContainer(creep: Creep, type?: ResourceConst
     }
     {
         let g = target as StructureContainer;
-        if (g.store && isEmpty(g)) {
+        if (g?.store && isEmpty(g)) {
             unLock();
-            return;
+            return ERR_NOT_FOUND;
         }
     }
     {
         let g = target as Resource;
-        if (g?.amount === 0) {
+        if (typeof g?.amount === 'number' && g?.amount === 0) {
             unLock();
-            return;
+            return ERR_NOT_FOUND;
         }
     }
 
     let code;
-    if (target.structureType === STRUCTURE_CONTAINER) {
+    if (target?.store) {
         code = creep.withdraw(target, h);
     } else {
         code = creep.pickup(target);
