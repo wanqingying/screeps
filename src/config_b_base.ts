@@ -1,13 +1,12 @@
 import { cfg_local } from './config_b_local';
 import { cfg_online } from './config_b_online';
 
-let cfg: typeof cfg_local;
+let cfg: typeof cfg_local = 'debug cfg' as any;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
     cfg = cfg_local;
 } else {
-    cfg= cfg_online as any;
+    cfg = cfg_online as any;
 }
-
 
 export const body_cost = {
     [MOVE]: 50,
@@ -56,8 +55,7 @@ export const config_global: ConfigGlobal = {
 };
 
 global.w_config = config_global;
-// global.rooms_n='fff'
-
+global.w_config.rooms = cfg as any;
 
 global.w_code = {
     SPAWN_BY_CONFIG: 8,
@@ -66,3 +64,9 @@ global.w_code = {
     SPAWN_BY_ROOM: 6,
 } as any;
 global.module_loaded = true;
+
+export function load() {
+    global.w_config.rooms = cfg as any;
+    console.log('================load');
+    console.log(global.w_config.rooms);
+}

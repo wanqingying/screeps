@@ -5,7 +5,12 @@ import { executeTickOut } from './lib_tick_out';
 import { load_spawn_check } from './lib_spawn_check';
 
 function main() {
-    load_spawn_check();
+    try {
+        load_spawn_check();
+    } catch (e) {
+        console.log('err spawn ', JSON.stringify(e));
+        throw new Error(e);
+    }
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
@@ -24,9 +29,8 @@ function main() {
             delete Memory.creeps[name];
         }
     });
-
     Object.values(Game.rooms).forEach(room => {
-        console.log('energy--', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log('energy-4g-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
         room.start();
     });
     Object.values(Game.creeps).forEach(creep => {

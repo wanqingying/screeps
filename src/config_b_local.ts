@@ -46,3 +46,4 @@ export const cfg_local = {
         [w_role_name.builder]: { x: 24, y: 27 },
     }
 };
+console.log('local =============================');
