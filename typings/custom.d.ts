@@ -18,7 +18,6 @@ declare type role_name_key =
 
 declare interface SourceCache {
     source: Source;
-    harvesters: Creep[];
     // 开采速度,等于 work*2
     speed?: number;
     container: StructureContainer;

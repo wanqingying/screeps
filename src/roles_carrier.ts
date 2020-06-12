@@ -11,7 +11,6 @@ carrier.setUp = function (creep) {
         creep.memory.process = 'drop';
     }
 
-
     if (creep.memory.process === 'pick') {
         pickUpFromMine(creep);
     } else {

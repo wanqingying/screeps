@@ -1,5 +1,5 @@
 declare type get_code_msg_screeps = (code: ScreepsReturnCode) => string;
-declare type count_distance = (a: RoomPosition, b: RoomPosition) => number;
+declare type count_distance = (a: RoomPosition | any, b: RoomPosition | any) => number;
 declare interface ConfigGlobal {
     enable_log: boolean;
     internal: {
@@ -61,15 +61,6 @@ declare type CreepCfgNum = { [role in role_name_key]: number };
 declare type FreePlace = { [role in role_name_key]: any };
 declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } };
 
-declare interface CacheCreep {
-    renewTime: number;
-    lockSeed: number;
-    tick: number;
-}
-
-declare type W_Room = Map<string, CacheRoom>;
-declare type W_Creep = Map<string, CacheCreep>;
-
 declare namespace NodeJS {
     export interface Global {
         w_role_name: RoleName;
@@ -79,8 +70,6 @@ declare namespace NodeJS {
         w_cache: CacheGlobal;
         cache_tick: 50;
         module_loaded: boolean;
-        w_rooms: W_Room;
-        w_creeps: W_Creep;
         w_code: W_CODE;
         w_utils: W_Utils;
         w_debug_creep: string;
@@ -95,10 +84,7 @@ declare const w_roles: Roles;
 declare const w_role_name: RoleName;
 declare const w_config: ConfigGlobal;
 declare const w_cache: CacheGlobal;
-declare const w_rooms: W_Room;
-declare const w_creeps: W_Creep;
 declare const w_code: W_CODE;
 declare const w_utils: W_Utils;
 declare const w_debug_creep: string;
 declare const w_my_name: string;
-declare const w_set_tick_out: (tick: number, fn: Function) => void;

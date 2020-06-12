@@ -1,15 +1,18 @@
-import { getBodyCost } from './lib_base';
-import { getCreepIndex } from './prototype_room_spawn';
-import { ListA } from './lib_base';
+import { getBodyCost, getCreepIndex, ListA } from './lib_base';
 
 interface RoomCache {
+    // 房间当前角色数量
     c_roles_count: { [name: string]: number };
+    // 房间是否停摆(长期小于 300 触发冷启动)
     c_energy_stop: boolean;
+    // 生产一个单位的失败tick总数
     c_spawn_fail_tick?: number;
+    // 能量充盈度
     c_energy: ListA<number>;
+    // 上次支持生产操作的返回码
     c_spawn_code: any;
+    // 生产中 或者将要生产的单位
     c_spawning_role: string;
-    c_creep_count?: number;
     // 需要预先生产的单位
     c_refresh_creep: {
         [id: string]: { role: string; body: any[]; id: string; progress: boolean; life: number };
@@ -18,6 +21,21 @@ interface RoomCache {
 let cache: { [name: string]: RoomCache } = {};
 const spawn_before_die = 40;
 
+// 外部模块
+export function load_spawn_check() {
+    Object.values(Game.rooms).forEach(room => {
+        if (room.controller?.my) {
+            try {
+                prepareCache(room);
+                checkSpawnCreep(room);
+            } catch (e) {
+                console.log('err load_spawn_check ', room.name);
+                console.log(e.message);
+                console.log(e.stack);
+            }
+        }
+    });
+}
 // 根据配置获取单位部件
 function getCreepBody(room: Room, role: role_name_key) {
     let che = getCache(room);
@@ -45,7 +63,7 @@ function spawnCreep(room: Room, role: role_name_key) {
             return ERR_BUSY;
         }
         const act = spawn.spawnCreep(body, name, {
-            memory: { role: role, born_tick: Game.time, index: index, cost: cost },
+            memory: { role: role, index: index, cost: cost },
         });
         if (act === OK) {
             che.c_spawning_role = '';
@@ -67,7 +85,7 @@ function spawnCreep(room: Room, role: role_name_key) {
 function checkSpawnCreep(room: Room) {
     let che = getCache(room);
     let role = che.c_spawning_role;
-    if (room.spawning && role) {
+    if (role) {
         // 如果上次生产失败 下个tick继续生产 保证每次的生产都是成功的
         return spawnCreep(room, role);
     }
@@ -190,7 +208,7 @@ function getCache(room: Room): RoomCache {
 // 检查当前房间的状况来生成单位
 function getRoleBoost(room: Room): role_name_key | undefined {
     const che = getCache(room);
-    const current_exist: RoleExist = che.c_roles_count;
+    const current_exist = che.c_roles_count;
     const current_harvester = current_exist[w_role_name.harvester];
     const current_carrier = current_exist[w_role_name.carrier];
     const cfg = w_config.rooms[room.name];
@@ -210,47 +228,3 @@ function getRoleBoost(room: Room): role_name_key | undefined {
         return w_role_name.carrier;
     }
 }
-// 外部模块
-export function load_spawn_check() {
-    // console.log('config', JSON.stringify(w_config));
-    Object.values(Game.rooms).forEach(room => {
-        if (room.controller?.my) {
-            prepareCache(room);
-            checkSpawnCreep(room);
-        }
-    });
-}
-let cfg = {
-    enable_log: false,
-    internal: {
-        extension_limit: [0, 0, 5, 10, 20, 30, 40, 50, 60],
-        body_cost: {
-            move: 50,
-            work: 100,
-            carry: 50,
-            attack: 80,
-            ranged_attack: 150,
-            heal: 250,
-            claim: 600,
-            tough: 10,
-        },
-        extension_energy: [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000],
-    },
-    energy_lack_rate: 0.5,
-    renew_max_rate: 0.4,
-    energy_lack_tick: 100,
-    renew_interval: 200,
-    creep_order: ['harvester', 'carrier', 'builder', 'upgrader'],
-    upgrader_only_container: true,
-    creep_cfg_body: {
-        carrier: { move: 6, carry: 10 },
-        starter: { move: 2, carry: 1, work: 2 },
-        harvester: { move: 2, work: 6, carry: 0 },
-        builder: { move: 6, work: 2, carry: 6 },
-        upgrader: { move: 2, work: 6, carry: 2 },
-        scout: { move: 1, carry: 0 },
-    },
-    creep_cfg_num: { starter: 0, carrier: 3, scout: 0, builder: 2, harvester: 2, upgrader: 2 },
-    role_auto: [],
-    freePlace: { carrier: { x: 24, y: 25 }, builder: { x: 24, y: 27 } },
-};

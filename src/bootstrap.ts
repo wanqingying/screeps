@@ -10,5 +10,4 @@ import './log';
 import './prototype';
 import './flash';
 import './z_module_findPath';
-import './test'
-
+import './test';

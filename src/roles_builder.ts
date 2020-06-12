@@ -1,11 +1,5 @@
-import {
-    pickUpDropEnergy,
-    getEnergyUpgrader,
-    moveToTarget,
-    checkRepair,
-    pickUpDropOrFromStructure,
-} from './lib_creep';
-import { findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_base';
+import { moveToTarget, checkRepair, pickUpDropOrFromStructure } from './lib_creep';
+import { getActionLockTarget, isEmpty, isFull } from './lib_base';
 
 const builder = {} as Role;
 
@@ -13,7 +7,7 @@ builder.setUp = function (creep) {
     if (creep.room.find(FIND_HOSTILE_CREEPS).length > 0) {
         const pos = w_config.freePlace.builder;
         moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
-        return
+        return;
     }
 
     if (creep.memory.building && isEmpty(creep)) {

@@ -6,9 +6,9 @@ import {
     getActionLockTarget,
     getCreepBodyNum,
     findByOrder,
-    isTargetNearSource,
-    findRepairTarget,
+    isContainerNearSource,
 } from './lib_base';
+import { findRepairTarget } from './lib_room';
 
 // 卸货
 export function transferNearby(
@@ -35,7 +35,7 @@ export function transferNearby(
                     if (!s || !s.store) {
                         return false;
                     }
-                    if (isTargetNearSource(creep.room, s)) {
+                    if (isContainerNearSource(creep.room, s)) {
                         // 矿源附近的 container 不用于卸货
                         return false;
                     }
@@ -331,30 +331,9 @@ function findAndMoveToSourcePos(creep: Creep, target) {
 export function moveToTarget(creep: Creep, target: RoomPosition, dis?: number) {
     const far = w_utils.count_distance(creep.pos, target);
     if (far > (dis || 0)) {
-        return creep.moveTo(target);
+        creep.moveTo(target);
     }
-    return OK;
-}
-
-export function getCache(creep: Creep) {
-    let che: CacheCreep = w_creeps.get(creep.name);
-    if (!che) {
-        che = { renewTime: 0, lockSeed: 0, tick: 0 };
-        w_creeps.set(creep.name, che);
-    }
-    if (typeof che.renewTime !== 'number') {
-        che.renewTime = 0;
-        w_creeps.set(creep.name, che);
-    }
-    if (typeof che.lockSeed !== 'number') {
-        che.lockSeed = 0;
-        w_creeps.set(creep.name, che);
-    }
-    if (typeof che.tick !== 'number') {
-        che.tick = 0;
-        w_creeps.set(creep.name, che);
-    }
-    return che;
+    return far;
 }
 
 export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): ScreepsReturnCode {

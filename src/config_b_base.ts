@@ -1,12 +1,14 @@
 import { cfg_local } from './config_b_local';
 import { cfg_online } from './config_b_online';
 
-let cfg: typeof cfg_local = 'debug cfg' as any;
+let cabs = { local: cfg_local, online: cfg_online };
+let key = 'online';
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
-    cfg = cfg_local;
+    key = 'local';
 } else {
-    cfg = cfg_online as any;
+    key = 'online';
 }
+let cfg = cabs[key];
 
 export const body_cost = {
     [MOVE]: 50,

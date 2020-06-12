@@ -1,4 +1,5 @@
-import { setTickOut } from './lib_tick_out';
+import { setTickOut } from './mod';
+import { getSourceWithContainer } from './lib_room';
 
 export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
@@ -33,7 +34,7 @@ export function getActionLockTarget<T>(
         if (tickLimit && target) {
             setTickOut(tickLimit, reset);
         }
-        if (target){
+        if (target) {
             w_cache.set(cache_key, target?.id);
         }
     }
@@ -150,34 +151,30 @@ export function findByOrder<K extends FindConstant>(
 }
 
 // 能量矿边上的container不能drop
-export function isTargetNearSource(room: Room, target: StructureContainer) {
+export function isContainerNearSource(room: Room, target: StructureContainer) {
     if (target.structureType !== STRUCTURE_CONTAINER) {
         return false;
     }
-    if (!room?.sourceInfo?.length) {
+    let mats = getSourceWithContainer(room);
+    return !!mats?.find(s => s.container?.id === target?.id);
+}
+//
+export function isContainerNearController(room: Room, target: StructureContainer) {
+    if (target.structureType !== STRUCTURE_CONTAINER) {
         return false;
     }
-    return room.sourceInfo?.find(s => s.container?.id === target?.id);
+    if (!room.controller) {
+        return false;
+    }
+    let far = w_utils.count_distance(target, room.controller);
+    return far < 2;
 }
-
-export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
-    let targets = room
-        .findBy(FIND_STRUCTURES, t => {
-            if (types && !types.includes(t.structureType)) {
-                return false;
-            }
-            if (excludes && excludes.includes(t.structureType)) {
-                return false;
-            }
-            return t.hits < (t.hitsMax * 4) / 5;
-        })
-        .sort((a, b) => {
-            return a.hits - b.hits;
-        });
-    return targets.shift();
-}
-
-export function findTargetAttack(room: Room) {
-    let target = room.find(FIND_HOSTILE_CREEPS);
-    return target.pop();
+// 用于 creep name
+export function getCreepIndex() {
+    const mk = Object.values(Game.creeps).map(k => k.memory.index);
+    for (let i = 0; i < mk.length + 1; i++) {
+        if (!mk.includes(i)) {
+            return i;
+        }
+    }
 }

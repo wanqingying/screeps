@@ -2,7 +2,7 @@
 // body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
 console.log('online==============================');
 export const cfg_online = {
-    W22S15:{
+    W22S15: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
             [w_role_name.carrier]: 3,
@@ -20,10 +20,10 @@ export const cfg_online = {
             [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
         },
         reserve_rooms: [],
-        freePlace : {
+        freePlace: {
             [w_role_name.carrier]: { x: 23, y: 40 },
             [w_role_name.builder]: { x: 24, y: 27 },
-        }
+        },
     },
     creep_cfg_num: {
         [w_role_name.starter]: 0,
@@ -42,8 +42,8 @@ export const cfg_online = {
         [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
     },
     reserve_rooms: [],
-    freePlace : {
+    freePlace: {
         [w_role_name.carrier]: { x: 23, y: 40 },
         [w_role_name.builder]: { x: 24, y: 27 },
-    }
+    },
 };

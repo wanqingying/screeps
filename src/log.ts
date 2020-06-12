@@ -8,8 +8,8 @@ Creep.prototype.log_one = function (...msg) {
         log(px, msg.reverse(), true);
     }
 };
-Creep.prototype.say_one = function (name, ...msg) {
-    if (this.name === name) {
+Creep.prototype.say_one = function (...msg) {
+    if (this.name === w_debug_creep) {
         this.say(...msg.reverse());
     }
 };

@@ -1,8 +1,6 @@
 import './config_c_global_utils';
 global.w_roles = {} as Roles;
 global.w_cache = new Map<any, any>();
-global.w_rooms = new Map();
-global.w_creeps = new Map();
 global.w_my_name = Object.values(Game.rooms).find(
     room => room.controller?.my
 ).controller.owner.username;

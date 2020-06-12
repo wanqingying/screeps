@@ -46,7 +46,7 @@ export function clearTickInterval(fn_id: number) {
     fnCache.delete(fn_id);
 }
 
-export function executeTickOut() {
+export function load_tick_out() {
     const tickQue = cache.get(Game.time);
     cache.delete(Game.time);
     if (tickQue && Array.isArray(tickQue)) {

@@ -1,16 +1,12 @@
 import './bootstrap';
 
-import { executeTickOut } from './lib_tick_out';
-
-import { load_spawn_check } from './lib_spawn_check';
+import { load_tick_out, load_spawn_check, load_tower_logic, load_harvest } from './mod';
 
 function main() {
-    try {
-        load_spawn_check();
-    } catch (e) {
-        console.log('err spawn ', JSON.stringify(e));
-        throw new Error(e);
-    }
+    load_spawn_check();
+    load_tower_logic();
+    load_harvest();
+
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
@@ -40,7 +36,7 @@ function main() {
         // }
     });
     // 放在最后执行可支持 setTickOut(0,fn)
-    executeTickOut();
+    load_tick_out();
 }
 
 module.exports.loop = main;

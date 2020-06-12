@@ -12,9 +12,7 @@ export function spawnCreep(room: Room) {}
 // 发布生产单位的任务
 export function addSpawnTask(room: Room) {}
 
-export function executeMyRoom(room: Room) {
-
-}
+export function executeMyRoom(room: Room) {}
 export function executeReserveRoom(room: Room) {
     if (!canReservation(room)) {
         log(`reservation not possible `, room.name);

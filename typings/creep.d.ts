@@ -7,10 +7,4 @@ declare interface Creep {
     log_one(...p: any): void;
     say_one(...p: any): void;
     run(): void;
-    prepare(): void;
-    // 自杀/更新换代
-    refresh(): void;
-    getCache(): CacheCreep;
-    findSourceHarvester(): Source;
-    findAndMoveToSourcePos(target: Source): ScreepsReturnCode;
 }
