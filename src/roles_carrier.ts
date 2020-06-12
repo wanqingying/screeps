@@ -17,8 +17,8 @@ carrier.setUp = function (creep) {
     } else {
         let act = transferNearby(creep);
         if (act === ERR_NOT_FOUND) {
-            let { x, y } = w_config.freePlace.carrier;
-            moveToTarget(creep, new RoomPosition(x, y, creep.room.name));
+            // let { x, y } = w_config.freePlace.carrier;
+            // moveToTarget(creep, new RoomPosition(x, y, creep.room.name));
         }
     }
 };

@@ -71,7 +71,4 @@ export function executeTickOut() {
     }
 }
 
-let cp = Object.values(Game.creeps).find(c => c.memory.role === 'carrier');
-setTickInterval(3, () => {
-    console.log(' cp ', cp.name, cp.say('hi_free_' + cp.store.getFreeCapacity()), cp.id);
-});
+let cp = Object.values(Game.creeps).find(c => c.name === 'carrier_5');

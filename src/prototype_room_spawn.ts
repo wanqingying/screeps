@@ -4,7 +4,7 @@ export function checkCreep(room: Room) {
     // killCreepByConfig(room);
     // killCreepByCost(room);
     // killCreepByAuto(room);
-    checkSpawnCreep(room);
+    // checkSpawnCreep(room);
 }
 
 function checkSpawnCreep(room: Room) {
@@ -37,15 +37,15 @@ function checkSpawnCreepByConfig(room: Room): role_name_key | undefined {
 
     const list = Object.entries(current_exist)
         .map(([role, num]) => {
-            return { role: role, num: current_exist[role] };
+            return { role: role, current: current_exist[role] };
         })
         .filter(current => {
-            let a = current.num < cfg[current.role];
+            let a = current.current < cfg[current.role];
             let auto = w_config.role_auto.includes(current.role);
             return a && !auto;
         })
         .sort((a, b) => {
-            return a.num - b.num;
+            return a.current - b.current;
         });
     let target = list.shift();
     return target?.role;
@@ -150,7 +150,6 @@ function killCreepByCost(room: Room) {
         });
     let tg = cs.shift();
     if (tg && !room.spawning) {
-        console.log('kill by cost ', tg?.name, tg?.memory?.cost);
         tg.suicide();
         return;
     }
@@ -177,7 +176,6 @@ function killCreepByConfig(room: Room) {
             for (let i = 0; i < creeps.length; i++) {
                 let creep = creeps[i];
                 if (creep.memory?.role === role) {
-                    console.log(`kill by config cur/max ${exist}/${max} ${creep.name}`);
                     creep.suicide();
                     return;
                 }

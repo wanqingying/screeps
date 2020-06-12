@@ -96,6 +96,7 @@ export function getCreepBodyNum(creep: Creep, type: BodyPartConstant): number {
     return body[type] || 0;
 }
 
+// 用于spawn计算消耗
 export function getBodyCost(body: BodyPartConstant[]): number {
     let cost = 0;
     body.forEach(b => {

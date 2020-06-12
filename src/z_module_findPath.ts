@@ -602,7 +602,6 @@ function generateCostMatrix(room, pos) {
                 }
             }
         }
-        //console.log(room.name + ' costMat 设置清理 ' + clearDelay);
         if (!(Game.time + clearDelay in costMatrixCacheTimer)) {
             costMatrixCacheTimer[Game.time + clearDelay] = [];
         }
@@ -718,14 +717,12 @@ let temporalAvoidFrom, temporalAvoidTo;
 function routeCallback(nextRoomName, fromRoomName) {
     // 避开avoidRooms设置了的
     if (nextRoomName in avoidRooms) {
-        //console.log('Infinity at ' + nextRoomName);
         return Infinity;
     }
     return isHighWay(nextRoomName) ? 1 : 1.15;
 }
 function bypassRouteCallback(nextRoomName, fromRoomName) {
     if (fromRoomName == temporalAvoidFrom && nextRoomName == temporalAvoidTo) {
-        //console.log(`Infinity from ${fromRoomName} to ${nextRoomName}`);
         return Infinity;
     }
     return routeCallback(nextRoomName, fromRoomName);
@@ -952,7 +949,6 @@ function roomCallbackWithRoute(roomName) {
             roomName in costMatrixCache
                 ? costMatrixCache[roomName][findPathIgnoreCondition]
                 : emptyCostMatrix;
-        //console.log('in route ' + roomName);
         if (userCostCallback) {
             let resultCostMat = userCostCallback(
                 roomName,
@@ -964,7 +960,6 @@ function roomCallbackWithRoute(roomName) {
         }
         return costMat;
     }
-    //console.log('out route ' + roomName);
     return false; // 不在route上的不搜索
 }
 /**

@@ -5,8 +5,9 @@ let cfg: typeof cfg_local;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
     cfg = cfg_local;
 } else {
-    cfg = cfg_online;
+    cfg= cfg_online as any;
 }
+
 
 export const body_cost = {
     [MOVE]: 50,
@@ -51,9 +52,13 @@ export const config_global: ConfigGlobal = {
     role_auto: [],
     freePlace: cfg.freePlace as any,
     reserve_rooms: cfg.reserve_rooms,
+    rooms: cfg as any,
 };
 
 global.w_config = config_global;
+// global.rooms_n='fff'
+
+
 global.w_code = {
     SPAWN_BY_CONFIG: 8,
     SPAWN_BY_FORCE: 9,

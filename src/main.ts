@@ -1,7 +1,11 @@
 import './bootstrap';
+
 import { executeTickOut } from './lib_tick_out';
 
+import { load_spawn_check } from './lib_spawn_check';
+
 function main() {
+    load_spawn_check();
     Object.values(Game.creeps).forEach(creep => {
         let m = creep.memory?.role;
         if (!Object.values(w_role_name).includes(m)) {
