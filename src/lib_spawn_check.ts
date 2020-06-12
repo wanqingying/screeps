@@ -120,7 +120,7 @@ function getSpawnRole(room: Room) {
 }
 
 function prepareCache(room: Room) {
-    let che = cache[room.name];
+    let che = getCache(room);
     if (!che) {
         che = {
             c_energy_stop: false,
@@ -176,7 +176,15 @@ function getCache(room: Room): RoomCache {
     }
     let che = cache[room.name];
     if (!che) {
-        return prepareCache(room);
+        che = {
+            c_energy_stop: false,
+            c_roles_count: {},
+            c_spawn_fail_tick: 0,
+            c_energy: new ListA<number>(30),
+            c_spawn_code: null,
+            c_spawning_role: '',
+            c_refresh_creep: {},
+        };
     }
     return che;
 }

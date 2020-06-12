@@ -67,6 +67,6 @@ global.module_loaded = true;
 
 export function load() {
     global.w_config.rooms = cfg as any;
-    console.log('================load');
+    console.log('================loa88d');
     console.log(global.w_config.rooms);
 }
