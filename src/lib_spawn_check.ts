@@ -1,4 +1,4 @@
-import { getActionLockTarget, getBodyCost } from './lib_base';
+import { getBodyCost } from './lib_base';
 import { getCreepIndex } from './prototype_room_spawn';
 import { ListA } from './lib_base';
 
@@ -18,6 +18,7 @@ interface RoomCache {
 let cache: { [name: string]: RoomCache } = {};
 const spawn_before_die = 40;
 
+// 根据配置获取单位部件
 function getCreepBody(room: Room, role: role_name_key) {
     let che = getCache(room);
     if (che.c_energy_stop && che.c_spawn_fail_tick > 30) {
@@ -30,7 +31,7 @@ function getCreepBody(room: Room, role: role_name_key) {
     });
     return body;
 }
-
+// 生产单位执行
 function spawnCreep(room: Room, role: role_name_key) {
     const body = getCreepBody(room, role);
     const cost = getBodyCost(body);
@@ -62,7 +63,7 @@ function spawnCreep(room: Room, role: role_name_key) {
     }
     return ERR_NOT_FOUND;
 }
-
+// 生产单位流程
 function checkSpawnCreep(room: Room) {
     let che = getCache(room);
     let role = che.c_spawning_role;
@@ -84,7 +85,6 @@ function checkSpawnCreep(room: Room) {
         return spawnCreep(room, role);
     }
 }
-
 // 提前生产将耗尽的单位
 function getRefreshRole(room: Room) {
     const che = getCache(room);
@@ -99,7 +99,6 @@ function getRefreshRole(room: Room) {
         return t.role;
     }
 }
-
 // 根据配置生产单位
 function getSpawnRole(room: Room) {
     const current_exist = getCache(room).c_roles_count;
@@ -118,7 +117,7 @@ function getSpawnRole(room: Room) {
     let target = list.shift();
     return target?.role;
 }
-
+// 准备缓存
 function prepareCache(room: Room) {
     let che = getCache(room);
     if (!che) {
@@ -169,7 +168,7 @@ function prepareCache(room: Room) {
     cache[room.name] = che;
     return che;
 }
-
+// 获取缓存
 function getCache(room: Room): RoomCache {
     if (!cache) {
         cache = {};
@@ -188,7 +187,6 @@ function getCache(room: Room): RoomCache {
     }
     return che;
 }
-
 // 检查当前房间的状况来生成单位
 function getRoleBoost(room: Room): role_name_key | undefined {
     const che = getCache(room);
@@ -212,7 +210,7 @@ function getRoleBoost(room: Room): role_name_key | undefined {
         return w_role_name.carrier;
     }
 }
-
+// 外部模块
 export function load_spawn_check() {
     // console.log('config', JSON.stringify(w_config));
     Object.values(Game.rooms).forEach(room => {
