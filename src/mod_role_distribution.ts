@@ -227,6 +227,19 @@ function prepareCacheRoom(room: Room) {
         });
         che.transOut.addTask(task);
     });
+    room.find(FIND_TOMBSTONES).forEach(tom => {
+        RESOURCES_ALL.forEach(type => {
+            const used = tom.store.getUsedCapacity(type);
+            if (used > 0) {
+                const taskOut = generateTask('out', tom as any, {
+                    amount: used,
+                    resourceType: type,
+                    structureType: 'drop',
+                });
+                che.transOut.addTask(taskOut);
+            }
+        });
+    });
     // storage===========================
     const storage = room.storage;
     if (storage && storage.my) {

@@ -6,7 +6,7 @@ function main() {
     Object.values(Game.rooms).forEach(room => {
         console.log(
             room.name,
-            '------05-----778-online-866-----',
+            '-----555-8--',
             `${room.energyAvailable}/${room.energyCapacityAvailable}`
         );
     });

@@ -55,8 +55,8 @@ function harvestSource(creep: Creep) {
         return ERR_NOT_FOUND;
     }
     // 临死前发布定时任务 重新配对 避免拥挤
-    if (creep.ticksToLive < 10) {
-        setTickOut(15, () => {
+    if (creep.ticksToLive < 5) {
+        setTickOut(10, () => {
             Array.from(cache.keys()).forEach(k => cache.delete(k));
         });
     }

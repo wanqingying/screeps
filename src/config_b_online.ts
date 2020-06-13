@@ -8,7 +8,7 @@ export const cfg_online = {
             [w_role_name.scout]: 0,
             [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 2,
+            [w_role_name.upgrader]: 3,
             [w_role_name.repair]: 1,
         },
         creep_cfg_body: {
