@@ -19,7 +19,7 @@ export const cfg_local = {
             [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
             [w_role_name.claim]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w_role_name.repair]: {[MOVE]: 6, [WORK]: 4, [CARRY]: 10 },
+            [w_role_name.repair]: {[MOVE]: 6, [WORK]: 4, [CARRY]: 4 },
         },
         reserve_rooms: [],
         freePlace: {

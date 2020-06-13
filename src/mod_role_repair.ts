@@ -40,7 +40,6 @@ export function load_repair() {
 function run_repair(creep: Creep) {
     const che = cache[creep.room.name];
 
-
     if (isFull(creep)) {
         creep.memory.process = 'work';
     }
@@ -49,24 +48,27 @@ function run_repair(creep: Creep) {
         cache_creep[creep.id] = undefined;
     }
     if (creep.memory.process === 'pick') {
+        cache_creep[creep.id] = undefined;
         return get_resource(creep);
     }
 
     const structure = che.c_his_structure;
-    const rate_a = structure.hits / structure.hitsMax;
+    const rate_structure = structure.hits / structure.hitsMax;
 
     let target;
     let cache_id = cache_creep[creep.id];
     if (cache_id) {
-        let cache_t = Game.getObjectById<AnyStructure>(cache_id);
-        if (cache_t) {
-            let rate_c = cache_t.hits / cache_t.hitsMax;
-            if (war_part.includes(cache_t.structureType as any)) {
-                if (rate_a >= min_hits_rate) {
-                    target = cache_t;
+        let cache_target = Game.getObjectById<AnyStructure>(cache_id);
+        if (cache_target) {
+            // 如果缓存对象的hits未达到目标 继续
+            let rate_cache = cache_target.hits / cache_target.hitsMax;
+            if (war_part.includes(cache_target.structureType as any)) {
+                // 如果有低血建筑,优先低血建筑
+                if (rate_structure >= max_hits_rate) {
+                    target = cache_target;
                 }
-            } else if (rate_c < max_hits_rate) {
-                target = cache_t;
+            } else if (rate_cache < max_hits_rate) {
+                target = cache_target;
             }
         }
     }
@@ -80,14 +82,12 @@ function run_repair(creep: Creep) {
     }
 
     if (!target) {
-        const w_t = che.war_part;
-        if (w_t && w_t.hits < w_t.hitsMax) {
-            target = w_t;
+        const war_target = che.war_part;
+        if (war_target && war_target.hits < war_target.hitsMax) {
+            target = war_target;
         }
     }
-
     if (target) {
-        creep.say('r');
         cache_creep[creep.id] = target.id;
         const code = creep.repair(target);
         if (code === ERR_NOT_IN_RANGE) {
@@ -104,12 +104,12 @@ function run_repair(creep: Creep) {
 function prepareCache(room: Room) {
     let che: Cache = { c_his_structure: null, war_part: null };
     let min_hits = 1;
-    let min_war_hits = 99999999;
+    let min_war_hits = 999999999;
     room.find(FIND_STRUCTURES).forEach(s => {
         let rate = s.hits / s.hitsMax;
         if (war_part.includes(s.structureType as any)) {
             if (s.hits < min_war_hits) {
-                min_war_hits = rate;
+                min_war_hits = s.hits;
                 che.war_part = s;
             }
             return;
