@@ -1,18 +1,13 @@
 import { getSourceWithContainer } from './lib_room';
-import { findNearTarget, getActionLockTarget, getCreepBodyNum } from './lib_base';
 import { isCreepStop, moveToTarget } from './lib_creep';
-import { setTickOut } from './mod_tick_out';
 
-interface CacheSource {
+interface Cache2 {
     source: Source;
+    creeps: Creep[];
     container: StructureContainer | undefined;
-    work: number;
 }
-interface CacheRoom {
-    sources: CacheSource[];
-    tick?: number;
-}
-const cache_rooms: { [name: string]: CacheRoom } = {};
+
+const cache2: { [k: string]: Cache2[] } = {};
 
 export function load_harvest() {
     Object.values(Game.rooms).forEach(room => {
@@ -38,7 +33,7 @@ export function load_harvest() {
 
 const cache = new Map();
 function harvestSource(creep: Creep) {
-    const che = getCache(creep.room);
+    const che2 = cache2[creep.room.name];
 
     let key = `${creep.id}_harvest`;
     let id = cache.get(key);
@@ -46,38 +41,25 @@ function harvestSource(creep: Creep) {
     if (id) {
         target = Game.getObjectById(id);
     } else {
-        let sh = Array.from(che.sources);
-        let si = { work: 9, source: null };
-        sh.forEach(s => {
-            if (s.work < si.work) {
-                si = s;
-            }
-        });
-        if (si.source?.id) {
-            si.work += 1;
-            console.log(creep.name, '========================harvest');
-            sh.forEach(s => console.log(s.work));
-            target = si.source;
-            cache.set(key, target.id);
+        let sh = che2.find(s => s.creeps.length === 0);
+        if (!sh) {
+            sh = che2[0];
         }
+        sh.creeps.push(creep);
+        target = sh.source;
+        cache.set(key, target.id);
     }
     if (!target) {
         cache.delete(key);
         return ERR_NOT_FOUND;
     }
 
-    // if (target.energy === 0 && target.ticksToRegeneration > 500) {
-    //     // 资源采尽时切换目标
-    //     unLock();
-    //     return ERR_NOT_FOUND;
-    //
-
-    findAndMoveToSourcePos(creep, target, che.sources);
+    findAndMoveToSourcePos(creep, target, che2);
 
     return creep.harvest(target);
 }
 
-function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[]) {
+function findAndMoveToSourcePos(creep: Creep, target: any, sources: Cache2[]) {
     let sh = sources.find(t => t.source.id === target.id);
     if (sh?.container) {
         return moveToTarget(creep, sh.container.pos);
@@ -86,27 +68,11 @@ function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[
     }
 }
 
-function getCache(room: Room): CacheRoom {
-    let che: CacheRoom = cache_rooms[room.name];
-    if (!che?.tick) {
-        che = {
-            tick: Game.time,
-            sources: [],
-        };
-        cache_rooms[room.name] = che;
-    }
-    che.tick = Game.time;
-    return che;
-}
-
-function updateCache(room: Room, newState: CacheRoom) {
-    let che = getCache(room);
-    cache_rooms[room.name] = Object.assign(che, newState);
-}
-
 function prepareCache(room: Room) {
-    const sources: CacheSource[] = getSourceWithContainer(room).map(m => {
-        return { source: m.source, container: m.container, work: 0 };
-    });
-    updateCache(room, { sources: sources });
+    let sous: Cache2[] = getSourceWithContainer(room).map(s => ({
+        source: s.source,
+        container: s.container,
+        creeps: [],
+    }));
+    cache2[room.name] = sous;
 }
