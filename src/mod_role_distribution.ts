@@ -43,8 +43,8 @@ const w_out = {
     // 矿区容器
     harvester_container: 90,
     // 升级用的容器
-    controller_container: 20,
-    [STRUCTURE_STORAGE]: 50,
+    controller_container: 30,
+    [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
     [STRUCTURE_EXTENSION]: 9,
@@ -244,7 +244,6 @@ function prepareCacheRoom(room: Room) {
             amount: free,
             resourceType: 'any',
         });
-        console.log('storate in ', log_task(taskIn));
         che.transIn.addTask(taskIn);
     }
     // spawn extension===================
@@ -286,18 +285,19 @@ function prepareCacheRoom(room: Room) {
                         resourceType: type,
                         structureType: stc,
                     });
-                    log_task(taskOut);
 
                     che.transOut.addTask(taskOut);
                 }
             });
             const free = s.store.getFreeCapacity();
-            const taskIn: TransTask = generateTask('in', s, {
-                amount: free,
-                resourceType: 'any',
-                structureType: stc,
-            });
-            che.transIn.addTask(taskIn);
+            if (stc !== 'harvester_container') {
+                const taskIn: TransTask = generateTask('in', s, {
+                    amount: free,
+                    resourceType: 'any',
+                    structureType: stc,
+                });
+                che.transIn.addTask(taskIn);
+            }
         });
     // tower
     Array.from(structures)
@@ -375,8 +375,6 @@ export function give_resource(creep: Creep, structures?: string[]) {
 }
 
 function run_task(creep: Creep, task: TransTask) {
-    console.log('task ', creep.name);
-    log_task(task);
     const [x, y, name] = task.pos;
     const pos = new RoomPosition(x, y, name);
     let code;

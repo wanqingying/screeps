@@ -1,4 +1,11 @@
-import { findNearTarget, findRepairTarget, getActionLockTarget, isEmpty, isFull } from './lib_base';
+import {
+    findNearTarget,
+    findRepairTarget,
+    findRepairTargetC,
+    getActionLockTarget,
+    isEmpty,
+    isFull,
+} from './lib_base';
 import { checkRepair, isCreepStop, moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 
@@ -10,7 +17,7 @@ export function load_builder() {
         if (isCreepStop(creep)) {
             return;
         }
-        if (creep.memory?.role === w_role_name.builder) {
+        if (creep.memory?.role === 'builder') {
             try {
                 run_builder(creep);
             } catch (e) {
@@ -25,14 +32,12 @@ export function load_builder() {
 // 工作优先级 :修复低血建筑,建造,修复高血建筑,修墙
 function run_builder(creep: Creep) {
     if (creep.room.find(FIND_HOSTILE_CREEPS).length > 0) {
-        const pos = w_config.freePlace.builder;
+        const pos = w_config.freePlace?.builder || { x: 25, y: 25 };
         moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
         return;
     }
-    let target = get_repair_target(creep.room, [], [STRUCTURE_WALL, STRUCTURE_RAMPART]);
-    if (target && target.hits < target.hitsMax / 3) {
-        return repair_target(creep, target);
-    }
+    let target_repair = findRepairTargetC(creep, [], [STRUCTURE_WALL, STRUCTURE_RAMPART]);
+    console.log('bbb', target_repair);
 
     if (creep.memory.building && isEmpty(creep)) {
         creep.memory.building = false;
@@ -42,8 +47,18 @@ function run_builder(creep: Creep) {
         creep.memory.building = true;
         creep.say('b');
     }
-
+    console.log(1);
     if (creep.memory.building) {
+        if (
+            target_repair &&
+            target_repair.hits < target_repair.hitsMax / 3 &&
+            ![STRUCTURE_WALL, STRUCTURE_RAMPART].includes(target_repair.structureType as any)
+        ) {
+            creep.say('repair');
+            console.log('repare', target_repair);
+            console.log(target_repair.hits, target_repair.hitsMax);
+            return repair_target(creep, target_repair);
+        }
         // 建筑
         let { target, unLock } = getActionLockTarget<any>(creep, 'builder_find', () => {
             let max_progress = 0;
@@ -60,11 +75,13 @@ function run_builder(creep: Creep) {
         });
         if (target) {
             let act = creep.build(target);
-            moveToTarget(creep, target, 1);
+            creep.say('build');
+            moveToTarget(creep, target, 2);
             if (act !== OK) {
                 unLock();
             }
         } else {
+            creep.say('wall');
             unLock();
             checkRepair(creep, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
         }
@@ -73,32 +90,24 @@ function run_builder(creep: Creep) {
     }
 }
 
-function get_repair_target(room: Room, includes?: any[], excludes?: any[]) {
-    return room
-        .findBy(FIND_MY_STRUCTURES, t => {
-            if (includes && includes.length && !repair_includes.includes(t.structureType)) {
-                return false;
-            }
-            if (excludes && excludes.length && repair_excludes.includes(t.structureType)) {
-                return false;
-            }
-            return t.hits < (t.hitsMax * 4) / 5;
-        })
-        .sort((a, b) => {
-            return a.hits - b.hits;
-        })
-        .shift();
-}
-
 function repair_target(creep: Creep, _target: any) {
-    const { target, unLock } = getActionLockTarget(creep, 'check_repair_creep', () => {
-        return _target;
-    });
+    const { target, unLock } = getActionLockTarget<StructureContainer>(
+        creep,
+        'check_repair_creep_cc',
+        () => {
+            return _target;
+        }
+    );
 
     if (!target) {
+        unLock();
         return ERR_NOT_FOUND;
     }
-    moveToTarget(creep, target);
+    if (target.his / target.hisMax > 0.6) {
+        unLock();
+        return;
+    }
+    moveToTarget(creep, target, 2);
     let act = creep.repair(target);
     if (isEmpty(creep)) {
         unLock();

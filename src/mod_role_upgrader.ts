@@ -32,7 +32,7 @@ function run_upgrader(creep: Creep) {
         moveToTarget(creep, creep.room.controller.pos);
     } else {
         creep.say('g');
-        get_resource(creep, [STRUCTURE_STORAGE]);
+        get_resource(creep, [STRUCTURE_STORAGE, 'controller_container', STRUCTURE_CONTAINER]);
         // get_resource(creep);
     }
 }

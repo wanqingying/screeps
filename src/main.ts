@@ -1,40 +1,35 @@
 import './bootstrap';
 
-import {
-    load_tick_out,
-    load_spawn_check,
-    load_tower_logic,
-    load_harvest,
-    load_distribution_transport,
-    load_builder,
-    load_upgrader,
-    load_starter,
-    load_claim,
-} from './mod';
+import * as mod from './mod';
 
 function main() {
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, '----------------------', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log(
+            room.name,
+            '----------------------',
+            `${room.energyAvailable}/${room.energyCapacityAvailable}`
+        );
     });
     // 生产单位
-    load_spawn_check();
+    mod.load_spawn_check();
     // 防御塔
-    load_tower_logic();
+    mod.load_tower_logic();
     // 采矿
-    load_harvest();
+    mod.load_harvest();
     // 运输
-    load_distribution_transport();
-    load_builder();
-    load_upgrader();
-    load_starter();
-    load_claim();
+    mod.load_distribution_transport();
+    mod.load_builder();
+    mod.load_upgrader();
+    mod.load_starter();
+    mod.load_claim();
+    mod.load_repair();
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
         }
     });
     // 放在最后执行可支持 setTickOut(0,fn)
-    load_tick_out();
+    mod.load_tick_out();
 }
 
 module.exports.loop = main;

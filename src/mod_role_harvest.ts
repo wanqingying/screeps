@@ -1,6 +1,7 @@
 import { getSourceWithContainer } from './lib_room';
 import { findNearTarget, getActionLockTarget, getCreepBodyNum } from './lib_base';
 import { isCreepStop, moveToTarget } from './lib_creep';
+import { setTickOut } from './mod_tick_out';
 
 interface CacheSource {
     source: Source;
@@ -35,53 +36,44 @@ export function load_harvest() {
     });
 }
 
+const cache = new Map();
 function harvestSource(creep: Creep) {
     const che = getCache(creep.room);
-    const { target, unLock } = getActionLockTarget(creep, 'harvest_source', () => {
-        let sh = Array.from(che.sources);
 
-        let has_container;
-        let min_work = 99;
+    let key = `${creep.id}_harvest`;
+    let id = cache.get(key);
+    let target;
+    if (id) {
+        target = Game.getObjectById(id);
+    } else {
+        let sh = Array.from(che.sources);
+        let si = { work: 9, source: null };
         sh.forEach(s => {
-            if (s.container) {
-                has_container = true;
-            }
-            if (s.work < min_work) {
-                min_work = s.work;
+            if (s.work < si.work) {
+                si = s;
             }
         });
-        console.log(creep.room.name, 'harvest=====');
-        console.log(JSON.stringify(sh.map(s => ({ id: s.source.id, work: s.work }))));
-        console.log(min_work);
-        sh = sh.filter(s => s.work === min_work);
-        if (has_container) {
-            sh = sh.filter(s => s.container);
+        if (si.source?.id) {
+            si.work += 1;
+            console.log(creep.name, '========================harvest');
+            sh.forEach(s => console.log(s.work));
+            target = si.source;
+            cache.set(key, target.id);
         }
-
-        let ch = findNearTarget<Source>(
-            creep.room.controller,
-            sh.map(s => s.source)
-        );
-
-        if (ch) {
-            let t = sh.find(s => s.source.id === ch.id);
-            t.work += getCreepBodyNum(creep, WORK);
-        }
-        return ch;
-    });
-
+    }
     if (!target) {
-        unLock();
+        cache.delete(key);
         return ERR_NOT_FOUND;
     }
 
-    if (target.energy === 0 && target.ticksToRegeneration > 500) {
-        // 资源采尽时切换目标
-        unLock();
-        return ERR_NOT_FOUND;
-    }
+    // if (target.energy === 0 && target.ticksToRegeneration > 500) {
+    //     // 资源采尽时切换目标
+    //     unLock();
+    //     return ERR_NOT_FOUND;
+    //
 
     findAndMoveToSourcePos(creep, target, che.sources);
+
     return creep.harvest(target);
 }
 

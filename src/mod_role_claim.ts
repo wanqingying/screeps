@@ -26,7 +26,7 @@ export function load_claim() {
     }
     if (cache.process === 0) {
         // todo 生产单位移动过去
-        spawnCreep(from_room, w_role_name.claim);
+        spawnCreep(from_room, w_role_name.claim, true);
         return;
     }
     if (cache.process === 1) {
@@ -48,7 +48,7 @@ export function load_claim() {
             let cur_num = cache.ext_creeps[role] || 0;
             if (cur_num < num) {
                 console.log('spawn claim creep', role);
-                spawnCreep(from_room, role, { target_room: cfg_claim.name });
+                spawnCreep(from_room, role, { target_room: cfg_claim.name }, true);
                 break;
             }
         }

@@ -6,5 +6,6 @@ export const role_name = {
     builder: 'builder',
     scout: 'scout',
     claim: 'claim',
+    repair: 'repair',
 };
 global.w_role_name = role_name;

@@ -20,6 +20,7 @@ interface RoomCache {
 }
 let cache: { [name: string]: RoomCache } = {};
 const spawn_before_die = 40;
+const max_fail_tick = 150;
 
 // 外部模块
 export function load_spawn_check() {
@@ -39,8 +40,15 @@ export function load_spawn_check() {
 // 根据配置获取单位部件
 function getCreepBody(room: Room, role: role_name_key) {
     let che = getCache(room);
-    if (che.c_energy_stop && che.c_spawn_fail_tick > 30) {
-        return [MOVE, WORK, CARRY, CARRY];
+    if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
+        switch (role) {
+            case 'carrier':
+                return [MOVE, CARRY, MOVE, CARRY];
+            case 'harvester':
+                return [MOVE, MOVE, WORK, WORK];
+            default:
+                return [MOVE, WORK, CARRY, CARRY];
+        }
     }
     const cfg = w_config.rooms[room.name].creep_cfg_body[role];
     let body = [];
@@ -50,13 +58,19 @@ function getCreepBody(room: Room, role: role_name_key) {
     return body;
 }
 // 生产单位执行
-export function spawnCreep(room: Room, role: role_name_key, mem?: any) {
+export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: boolean) {
+    const che = getCache(room);
+
+    if (outer) {
+        if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
+            return;
+        }
+    }
     const body = getCreepBody(room, role);
     const cost = getBodyCost(body);
     const index = getCreepIndex();
     const name = `${role}_${index}`;
     const spawns = room.findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_SPAWN);
-    const che = getCache(room);
     if (spawns.length) {
         const spawn: StructureSpawn = spawns.pop() as StructureSpawn;
         if (spawn.spawning) {
@@ -87,6 +101,10 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any) {
 function checkSpawnCreep(room: Room) {
     let che = getCache(room);
     let role = che.c_spawning_role;
+    if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
+        role = '';
+    }
+
     if (role) {
         // 如果上次生产失败 下个tick继续生产 保证每次的生产都是成功的
         return spawnCreep(room, role);
@@ -101,7 +119,6 @@ function checkSpawnCreep(room: Room) {
     }
     role = getRefreshRole(room);
     if (role) {
-        console.log('refresh ', role);
         return spawnCreep(room, role);
     }
 }

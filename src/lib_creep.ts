@@ -7,7 +7,7 @@ import {
     getCreepBodyNum,
     findByOrder,
     isContainerNearSource,
-    findRepairTarget,
+    findRepairTarget, findRepairTargetC,
 } from './lib_base';
 
 // 卸货
@@ -261,8 +261,9 @@ export function moveToTarget(creep: Creep, target: RoomPosition, dis?: number) {
 
 export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): ScreepsReturnCode {
     const { target, unLock } = getActionLockTarget(creep, 'check_repair_creep', () => {
-        return findRepairTarget(creep.room, include, exclude);
+        return findRepairTargetC(creep, include, exclude);
     });
+    console.log(5,target);
 
     if (!target) {
         return ERR_NOT_FOUND;

@@ -1,4 +1,3 @@
-
 export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
     const tt = targets.sort((a, b) => {
@@ -177,13 +176,37 @@ export function getCreepIndex() {
     }
 }
 
-export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
-    let targets = room
-        .findBy(FIND_MY_STRUCTURES, t => {
-            if (types && !types.includes(t.structureType)) {
+export function findRepairTargetC(
+    creep: Creep,
+    types?: any[] | null,
+    excludes?: any[]
+): AnyStructure {
+    let min_hit = 99;
+    let targets = creep.room
+        .findBy(FIND_STRUCTURES, t => {
+            if (types && types.length && !types.includes(t.structureType)) {
                 return false;
             }
-            if (excludes && excludes.includes(t.structureType)) {
+            if (excludes && excludes.length && excludes.includes(t.structureType)) {
+                return false;
+            }
+            if (t.hits / t.hitsMax < min_hit) {
+                min_hit = t.hits / t.hitsMax;
+            }
+            return t.hits < (t.hitsMax * 4) / 5;
+        })
+        .filter(a => {
+            return a.hits / a.hitsMax <= min_hit + 0.01;
+        });
+    return findNearTarget(creep, targets);
+}
+export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
+    let targets = room
+        .findBy(FIND_STRUCTURES, t => {
+            if (types && types.length && !types.includes(t.structureType)) {
+                return false;
+            }
+            if (excludes && excludes.length && excludes.includes(t.structureType)) {
                 return false;
             }
             return t.hits < (t.hitsMax * 4) / 5;
