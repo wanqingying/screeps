@@ -39,8 +39,6 @@ export function load_repair() {
 // 工作优先级 :修复低血建筑,建造,修复高血建筑,修墙
 function run_repair(creep: Creep) {
     const che = cache[creep.room.name];
-    console.log('che');
-    console.log(che.c_his_structure.hits, che.c_his_structure.id);
     let target;
     let cache_id = cache_creep[creep.id];
 

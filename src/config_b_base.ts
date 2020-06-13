@@ -66,9 +66,3 @@ global.w_code = {
     SPAWN_BY_ROOM: 6,
 } as any;
 global.module_loaded = true;
-
-export function load() {
-    global.w_config.rooms = cfg as any;
-    console.log('================loa88d');
-    console.log(global.w_config.rooms);
-}

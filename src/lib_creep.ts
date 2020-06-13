@@ -263,7 +263,6 @@ export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): Scr
     const { target, unLock } = getActionLockTarget(creep, 'check_repair_creep', () => {
         return findRepairTargetC(creep, include, exclude);
     });
-    console.log(5,target);
 
     if (!target) {
         return ERR_NOT_FOUND;

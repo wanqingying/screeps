@@ -57,9 +57,6 @@ function harvestSource(creep: Creep) {
         let sourceH = che.sources.sort((a, b) => {
             return a.work - b.work;
         });
-        sourceH.forEach(s => {
-            console.log(s.source.id, s.work);
-        });
         let t = Array.from(sourceH).shift();
         if (t) {
             t.work += getCreepBodyNum(creep, WORK);

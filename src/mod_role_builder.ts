@@ -37,7 +37,6 @@ function run_builder(creep: Creep) {
         return;
     }
     let target_repair = findRepairTargetC(creep, [], [STRUCTURE_WALL, STRUCTURE_RAMPART]);
-    console.log('bbb', target_repair);
 
     if (creep.memory.building && isEmpty(creep)) {
         creep.memory.building = false;
@@ -47,7 +46,6 @@ function run_builder(creep: Creep) {
         creep.memory.building = true;
         creep.say('b');
     }
-    console.log(1);
     if (creep.memory.building) {
         if (
             target_repair &&
@@ -55,8 +53,6 @@ function run_builder(creep: Creep) {
             ![STRUCTURE_WALL, STRUCTURE_RAMPART].includes(target_repair.structureType as any)
         ) {
             creep.say('repair');
-            console.log('repare', target_repair);
-            console.log(target_repair.hits, target_repair.hitsMax);
             return repair_target(creep, target_repair);
         }
         // 建筑
