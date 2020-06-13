@@ -19,7 +19,7 @@ interface RoomCache {
     };
 }
 let cache: { [name: string]: RoomCache } = {};
-const spawn_before_die = 40;
+const spawn_before_die = 20;
 const max_fail_tick = 150;
 
 // 外部模块
@@ -59,8 +59,11 @@ function getCreepBody(room: Room, role: role_name_key) {
 }
 // 生产单位执行
 export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: boolean) {
+    let k = Memory.creeps_spawn_index || 0;
+    if (typeof k !== 'number') {
+        k = 0;
+    }
     const che = getCache(room);
-
     if (outer) {
         if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
             return;
@@ -83,6 +86,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
         if (act === OK) {
             che.c_spawning_role = '';
             che.c_spawn_fail_tick = 0;
+            Memory.creeps_spawn_index = k + 1;
         } else {
             che.c_spawning_role = role;
             che.c_spawn_fail_tick++;

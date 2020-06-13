@@ -35,16 +35,17 @@ export function load_harvest() {
 const cache = new Map();
 function harvestSource(creep: Creep) {
     const che2 = cache2[creep.room.name];
-    let sh = che2.find(s => s.creeps.length === 0);
     let key = `${creep.id}_harvest`;
     let id = cache.get(key);
     let target;
     if (id) {
         target = Game.getObjectById(id);
     } else {
-        if (!sh) {
-            sh = che2[0];
-        }
+        let sh = che2.find(s => s.creeps.length < 1);
+        // 每个矿分配一个
+        // if (!sh) {
+        //     sh = che2[0];
+        // }
         sh.creeps.push(creep);
         target = sh.source;
         cache.set(key, target.id);

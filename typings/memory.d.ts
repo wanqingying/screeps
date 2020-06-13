@@ -1,5 +1,5 @@
 declare interface Memory {
-    creeps_spawn_index: number[];
+    creeps_spawn_index: number;
     resource_energy: { [id: string]: { miners: string[] } };
     renew_creeps?: { name: string; ticks: number }[];
 }

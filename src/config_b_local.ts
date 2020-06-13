@@ -14,7 +14,7 @@ export const cfg_local = {
         creep_cfg_body: {
             [w_role_name.carrier]: { [MOVE]: 5, [CARRY]: 15 },
             [w_role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
-            [w_role_name.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w_role_name.harvester]: { [MOVE]: 2, [WORK]: 7, [CARRY]: 0 },
             [w_role_name.builder]: { [MOVE]: 10, [WORK]: 4, [CARRY]: 12 },
             [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
