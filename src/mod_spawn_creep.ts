@@ -251,10 +251,11 @@ function getRoleBoost(room: Room): role_name_key | undefined {
     if (current_carrier < 1) {
         return w_role_name.carrier;
     }
-    if (current_harvester < 2) {
-        return w_role_name.harvester;
-    }
     if (current_carrier < 2) {
         return w_role_name.carrier;
     }
+    if (current_harvester < 2) {
+        return w_role_name.harvester;
+    }
+
 }

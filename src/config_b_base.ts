@@ -2,7 +2,7 @@ import { cfg_local } from './config_b_local';
 import { cfg_online } from './config_b_online';
 
 let cabs = { local: cfg_local, online: cfg_online };
-let key = 'online';
+let key: string;
 if (Game.shard.name === 'LAPTOP-B07N3SVP') {
     key = 'local';
 } else {
@@ -19,10 +19,6 @@ export const body_cost = {
     [HEAL]: 250,
     [CLAIM]: 600,
     [TOUGH]: 10,
-};
-const freePlace = {
-    [w_role_name.carrier]: { x: 23, y: 40 },
-    [w_role_name.builder]: { x: 24, y: 27 },
 };
 
 global.w_roles = {} as Roles;

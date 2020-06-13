@@ -6,7 +6,7 @@ function main() {
     Object.values(Game.rooms).forEach(room => {
         console.log(
             room.name,
-            '-----555-8--',
+            '--sss85rt-',
             `${room.energyAvailable}/${room.energyCapacityAvailable}`
         );
     });
@@ -21,7 +21,7 @@ function main() {
     mod.load_builder();
     mod.load_upgrader();
     mod.load_starter();
-    mod.load_claim();
+    // mod.load_claim();
     mod.load_repair();
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
