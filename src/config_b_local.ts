@@ -69,4 +69,3 @@ export const cfg_local = {
         claim: 'W2N7',
     },
 };
-console.log('local =============================');
