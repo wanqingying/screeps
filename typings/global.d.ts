@@ -19,7 +19,20 @@ declare interface ConfigGlobal {
     // auto spawn role
     role_auto: role_name_key[];
     reserve_rooms: string[];
-    rooms: { [name: string]: { creep_cfg_num: CreepCfgNum; creep_cfg_body: CreepCfgBody } };
+    rooms: {
+        [name: string]: CfgRoom;
+    };
+}
+
+interface CfgRoom {
+    creep_cfg_num: CreepCfgNum;
+    creep_cfg_body: CreepCfgBody;
+    claims: Claims;
+}
+
+interface Claims{
+    name:string,
+    creep:any[][]
 }
 
 declare interface W_Utils {

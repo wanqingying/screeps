@@ -1,5 +1,3 @@
-import { setTickOut } from './mod';
-import { getSourceWithContainer } from './lib_room';
 
 export function findNearTarget<T>(base, targets: any[]): T {
     const c = base.pos || base;
@@ -31,9 +29,9 @@ export function getActionLockTarget<T>(
         target = Game.getObjectById(cache_id);
     } else {
         target = getTarget();
-        if (tickLimit && target) {
-            setTickOut(tickLimit, reset);
-        }
+        // if (tickLimit && target) {
+        //     setTickOut(tickLimit, reset);
+        // }
         if (target) {
             w_cache.set(cache_key, target?.id);
         }
@@ -177,4 +175,37 @@ export function getCreepIndex() {
             return i;
         }
     }
+}
+
+export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
+    let targets = room
+        .findBy(FIND_MY_STRUCTURES, t => {
+            if (types && !types.includes(t.structureType)) {
+                return false;
+            }
+            if (excludes && excludes.includes(t.structureType)) {
+                return false;
+            }
+            return t.hits < (t.hitsMax * 4) / 5;
+        })
+        .sort((a, b) => {
+            return a.hits - b.hits;
+        });
+    return targets.shift();
+}
+
+// 获取房间内 source 和旁边 container 配对信息
+export function getSourceWithContainer(
+    room: Room
+): { source: Source; container: StructureContainer | undefined }[] {
+    const containers = room.findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_CONTAINER);
+    return room.find(FIND_SOURCES).map(source => {
+        const near_container = findNearTarget(source, containers) as StructureContainer;
+        const far = w_utils.count_distance(near_container?.pos, source?.pos);
+        if (far <= 2 && near_container) {
+            return { source: source, container: near_container };
+        } else {
+            return { source: source, container: undefined };
+        }
+    });
 }

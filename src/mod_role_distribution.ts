@@ -1,5 +1,11 @@
-import { moveToTarget } from './lib_creep';
-import { isContainerNearController, isContainerNearSource, isEmpty, isFull } from './lib_base';
+import { isCreepStop, moveToTarget } from './lib_creep';
+import {
+    findNearTarget,
+    isContainerNearController,
+    isContainerNearSource,
+    isEmpty,
+    isFull,
+} from './lib_base';
 
 type resType = ResourceConstant | 'any';
 type strType = StructureConstant | 'drop' | 'harvester_container' | 'controller_container';
@@ -23,9 +29,9 @@ interface CacheRoom {
     transOut: TransList;
 }
 
-// 单位资源存量大于某个值后 单位会倾向于卸货 处理资源需求任务 0:有资源就卸货,1:只有装满才会卸货
+// 单位资源存量大于x后 单位会倾向于卸货 0:有资源就卸货,1:只有装满才会卸货
 // 单位可以接多个同种资源类型的任务
-const x = 0.5;
+const x = 0.9;
 // 发布任务的最小数量,小于此数量不发布运输任务 目前适用于 drop 防止反复捡
 const minAmo = 40;
 // 接收任务的最小空间,小于此空间不接收任务
@@ -39,25 +45,23 @@ const w_out = {
     // 升级用的容器
     controller_container: 20,
     [STRUCTURE_STORAGE]: 50,
-    [STRUCTURE_SPAWN]: 0,
+    [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
-    [STRUCTURE_EXTENSION]: 0,
-    [STRUCTURE_CONTAINER]: 30,
+    [STRUCTURE_EXTENSION]: 9,
+    [STRUCTURE_CONTAINER]: 40,
 };
 const w_in = {
-    // 丢地上的
-    drop: 100,
-    // 矿区容器
-    harvester_container: 90,
-    // 升级用的容器
-    controller_container: 20,
-    [STRUCTURE_STORAGE]: 50,
-    [STRUCTURE_SPAWN]: 0,
-    [STRUCTURE_TOWER]: 0,
-    [STRUCTURE_EXTENSION]: 0,
-    [STRUCTURE_CONTAINER]: 30,
+    drop: 0,
+    harvester_container: 0,
+    controller_container: 50,
+    [STRUCTURE_STORAGE]: 30,
+    [STRUCTURE_SPAWN]: 90,
+    [STRUCTURE_TOWER]: 80,
+    [STRUCTURE_EXTENSION]: 100,
+    [STRUCTURE_CONTAINER]: 50,
 };
 const cache_creep_task = {} as any;
+const cache_creep_switch = {} as any;
 
 class TransList {
     private readonly trans_dec: 'in' | 'out';
@@ -83,22 +87,59 @@ class TransList {
         }
     };
     // structures 偏好的建筑类型
-    public getTask = (creep: Creep, structures?: StructureConstant[]): TransTask => {
-        let s: typeof w_in;
+    public getTask = (creep: Creep, structures?: string[]): TransTask => {
+        let ws: typeof w_in;
         if (this.trans_dec === 'in') {
-            s = w_in;
+            ws = w_in;
         } else {
-            s = w_out;
+            ws = w_out;
         }
-        const bs = Array.from(this.array).sort((a, b) => {
-            const am = a.amount - a.amount_rec;
-            const bm = b.amount - b.amount_rec;
-            const ka = s[a.structureType];
-            const kb = s[b.structureType];
-            return am * ka - bm * kb;
+
+        let max_w = 0;
+        // 优先的建筑不存在 则无效
+        // 如果存在优先建筑 就从优先建筑里取任务
+        let prior_structure = 0;
+        let bs = Array.from(this.array).filter(a => {
+            // 筛选未完成的任务amount<amount_rec
+            if (a.amount <= a.amount_rec) {
+                return false;
+            }
+            const wa = ws[a.structureType];
+            // 统计最高权重
+            if (wa > max_w) {
+                max_w = wa;
+            }
+            // 统计优先建筑数量
+            if (structures && structures.includes(a.structureType)) {
+                prior_structure += 1;
+            }
+            return true;
         });
-        let task = bs.shift();
-        this.addRecord(creep, task);
+        bs = bs.filter(s => {
+            const wa = ws[s.structureType];
+
+            // 筛选优先的
+            if (prior_structure > 0) {
+                if (structures.includes(s.structureType)) {
+                    return true;
+                }
+            } else {
+                // 筛选权重最高的
+                if (wa === max_w) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        const ps = Array.from(bs).map(t => {
+            return { pos: { x: t.pos[0], y: t.pos[1] }, id: t.id };
+        });
+        // 有多个就选最近的
+        let near = findNearTarget(creep, ps);
+        let task = bs.find(t => t.id === (near as any)?.id);
+        if (task) {
+            this.addRecord(creep, task);
+        }
         return task;
     };
     public addRecord = (creep: Creep, task: TransTask) => {
@@ -119,13 +160,11 @@ class TransList {
     };
     public getTaskById = (creep: Creep, id?: string): TransTask => {
         let task = this.array.find(t => t.trans_id === id);
-        this.addRecord(creep, task);
+        if (task) {
+            this.addRecord(creep, task);
+        }
         return task;
     };
-    // 匹配所有任务和单位 算法复杂度 O(n2) todo 待优化
-    // public matchTackWithCreeps =()=>{
-    //
-    // }
 }
 
 const cache: { [name: string]: CacheRoom } = {};
@@ -140,8 +179,13 @@ export function load_distribution_transport() {
                 console.log(e.message);
                 console.log(e.stack);
             }
-
             room.find(FIND_MY_CREEPS).forEach(creep => {
+                if (isCreepStop(creep)) {
+                    return;
+                }
+                if (creep.memory?.role !== w_role_name.carrier) {
+                    return;
+                }
                 try {
                     run_transport(creep);
                 } catch (e) {
@@ -169,13 +213,14 @@ function getCache(room: Room) {
 
 function prepareCacheRoom(room: Room) {
     const che = getCache(room);
-    const structures = room.findBy(FIND_MY_STRUCTURES);
+    const structures = room.findBy(FIND_STRUCTURES);
 
+    // drop=============================================
     room.find(FIND_DROPPED_RESOURCES).forEach(resource => {
         if (resource.amount < minAmo) {
             return;
         }
-        let task = generateTask(resource as any, {
+        let task = generateTask('out', resource as any, {
             amount: resource.amount,
             resourceType: resource.resourceType,
             structureType: 'drop',
@@ -189,12 +234,17 @@ function prepareCacheRoom(room: Room) {
         RESOURCES_ALL.forEach(type => {
             const used = storage.store.getUsedCapacity(type);
             if (used > 0) {
-                const taskOut = generateTask(storage, { amount: used, resourceType: type });
+                const taskOut = generateTask('out', storage, { amount: used, resourceType: type });
                 che.transOut.addTask(taskOut);
             }
         });
         const free = storage.store.getFreeCapacity();
-        const taskIn: TransTask = generateTask(storage, { amount: free, resourceType: 'any' });
+
+        const taskIn: TransTask = generateTask('in', storage, {
+            amount: free,
+            resourceType: 'any',
+        });
+        console.log('storate in ', log_task(taskIn));
         che.transIn.addTask(taskIn);
     }
     // spawn extension===================
@@ -205,18 +255,20 @@ function prepareCacheRoom(room: Room) {
             const free = s.store.getFreeCapacity(RESOURCE_ENERGY);
             if (used > 0) {
                 che.transOut.addTask(
-                    generateTask(s, { amount: used, resourceType: RESOURCE_ENERGY })
+                    generateTask('out', s, { amount: used, resourceType: RESOURCE_ENERGY })
                 );
             }
             if (free > 0) {
-                che.transOut.addTask(
-                    generateTask(s, { amount: free, resourceType: RESOURCE_ENERGY })
+                che.transIn.addTask(
+                    generateTask('in', s, { amount: free, resourceType: RESOURCE_ENERGY })
                 );
             }
         });
     // container=========================
     Array.from(structures as any)
-        .filter(s => (s as any).structureType === STRUCTURE_CONTAINER)
+        .filter(s => {
+            return (s as any).structureType === STRUCTURE_CONTAINER;
+        })
         .forEach((s: StructureContainer) => {
             let stc: strType = s.structureType;
             if (isContainerNearSource(room, s)) {
@@ -229,16 +281,18 @@ function prepareCacheRoom(room: Room) {
             RESOURCES_ALL.forEach(type => {
                 const used = s.store.getUsedCapacity(type);
                 if (used > 0) {
-                    const taskOut = generateTask(s, {
+                    const taskOut = generateTask('out', s, {
                         amount: used,
                         resourceType: type,
                         structureType: stc,
                     });
+                    log_task(taskOut);
+
                     che.transOut.addTask(taskOut);
                 }
             });
             const free = s.store.getFreeCapacity();
-            const taskIn: TransTask = generateTask(s, {
+            const taskIn: TransTask = generateTask('in', s, {
                 amount: free,
                 resourceType: 'any',
                 structureType: stc,
@@ -251,19 +305,18 @@ function prepareCacheRoom(room: Room) {
         .forEach((s: StructureTower) => {
             const free = s.store.getFreeCapacity(RESOURCE_ENERGY);
             if (free > 0) {
-                che.transOut.addTask(
-                    generateTask(s, { amount: free, resourceType: RESOURCE_ENERGY })
+                che.transIn.addTask(
+                    generateTask('in', s, { amount: free, resourceType: RESOURCE_ENERGY })
                 );
             }
         });
 }
 
-function run_transport(creep: Creep) {
+function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
     const che = getCache(creep.room);
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
-
     let task: TransTask;
     let cache_id: string = cache_creep_task[creep.name];
     if (cache_id) {
@@ -278,52 +331,78 @@ function run_transport(creep: Creep) {
         return run_task(creep, task);
     }
 
-    if (free > used) {
-        task = che.transOut.getTask(creep);
+    let swh = cache_creep_switch[creep.name];
+    if (used / cap > x) {
+        swh = cache_creep_switch[creep.name] = 'in';
+    }
+    if (used / cap < 1 - x) {
+        swh = cache_creep_switch[creep.name] = 'out';
+    }
+    if (sop === 'give') {
+        swh = 'in';
+    }
+    if (sop === 'get') {
+        swh = 'out';
+    }
+
+    if (swh === 'out') {
+        task = che.transOut.getTask(creep, structures);
         if (!task && used > 0) {
-            task = che.transIn.getTask(creep);
+            task = che.transIn.getTask(creep, structures);
         }
     } else {
-        task = che.transIn.getTask(creep);
+        task = che.transIn.getTask(creep, structures);
         if (!task && free > 0) {
-            task = che.transOut.getTask(creep);
+            task = che.transOut.getTask(creep, structures);
         }
     }
+
     if (!task) {
+        console.log('no task get');
         return ERR_NOT_FOUND;
     }
     cache_creep_task[creep.name] = task.trans_id;
-
     return run_task(creep, task);
 }
 
+export function get_resource(creep: Creep, structures?: string[]) {
+    creep.memory.process = 'get_transport';
+    run_transport(creep, 'get', structures);
+}
+export function give_resource(creep: Creep, structures?: string[]) {
+    creep.memory.process = 'give_transport';
+    run_transport(creep, 'give', structures);
+}
+
 function run_task(creep: Creep, task: TransTask) {
+    console.log('task ', creep.name);
+    log_task(task);
     const [x, y, name] = task.pos;
     const pos = new RoomPosition(x, y, name);
-    const far = moveToTarget(creep, pos);
-    if (far !== 0) {
-        return ERR_NOT_IN_RANGE;
-    }
+    let code;
     const target = Game.getObjectById(task.id) as any;
     if (task.trans_dec === 'in') {
         const type = task.resourceType;
         if (type === 'any') {
             RESOURCES_ALL.forEach(t => {
                 if (creep.store[t] > 0) {
-                    creep.transfer(target, t);
+                    code = creep.transfer(target, t);
                 }
             });
         } else {
-            creep.transfer(target, type);
+            code = creep.transfer(target, type);
         }
     }
 
     if (task.trans_dec === 'out') {
         if (task.structureType === 'drop') {
-            creep.pickup(target as Resource);
+            code = creep.pickup(target as Resource);
         } else {
-            creep.withdraw(target, task.resourceType as any);
+            code = creep.withdraw(target, task.resourceType as any);
         }
+    }
+    if (code === ERR_NOT_IN_RANGE) {
+        moveToTarget(creep, pos);
     }
     checkTaskIsComplete(creep, task);
 }
@@ -334,22 +413,29 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
         // 卸载任务完成
         if (isEmpty(creep, type)) {
             delete cache_creep_task[creep.name];
+            task.amount = task.amount_rec = 0;
+            creep.memory.process = null;
             return true;
         }
         if (task.amount_rec >= task.amount) {
             delete cache_creep_task[creep.name];
+            task.amount = task.amount_rec = 0;
+            creep.memory.process = null;
             return true;
         }
     }
-
     if (task.trans_dec === 'out') {
         // 装运任务完成
         if (isFull(creep)) {
             delete cache_creep_task[creep.name];
+            task.amount = task.amount_rec = 0;
+            creep.memory.process = null;
             return true;
         }
         if (task.amount_rec >= task.amount) {
             delete cache_creep_task[creep.name];
+            task.amount = task.amount_rec = 0;
+            creep.memory.process = null;
             return true;
         }
     }
@@ -360,16 +446,36 @@ interface GenTask {
     resourceType: resType;
     structureType?: strType;
 }
-function generateTask(structure: AnyStructure, { amount, resourceType, structureType }: GenTask) {
+function generateTask(
+    dec: 'in' | 'out',
+    structure: AnyStructure,
+    { amount, resourceType, structureType }: GenTask
+) {
     const pos = [structure.pos.x, structure.pos.y, structure.pos.roomName];
     const st = structure?.structureType || structureType;
+    let ws;
+    if (dec === 'in') {
+        ws = w_in;
+    }
+    if (dec === 'out') {
+        ws = w_out;
+    }
     return {
         id: structure.id,
         amount: amount,
         pos,
         amount_rec: 0,
-        w: w_in[st],
+        w: ws[st],
         resourceType: resourceType,
         structureType: st,
     } as TransTask;
+}
+
+function log_task(task: TransTask) {
+    let roomName = task.pos[2];
+    if (roomName === 'W1N7') {
+        console.log(
+            `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec}`
+        );
+    }
 }

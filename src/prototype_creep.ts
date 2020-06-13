@@ -9,14 +9,14 @@ Creep.prototype.run = function () {
     }
 };
 
-Object.defineProperty(Creep.prototype, 'cost', {
-    get(): number {
-        const creep = this;
-        let cost = 0;
-        creep.body.forEach(b => {
-            const type = b.type;
-            cost += w_config.internal.body_cost[type];
-        });
-        return cost;
-    },
-});
+// Object.defineProperty(Creep.prototype, 'cost', {
+//     get(): number {
+//         const creep = this;
+//         let cost = 0;
+//         creep.body.forEach(b => {
+//             const type = b.type;
+//             cost += w_config.internal.body_cost[type];
+//         });
+//         return cost;
+//     },
+// });

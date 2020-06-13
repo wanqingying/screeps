@@ -1,6 +1,6 @@
 import { getSourceWithContainer } from './lib_room';
-import { getActionLockTarget, getCreepBodyNum } from './lib_base';
-import { moveToTarget } from './lib_creep';
+import { findNearTarget, getActionLockTarget, getCreepBodyNum } from './lib_base';
+import { isCreepStop, moveToTarget } from './lib_creep';
 
 interface CacheSource {
     source: Source;
@@ -20,7 +20,10 @@ export function load_harvest() {
         }
     });
     Object.values(Game.creeps).forEach(creep => {
-        if (creep.memory?.role === w_role_name.harvester && !creep.spawning) {
+        if (isCreepStop(creep)) {
+            return;
+        }
+        if (creep.memory?.role === w_role_name.harvester) {
             try {
                 harvestSource(creep);
             } catch (e) {
@@ -35,14 +38,36 @@ export function load_harvest() {
 function harvestSource(creep: Creep) {
     const che = getCache(creep.room);
     const { target, unLock } = getActionLockTarget(creep, 'harvest_source', () => {
-        let sourceH = che.sources.sort((a, b) => {
-            return a.work - b.work;
+        let sh = Array.from(che.sources);
+
+        let has_container;
+        let min_work = 99;
+        sh.forEach(s => {
+            if (s.container) {
+                has_container = true;
+            }
+            if (s.work < min_work) {
+                min_work = s.work;
+            }
         });
-        let t = Array.from(sourceH).shift();
-        if (t) {
+        console.log(creep.room.name, 'harvest=====');
+        console.log(JSON.stringify(sh.map(s => ({ id: s.source.id, work: s.work }))));
+        console.log(min_work);
+        sh = sh.filter(s => s.work === min_work);
+        if (has_container) {
+            sh = sh.filter(s => s.container);
+        }
+
+        let ch = findNearTarget<Source>(
+            creep.room.controller,
+            sh.map(s => s.source)
+        );
+
+        if (ch) {
+            let t = sh.find(s => s.source.id === ch.id);
             t.work += getCreepBodyNum(creep, WORK);
         }
-        return t?.source;
+        return ch;
     });
 
     if (!target) {

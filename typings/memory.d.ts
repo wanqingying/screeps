@@ -10,8 +10,10 @@ declare interface CreepMemory {
     index: number;
     building?: boolean;
     upgrading?: boolean;
+    // get_transport 物流系统get
     process?: string;
     distance?: number;
+    target_room:string
 }
 
 declare interface RoomMemory {
@@ -20,6 +22,7 @@ declare interface RoomMemory {
     renew_count: number;
     // 正在生产的角色
     spawnRole: string;
+    ext_creep:any
 }
 
 declare interface SpawnMemory {

@@ -50,7 +50,7 @@ function getCreepBody(room: Room, role: role_name_key) {
     return body;
 }
 // 生产单位执行
-function spawnCreep(room: Room, role: role_name_key) {
+export function spawnCreep(room: Room, role: role_name_key, mem?: any) {
     const body = getCreepBody(room, role);
     const cost = getBodyCost(body);
     const index = getCreepIndex();
@@ -62,8 +62,9 @@ function spawnCreep(room: Room, role: role_name_key) {
         if (spawn.spawning) {
             return ERR_BUSY;
         }
+        const gems = Object.assign({ role: role, index: index, cost: cost }, mem);
         const act = spawn.spawnCreep(body, name, {
-            memory: { role: role, index: index, cost: cost },
+            memory: gems,
         });
         if (act === OK) {
             che.c_spawning_role = '';
@@ -76,6 +77,7 @@ function spawnCreep(room: Room, role: role_name_key) {
                 act
             )}  need/current/total ${cost}/${eng}/${cap}`;
             console.log(msg);
+            console.log('memory ', JSON.stringify(gems));
         }
         che.c_spawn_code = act;
     }
@@ -113,8 +115,15 @@ function getRefreshRole(room: Room) {
         })
         .pop();
     if (t) {
+        let role = t.role;
+        let current_count = che.c_roles_count[role];
+        const cfg = w_config.rooms[room.name].creep_cfg_num;
+        let target_count = cfg[role];
+        if (current_count > target_count) {
+            return;
+        }
         che.c_refresh_creep[t.id].progress = true;
-        return t.role;
+        return role;
     }
 }
 // 根据配置生产单位

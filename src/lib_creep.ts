@@ -7,8 +7,8 @@ import {
     getCreepBodyNum,
     findByOrder,
     isContainerNearSource,
+    findRepairTarget,
 } from './lib_base';
-import { findRepairTarget } from './lib_room';
 
 // 卸货
 export function transferNearby(
@@ -189,83 +189,6 @@ export function isMineContainerNeedWithdraw(sh: SourceCache, type?: ResourceCons
     );
 }
 
-// 拿资源 builder,upgrader 等,优先建筑
-export function pickUpDropOrFromStructure(
-    creep: Creep,
-    structures?: StructureConstant[],
-    type?: ResourceConstant
-) {
-    const h = type || RESOURCE_ENERGY;
-    let structureFilters = structures || [STRUCTURE_STORAGE, STRUCTURE_CONTAINER];
-
-    let { target, unLock } = getActionLockTarget<ResourceConstant>(
-        creep,
-        'pickUpDropOrFromStructure',
-        () => {
-            let targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure: StructureContainer) => {
-                    if (!structure.store) {
-                        return false;
-                    }
-                    if (!structureFilters.includes(structure?.structureType)) {
-                        return false;
-                    }
-                    if (structure.store && isEmpty(structure)) {
-                        return false;
-                    }
-                    return true;
-                },
-            });
-            let m = findNearTarget(creep, targets);
-            if (m) {
-                return m;
-            }
-            let drops = Array.from(creep.room.dropResources).filter(a => {
-                return a?.cap < a.resource.amount && a?.resource?.amount;
-            });
-            let drop = findNearTarget<Resource>(
-                creep,
-                drops.map(d => d.resource)
-            );
-            if (drop) {
-                drops.forEach(d => {
-                    if (d.resource.id === drop.id) {
-                        d.cap += creep.store.getFreeCapacity(h);
-                    }
-                });
-                return drop;
-            }
-        }
-    );
-
-    if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if ((target as StructureContainer).store && isEmpty(target)) {
-        unLock();
-        return;
-    }
-    if ((target as Resource)?.amount === 0) {
-        unLock();
-        return;
-    }
-    let code;
-    if (target?.store) {
-        code = creep.withdraw(target, h);
-    } else {
-        code = creep.pickup(target);
-    }
-    if (code === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
-    }
-    if (code === OK) {
-        unLock();
-        return;
-    }
-    return code;
-}
-
 // upgrader获取能量
 export function getEnergyUpgrader(creep: Creep, types?: any[]) {
     let { target, unLock } = getActionLockTarget(creep, 'get_energy_up', () => {
@@ -350,4 +273,14 @@ export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): Scr
         unLock();
     }
     return act;
+}
+
+export function isCreepStop(creep: Creep) {
+    if (creep.spawning){
+        return true
+    }
+    if (creep.memory.target_room && creep.memory.target_room !== creep.room.name) {
+        return true;
+    }
+    return false;
 }

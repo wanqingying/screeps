@@ -1,39 +1,37 @@
 import './bootstrap';
 
-import { load_tick_out, load_spawn_check, load_tower_logic, load_harvest } from './mod';
+import {
+    load_tick_out,
+    load_spawn_check,
+    load_tower_logic,
+    load_harvest,
+    load_distribution_transport,
+    load_builder,
+    load_upgrader,
+    load_starter,
+    load_claim,
+} from './mod';
 
 function main() {
-    load_spawn_check();
-    load_tower_logic();
-    load_harvest();
-
-    Object.values(Game.creeps).forEach(creep => {
-        let m = creep.memory?.role;
-        if (!Object.values(w_role_name).includes(m)) {
-            creep.suicide();
-        }
-        if (!creep.memory.cost) {
-            let cost = 0;
-            creep.body.forEach(b => {
-                cost += w_config.internal.body_cost[b.type];
-            });
-            creep.memory.cost = cost;
-        }
+    Object.values(Game.rooms).forEach(room => {
+        console.log(room.name, '----------------------', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
+    // 生产单位
+    load_spawn_check();
+    // 防御塔
+    load_tower_logic();
+    // 采矿
+    load_harvest();
+    // 运输
+    load_distribution_transport();
+    load_builder();
+    load_upgrader();
+    load_starter();
+    load_claim();
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
         }
-    });
-    Object.values(Game.rooms).forEach(room => {
-        console.log('energy-554g-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
-        room.start();
-    });
-    Object.values(Game.creeps).forEach(creep => {
-        creep.run();
-        // try {
-        // } catch (e) {
-        // }
     });
     // 放在最后执行可支持 setTickOut(0,fn)
     load_tick_out();

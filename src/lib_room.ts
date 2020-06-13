@@ -16,7 +16,7 @@ export function canReservation(room: Room): boolean {
 
 export function findRepairTarget(room: Room, types?: any[] | null, excludes?: any[]): AnyStructure {
     let targets = room
-        .findBy(FIND_MY_STRUCTURES, t => {
+        .findBy(FIND_STRUCTURES, t => {
             if (types && !types.includes(t.structureType)) {
                 return false;
             }
