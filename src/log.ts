@@ -31,13 +31,11 @@ function log(px, msg, force = false) {
         console.log(px);
     }
 }
-
-global.w_log = function (k) {
-    require('./z_module_findPath').print();
-    // switch (k) {
-    //     case 1:
-    //         return log_W2N8();
-    // }
+global.w_log_on = false;
+global.w_log = function (...p) {
+    if (global.w_log_on) {
+        log('', p);
+    }
 };
 global.w_a_log = function () {};
 

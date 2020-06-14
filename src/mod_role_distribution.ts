@@ -47,7 +47,7 @@ const w_out = {
     // 矿区容器
     harvester_container: 90,
     // 升级用的容器
-    controller_container: 40,
+    controller_container: 30,
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
@@ -118,7 +118,7 @@ class TransList {
                 [STRUCTURE_SPAWN, STRUCTURE_EXTENSION].includes(a.structureType as any) &&
                 this.trans_dec === 'out'
             ) {
-                console.log('can not get from spawn when spawning');
+                global.w_log('can not get energy from spawn when spawning');
                 return false;
             }
             const wa = ws[a.structureType];
@@ -349,18 +349,13 @@ function is_empty_tate(creep: Creep) {
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
-    if (used / cap < 1 - FULL_RATE) {
-        return true;
-    }
-    return false;
+    return used / cap < 1 - FULL_RATE;
 }
 function is_full_tate(creep: Creep) {
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
-    if (used / cap > FULL_RATE) {
-        return true;
-    }
+    return used / cap > FULL_RATE;
 }
 // 物流运输单位逻辑
 function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
@@ -409,7 +404,6 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
     }
 
     if (!task) {
-        console.log('no task get');
         return ERR_NOT_FOUND;
     }
     cache_creep_task[creep.name] = task.trans_id;
@@ -431,6 +425,16 @@ export function give_resource(creep: Creep, structures?: string[]) {
 
 // 执行物流任务
 function run_task(creep: Creep, task: TransTask) {
+    if (task.trans_dec === 'in' && is_empty_tate(creep)) {
+        // 运入建筑 单位没有资源重置
+        cache_creep_task[creep.name] = undefined;
+        return;
+    }
+    if (task.trans_dec === 'out' && is_full_tate(creep)) {
+        // 从建筑运出 如果单位已满则重置任务
+        cache_creep_task[creep.name] = undefined;
+        return;
+    }
     const [x, y, name] = task.pos;
     const pos = new RoomPosition(x, y, name);
     let code;
@@ -458,7 +462,6 @@ function run_task(creep: Creep, task: TransTask) {
     if (code === ERR_NOT_IN_RANGE) {
         moveToTarget(creep, pos);
     }
-    console.log('run task ', w_utils.get_code_msg(code));
     checkTaskIsComplete(creep, task);
 }
 

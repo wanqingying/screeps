@@ -52,25 +52,10 @@ function run_repair(creep: Creep) {
         return get_resource(creep);
     }
 
-    const structure = che.c_his_structure;
-    const rate_structure = structure.hits / structure.hitsMax;
-
     let target;
     let cache_id = cache_creep[creep.id];
     if (cache_id) {
-        let cache_target = Game.getObjectById<AnyStructure>(cache_id);
-        if (cache_target) {
-            // 如果缓存对象的hits未达到目标 继续
-            let rate_cache = cache_target.hits / cache_target.hitsMax;
-            if (war_part.includes(cache_target.structureType as any)) {
-                // 如果有低血建筑,优先低血建筑
-                if (rate_structure >= max_hits_rate) {
-                    target = cache_target;
-                }
-            } else if (rate_cache < max_hits_rate) {
-                target = cache_target;
-            }
-        }
+        target = Game.getObjectById<AnyStructure>(cache_id);
     }
 
     if (!target) {

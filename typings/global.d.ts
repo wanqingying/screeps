@@ -35,6 +35,7 @@ interface Claims{
     creep:any[][]
 }
 
+
 declare interface W_Utils {
     count_distance: count_distance;
     get_code_msg: get_code_msg_screeps;
@@ -72,7 +73,7 @@ declare interface SourceWithContainer {
 }
 
 declare interface CacheGlobalRoom{
-
+    spawning:boolean
 }
 
 declare type CreepCfgNum = { [role in role_name_key]: number };
@@ -92,6 +93,7 @@ declare namespace NodeJS {
         w_utils: W_Utils;
         w_debug_creep: string;
         w_log(...p: any): void;
+        w_log_on: boolean;
         w_a_log(...p: any): void;
         w_my_name: string;
         w_set_tick_out(tick: number, fn: Function): void;

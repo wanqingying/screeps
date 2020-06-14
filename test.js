@@ -17,3 +17,12 @@ function test() {
     console.log(che);
 }
 test()
+
+let k=4*3;
+//1500 tick
+let total=6000*5;
+let upgrade_cost=k*300;
+let creep_cost=(3+3+1+2)*550;
+
+const rest=total-creep_cost;
+console.log(rest/300);

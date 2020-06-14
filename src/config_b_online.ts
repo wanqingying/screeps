@@ -5,22 +5,22 @@ export const cfg_online = {
     E18S5: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 3,
+            [w_role_name.carrier]: 4,
             [w_role_name.scout]: 0,
-            [w_role_name.builder]: 0,
+            [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 2,
+            [w_role_name.upgrader]: 4,
             [w_role_name.repair]: 1,
         },
         creep_cfg_body: {
             [w_role_name.carrier]: { [MOVE]: 3, [CARRY]: 6 },
             [w_role_name.starter]: { [MOVE]: 2, [CARRY]: 2, [WORK]: 1 },
             [w_role_name.harvester]: { [MOVE]: 1, [WORK]: 5, [CARRY]: 0 },
-            [w_role_name.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+            [w_role_name.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 1 },
             [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 4, [CARRY]: 1 },
             [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
             [w_role_name.claim]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w_role_name.repair]: {[MOVE]: 3, [WORK]: 1, [CARRY]: 5 },
+            [w_role_name.repair]: {[MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
         },
         reserve_rooms: [],
         freePlace: {

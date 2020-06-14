@@ -3,13 +3,15 @@ import './bootstrap';
 import * as mod from './mod';
 
 function main() {
+    global.w_log('log on')
     Object.values(Game.rooms).forEach(room => {
         console.log(
             room.name,
-            '--444-',
+            '--55568-',
             `${room.energyAvailable}/${room.energyCapacityAvailable}`
         );
     });
+    mod.load_cache()
     // 生产单位
     mod.load_spawn_check();
     // 防御塔

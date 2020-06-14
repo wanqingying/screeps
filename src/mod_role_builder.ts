@@ -68,7 +68,7 @@ function run_builder(creep: Creep) {
         } else {
             creep.say('wall');
             unLock();
-            checkRepair(creep, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
+            // checkRepair(creep, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
         }
     } else {
         get_resource(creep);

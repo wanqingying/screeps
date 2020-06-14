@@ -43,13 +43,13 @@ function harvestSource(creep: Creep) {
     } else {
         let sh = che2.find(s => s.creeps.length < 1);
         if (!sh) {
-            sh = che2[0];
+            sh = che2.sort((a, b) => {
+                return a.creeps.length - b.creeps.length;
+            })[0];
         }
-        if (sh) {
-            sh.creeps.push(creep);
-            target = sh.source;
-            cache.set(key, target.id);
-        }
+        sh.creeps.push(creep);
+        target = sh.source;
+        cache.set(key, target.id);
     }
     if (!target) {
         cache.delete(key);

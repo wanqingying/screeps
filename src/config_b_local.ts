@@ -9,7 +9,7 @@ export const cfg_local = {
             [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 1,
-            [w_role_name.repair]: 0,
+            [w_role_name.repair]: 1,
             [w_role_name.attack]: 0,
         },
         creep_cfg_body: {
