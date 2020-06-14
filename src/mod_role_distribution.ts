@@ -30,9 +30,12 @@ interface CacheRoom {
     spawning: boolean;
 }
 
+// 1 资源来源 比如建筑等 发布(刷新)资源需求和资源运输任务
+// 2 单位接收任务
+// 3 单位完成任务
 // 单位资源存量大于x后 单位会倾向于卸货 0:有资源就卸货,1:只有装满才会卸货
-// 单位可以接多个同种资源类型的任务
-const x = 0.9;
+// 单位可以接多个任务
+const FULL_RATE = 0.9;
 // 发布任务的最小数量,小于此数量不发布运输任务 目前适用于 drop 防止反复捡
 const minAmo = 40;
 // 接收任务的最小空间,小于此空间不接收任务
@@ -44,7 +47,7 @@ const w_out = {
     // 矿区容器
     harvester_container: 90,
     // 升级用的容器
-    controller_container: 30,
+    controller_container: 40,
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
@@ -115,7 +118,7 @@ class TransList {
                 [STRUCTURE_SPAWN, STRUCTURE_EXTENSION].includes(a.structureType as any) &&
                 this.trans_dec === 'out'
             ) {
-                console.log('can not get from spawn');
+                console.log('can not get from spawn when spawning');
                 return false;
             }
             const wa = ws[a.structureType];
@@ -183,6 +186,7 @@ class TransList {
 
 const cache: { [name: string]: CacheRoom } = {};
 
+// 启动物流系统
 export function load_distribution_transport() {
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
@@ -341,6 +345,24 @@ function prepareCacheRoom(room: Room) {
         });
 }
 
+function is_empty_tate(creep: Creep) {
+    const free = creep.store.getFreeCapacity();
+    const cap = creep.store.getCapacity();
+    const used = cap - free;
+    if (used / cap < 1 - FULL_RATE) {
+        return true;
+    }
+    return false;
+}
+function is_full_tate(creep: Creep) {
+    const free = creep.store.getFreeCapacity();
+    const cap = creep.store.getCapacity();
+    const used = cap - free;
+    if (used / cap > FULL_RATE) {
+        return true;
+    }
+}
+// 物流运输单位逻辑
 function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
     const che = getCache(creep.room);
     const free = creep.store.getFreeCapacity();
@@ -361,10 +383,10 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
     }
 
     let swh = cache_creep_switch[creep.name];
-    if (used / cap > x) {
+    if (is_full_tate(creep)) {
         swh = cache_creep_switch[creep.name] = 'in';
     }
-    if (used / cap < 1 - x) {
+    if (is_empty_tate(creep)) {
         swh = cache_creep_switch[creep.name] = 'out';
     }
     if (sop === 'give') {
@@ -396,15 +418,18 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
     return run_task(creep, task);
 }
 
+// 从物流中获取物资
 export function get_resource(creep: Creep, structures?: string[]) {
     creep.memory.process = 'get_transport';
     run_transport(creep, 'get', structures);
 }
+// 存放物资
 export function give_resource(creep: Creep, structures?: string[]) {
     creep.memory.process = 'give_transport';
     run_transport(creep, 'give', structures);
 }
 
+// 执行物流任务
 function run_task(creep: Creep, task: TransTask) {
     const [x, y, name] = task.pos;
     const pos = new RoomPosition(x, y, name);
@@ -433,6 +458,7 @@ function run_task(creep: Creep, task: TransTask) {
     if (code === ERR_NOT_IN_RANGE) {
         moveToTarget(creep, pos);
     }
+    console.log('run task ', w_utils.get_code_msg(code));
     checkTaskIsComplete(creep, task);
 }
 

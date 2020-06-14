@@ -42,13 +42,14 @@ function harvestSource(creep: Creep) {
         target = Game.getObjectById(id);
     } else {
         let sh = che2.find(s => s.creeps.length < 1);
-        // 每个矿分配一个
-        // if (!sh) {
-        //     sh = che2[0];
-        // }
-        sh.creeps.push(creep);
-        target = sh.source;
-        cache.set(key, target.id);
+        if (!sh) {
+            sh = che2[0];
+        }
+        if (sh) {
+            sh.creeps.push(creep);
+            target = sh.source;
+            cache.set(key, target.id);
+        }
     }
     if (!target) {
         cache.delete(key);
