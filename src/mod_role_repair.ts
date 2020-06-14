@@ -48,7 +48,7 @@ function run_repair(creep: Creep) {
         cache_creep[creep.id] = undefined;
     }
     if (creep.memory.process === 'pick') {
-        cache_creep[creep.id] = undefined;
+        // cache_creep[creep.id] = undefined;
         return get_resource(creep);
     }
 
