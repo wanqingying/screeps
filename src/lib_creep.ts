@@ -14,7 +14,7 @@ export function harvestSource(creep: Creep) {
         let source = Game.getObjectById<Source>(id);
         if (ch && id === ch.source.id) {
             // 多人采一个矿 重新分配
-            w_cache.delete(key);
+            // w_cache.delete(key);
         } else {
             target = source;
         }
@@ -28,9 +28,9 @@ export function harvestSource(creep: Creep) {
             if (time_out_miner) {
                 sh = time_out_miner;
             } else {
-                sh = source.sort((a, b) => {
-                    return a.creep_ids.length - b.creep_ids.length;
-                })[0];
+                // sh = source.sort((a, b) => {
+                //     return a.creep_ids.length - b.creep_ids.length;
+                // })[0];
             }
         }
         sh.creep_ids.push(creep.id);
@@ -118,7 +118,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
-            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 1 },
         };
     }
     // 550
@@ -129,7 +129,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
             [w.upgrader]: { [MOVE]: 1, [WORK]: 4, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
-            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 1 },
         };
     }
     // 800
@@ -141,7 +141,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
-            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 1 },
         };
     }
     // 1300

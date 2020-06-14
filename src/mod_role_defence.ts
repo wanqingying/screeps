@@ -42,7 +42,7 @@ function defenceSpawnAttack(room: Room) {
 function run_defence(creep: Creep) {
     let che = cache[creep.room.name];
     let target = che.attack;
-    if (target && che.my_attack_creeps >= 3) {
+    if (target && che.my_attack_creeps >= 0) {
         creep.attack(target);
         moveToTarget(creep, target);
     }

@@ -42,19 +42,19 @@ function prepareCache(room: Room) {
     } else {
         che.source.forEach(c => (c.creep_ids = []));
     }
-    if (!room.controller?.my) {
-        w_utils.update_cache(room.name, che);
-
-        return;
-    }
+    // if (!room.controller?.my) {
+    //     w_utils.update_cache(room.name, che);
+    //
+    //     return;
+    // }
     // 外矿缓存
-    const cfg_a = w_config.rooms[room.name]?.reserve || [];
-    if (!che.remote) {
-        che.remote = {};
-    }
-    cfg_a.forEach(cfg => {
-        che.remote[cfg.name] = { remote_role_count: {} };
-    });
+    // const cfg_a = w_config.rooms[room.name]?.reserve || [];
+    // if (!che.remote) {
+    //     che.remote = {};
+    // }
+    // cfg_a.forEach(cfg => {
+    //     che.remote[cfg.name] = { remote_role_count: {} };
+    // });
     // let remote_sources = [];
     // cfg_a.forEach(cfg => {
     //     const remote_room = Game.rooms[cfg.name];
