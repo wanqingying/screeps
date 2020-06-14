@@ -14,6 +14,7 @@ declare interface CreepMemory {
     process?: string;
     distance?: number;
     target_room:string
+    obj:any
 }
 
 declare interface RoomMemory {

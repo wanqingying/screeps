@@ -64,8 +64,12 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
         k = 0;
     }
     const che = getCache(room);
+    global.w_utils.update_cache(room.name, { spawning: true });
     if (outer) {
         if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
+            return;
+        }
+        if (che.c_spawning_role) {
             return;
         }
     }
@@ -87,6 +91,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             che.c_spawning_role = '';
             che.c_spawn_fail_tick = 0;
             Memory.creeps_spawn_index = k + 1;
+            global.w_utils.update_cache(room.name, { spawning: false });
         } else {
             che.c_spawning_role = role;
             che.c_spawn_fail_tick++;
@@ -173,7 +178,7 @@ function prepareCache(room: Room) {
             c_energy_stop: false,
             c_roles_count: {},
             c_spawn_fail_tick: 0,
-            c_energy: new ListA<number>(30),
+            c_energy: new ListA<number>(max_fail_tick),
             c_spawn_code: null,
             c_spawning_role: '',
             c_refresh_creep: {},
@@ -212,7 +217,8 @@ function prepareCache(room: Room) {
     che.c_roles_count = roles_current_count;
     che.c_energy.push(room.energyAvailable);
     let c_ng = che.c_energy;
-    che.c_energy_stop = c_ng.length > 20 && c_ng.every(e => e === undefined || e <= 300);
+    che.c_energy_stop =
+        c_ng.length > max_fail_tick-20 && c_ng.every(e => e === undefined || e <= 300);
     cache[room.name] = che;
     return che;
 }
@@ -242,14 +248,20 @@ function getRoleBoost(room: Room): role_name_key | undefined {
     const current_harvester = current_exist[w_role_name.harvester];
     const current_carrier = current_exist[w_role_name.carrier];
     const cfg = w_config.rooms[room.name];
+    if (
+        che.c_roles_count[w_role_name.harvester] === 0 &&
+        che.c_roles_count[w_role_name.carrier] === 0
+    ) {
+        return w_role_name.starter;
+    }
     if (current_exist.starter < cfg.creep_cfg_num.starter) {
         return w_role_name.starter;
     }
-    if (current_harvester < 1) {
-        return w_role_name.harvester;
-    }
     if (current_carrier < 1) {
         return w_role_name.carrier;
+    }
+    if (current_harvester < 1) {
+        return w_role_name.harvester;
     }
     if (current_carrier < 2) {
         return w_role_name.carrier;
@@ -257,5 +269,4 @@ function getRoleBoost(room: Room): role_name_key | undefined {
     if (current_harvester < 2) {
         return w_role_name.harvester;
     }
-
 }

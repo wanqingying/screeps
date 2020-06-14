@@ -16,6 +16,8 @@ declare type role_name_key =
     | 'scout'
     | 'claim'
     | 'repair'
+    | 'attack'
+    | 'heal'
     | string;
 
 declare interface SourceCache {

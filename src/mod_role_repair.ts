@@ -1,4 +1,4 @@
-import { isEmpty, isFull, isNotFull } from './lib_base';
+import { isEmpty, isFull } from './lib_base';
 import { isCreepStop } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 

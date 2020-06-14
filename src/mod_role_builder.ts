@@ -1,6 +1,5 @@
 import {
     findNearTarget,
-    findRepairTarget,
     findRepairTargetC,
     getActionLockTarget,
     isEmpty,
@@ -9,8 +8,6 @@ import {
 import { checkRepair, isCreepStop, moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 
-const repair_includes = [];
-const repair_excludes = [];
 
 export function load_builder() {
     Object.values(Game.creeps).forEach(creep => {
@@ -47,14 +44,6 @@ function run_builder(creep: Creep) {
         creep.say('b');
     }
     if (creep.memory.building) {
-        if (
-            target_repair &&
-            target_repair.hits < target_repair.hitsMax / 3 &&
-            ![STRUCTURE_WALL, STRUCTURE_RAMPART].includes(target_repair.structureType as any)
-        ) {
-            creep.say('repair');
-            return repair_target(creep, target_repair);
-        }
         // 建筑
         let { target, unLock } = getActionLockTarget<any>(creep, 'builder_find', () => {
             let max_progress = 0;

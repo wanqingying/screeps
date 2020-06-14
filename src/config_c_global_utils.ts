@@ -31,5 +31,10 @@ global.w_utils = {
         ];
         return ScreepsReturnCodeMsg[0 - code];
     },
+    update_cache(key, newCache) {
+        let che = global.w_cache.get(key);
+        global.w_cache.set(key, Object.assign(che || {}, newCache));
+        return global.w_cache.get(key);
+    },
     print() {},
 };

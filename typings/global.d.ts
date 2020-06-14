@@ -38,6 +38,7 @@ interface Claims{
 declare interface W_Utils {
     count_distance: count_distance;
     get_code_msg: get_code_msg_screeps;
+    update_cache: (key:any,cache:any)=>any;
     print: any;
 }
 
@@ -68,6 +69,10 @@ declare interface SourceWithContainer {
     source: Source;
     container: StructureContainer;
     cap: number;
+}
+
+declare interface CacheGlobalRoom{
+
 }
 
 declare type CreepCfgNum = { [role in role_name_key]: number };

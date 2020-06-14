@@ -27,6 +27,7 @@ interface CacheRoom {
     tick: number;
     transIn: TransList;
     transOut: TransList;
+    spawning: boolean;
 }
 
 // 单位资源存量大于x后 单位会倾向于卸货 0:有资源就卸货,1:只有装满才会卸货
@@ -62,6 +63,9 @@ const w_in = {
 };
 const cache_creep_task = {} as any;
 const cache_creep_switch = {} as any;
+if (!global.w_cache) {
+    global.w_cache = new Map<any, any>();
+}
 
 class TransList {
     private readonly trans_dec: 'in' | 'out';
@@ -88,6 +92,7 @@ class TransList {
     };
     // structures 偏好的建筑类型
     public getTask = (creep: Creep, structures?: string[]): TransTask => {
+        let che = getCache(creep.room);
         let ws: typeof w_in;
         if (this.trans_dec === 'in') {
             ws = w_in;
@@ -102,6 +107,15 @@ class TransList {
         let bs = Array.from(this.array).filter(a => {
             // 筛选未完成的任务amount<amount_rec
             if (a.amount <= a.amount_rec) {
+                return false;
+            }
+            // 生产中的母巢不能出资源
+            if (
+                che.spawning &&
+                [STRUCTURE_SPAWN, STRUCTURE_EXTENSION].includes(a.structureType as any) &&
+                this.trans_dec === 'out'
+            ) {
+                console.log('can not get from spawn');
                 return false;
             }
             const wa = ws[a.structureType];
@@ -205,6 +219,7 @@ function getCache(room: Room) {
             tick: Game.time,
             transIn: new TransList('in'),
             transOut: new TransList('out'),
+            spawning: false,
         };
         cache[room.name] = che;
     }
@@ -214,7 +229,8 @@ function getCache(room: Room) {
 function prepareCacheRoom(room: Room) {
     const che = getCache(room);
     const structures = room.findBy(FIND_STRUCTURES);
-
+    let ghe = global.w_cache.get(room.name) || {};
+    che.spawning = !!ghe.spawning;
     // drop=============================================
     room.find(FIND_DROPPED_RESOURCES).forEach(resource => {
         if (resource.amount < minAmo) {
@@ -375,6 +391,8 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
         return ERR_NOT_FOUND;
     }
     cache_creep_task[creep.name] = task.trans_id;
+    debugger;
+    creep.memory.obj = task;
     return run_task(creep, task);
 }
 

@@ -42,7 +42,7 @@ export function findAttackTarget(room: Room) {
     let targets = room
         .findBy(FIND_HOSTILE_CREEPS, t => {
             return t.body.some(b =>
-                [WORK, ATTACK, RANGED_ATTACK, HEAL, CLAIM].includes(b.type as any)
+                [ATTACK, RANGED_ATTACK, HEAL].includes(b.type as any)
             );
         })
         .sort((a, b) => {
