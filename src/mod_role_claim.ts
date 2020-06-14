@@ -35,8 +35,12 @@ export function load_claim() {
                 return;
             }
             if (creep.memory.role === w_role_name.claim) {
-                creep.claimController(claim_room.controller);
-                moveToTarget(creep, claim_room.controller as any);
+                if (claim_room) {
+                    creep.claimController(claim_room.controller);
+                    moveToTarget(creep, claim_room.controller as any);
+                } else {
+                    moveToTarget(creep, new RoomPosition(25, 25, claim_room_name));
+                }
                 return;
             }
         });
@@ -101,7 +105,9 @@ function prepareCache() {
         return;
     }
 
-    let spawn = claim_room.find(FIND_MY_SPAWNS);
+    let spawn = claim_room.find(FIND_MY_CONSTRUCTION_SITES, {
+        filter: s => s.structureType === STRUCTURE_SPAWN,
+    });
     if (spawn.length > 0 && claim_room.controller.my) {
         cache.process = 2;
     }

@@ -2,12 +2,14 @@ import {
     findNearTarget,
     findRepairTargetC,
     getActionLockTarget,
+    is_empty_tate,
+    is_full_tate,
     isEmpty,
     isFull,
 } from './lib_base';
 import { checkRepair, isCreepStop, moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
-
+import { run_repair } from './mod_role_repair';
 
 export function load_builder() {
     Object.values(Game.creeps).forEach(creep => {
@@ -33,13 +35,12 @@ function run_builder(creep: Creep) {
         moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
         return;
     }
-    let target_repair = findRepairTargetC(creep, [], [STRUCTURE_WALL, STRUCTURE_RAMPART]);
 
-    if (creep.memory.building && isEmpty(creep)) {
+    if (creep.memory.building && is_empty_tate(creep)) {
         creep.memory.building = false;
         creep.say('g');
     }
-    if (!creep.memory.building && isFull(creep)) {
+    if (!creep.memory.building && is_full_tate(creep)) {
         creep.memory.building = true;
         creep.say('b');
     }
@@ -60,17 +61,18 @@ function run_builder(creep: Creep) {
         });
         if (target) {
             let act = creep.build(target);
-            creep.say('build');
+            creep.say('b');
             moveToTarget(creep, target, 2);
             if (act !== OK) {
                 unLock();
             }
         } else {
-            creep.say('wall');
+            creep.say('r');
             unLock();
-            // checkRepair(creep, [STRUCTURE_WALL, STRUCTURE_RAMPART]);
+            run_repair(creep);
         }
     } else {
+        creep.say('g');
         get_resource(creep);
     }
 }

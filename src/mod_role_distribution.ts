@@ -1,10 +1,10 @@
 import { isCreepStop, moveToTarget } from './lib_creep';
 import {
     findNearTarget,
+    is_empty_tate,
+    is_full_tate,
     isContainerNearController,
     isContainerNearSource,
-    isEmpty,
-    isFull,
 } from './lib_base';
 
 type resType = ResourceConstant | 'any';
@@ -47,7 +47,7 @@ const w_out = {
     // 矿区容器
     harvester_container: 90,
     // 升级用的容器
-    controller_container: 30,
+    controller_container: 20,
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
@@ -57,7 +57,7 @@ const w_out = {
 const w_in = {
     drop: 0,
     harvester_container: 0,
-    controller_container: 50,
+    controller_container: 60,
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 90,
     [STRUCTURE_TOWER]: 80,
@@ -318,7 +318,6 @@ function prepareCacheRoom(room: Room) {
                         resourceType: type,
                         structureType: stc,
                     });
-
                     che.transOut.addTask(taskOut);
                 }
             });
@@ -343,19 +342,6 @@ function prepareCacheRoom(room: Room) {
                 );
             }
         });
-}
-
-function is_empty_tate(creep: Creep) {
-    const free = creep.store.getFreeCapacity();
-    const cap = creep.store.getCapacity();
-    const used = cap - free;
-    return used / cap < 1 - FULL_RATE;
-}
-function is_full_tate(creep: Creep) {
-    const free = creep.store.getFreeCapacity();
-    const cap = creep.store.getCapacity();
-    const used = cap - free;
-    return used / cap > FULL_RATE;
 }
 // 物流运输单位逻辑
 function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
@@ -469,7 +455,7 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
     if (task.trans_dec === 'in') {
         let type = task.resourceType === 'any' ? undefined : task.resourceType;
         // 卸载任务完成
-        if (isEmpty(creep, type)) {
+        if (is_empty_tate(creep)) {
             delete cache_creep_task[creep.name];
             task.amount = task.amount_rec = 0;
             creep.memory.process = null;
@@ -484,7 +470,7 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
     }
     if (task.trans_dec === 'out') {
         // 装运任务完成
-        if (isFull(creep)) {
+        if (is_full_tate(creep)) {
             delete cache_creep_task[creep.name];
             task.amount = task.amount_rec = 0;
             creep.memory.process = null;
@@ -510,7 +496,7 @@ function generateTask(
     { amount, resourceType, structureType }: GenTask
 ) {
     const pos = [structure.pos.x, structure.pos.y, structure.pos.roomName];
-    const st = structure?.structureType || structureType;
+    const type = structureType || structure?.structureType;
     let ws;
     if (dec === 'in') {
         ws = w_in;
@@ -523,17 +509,14 @@ function generateTask(
         amount: amount,
         pos,
         amount_rec: 0,
-        w: ws[st],
+        w: ws[type],
         resourceType: resourceType,
-        structureType: st,
+        structureType: type,
     } as TransTask;
 }
 
 function log_task(task: TransTask) {
-    let roomName = task.pos[2];
-    if (roomName === 'W1N7') {
-        console.log(
-            `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec}`
-        );
-    }
+    console.log(
+        `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec}`
+    );
 }

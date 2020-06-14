@@ -116,8 +116,23 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
     return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) === 0;
 }
 
+const FULL_RATE = 0.85;
+
+export function is_empty_tate(creep: Creep) {
+    const free = creep.store.getFreeCapacity();
+    const cap = creep.store.getCapacity();
+    const used = cap - free;
+    return used / cap < 1 - FULL_RATE;
+}
+export function is_full_tate(creep: Creep) {
+    const free = creep.store.getFreeCapacity();
+    const cap = creep.store.getCapacity();
+    const used = cap - free;
+    return used / cap > FULL_RATE;
+}
+
 // 按照优先级顺序找到建筑
-export function findByOrder<K extends FindConstant>(
+ export function findByOrder<K extends FindConstant>(
     room: Room,
     filter?: FilterFunction<K>,
     structureTypesOrder?: StructureConstant[]

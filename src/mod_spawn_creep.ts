@@ -50,9 +50,10 @@ function getCreepBody(room: Room, role: role_name_key) {
                 return [MOVE, WORK, CARRY, CARRY];
         }
     }
+    console.log('gb', room.name);
     const cfg = w_config.rooms[room.name].creep_cfg_body[role];
     let body = [];
-    Object.keys(cfg).forEach(b => {
+    Object.keys(cfg || {}).forEach(b => {
         body = body.concat(new Array(cfg[b]).fill(b));
     });
     return body;
@@ -216,7 +217,7 @@ function prepareCache(room: Room) {
     che.c_energy.push(room.energyAvailable);
     let c_ng = che.c_energy;
     che.c_energy_stop =
-        c_ng.length > max_fail_tick-20 && c_ng.every(e => e === undefined || e <= 300);
+        c_ng.length > max_fail_tick - 20 && c_ng.every(e => e === undefined || e <= 300);
     cache[room.name] = che;
     return che;
 }
@@ -248,7 +249,8 @@ function getRoleBoost(room: Room): role_name_key | undefined {
     const cfg = w_config.rooms[room.name];
     if (
         che.c_roles_count[w_role_name.harvester] === 0 &&
-        che.c_roles_count[w_role_name.carrier] === 0
+        che.c_roles_count[w_role_name.carrier] === 0 &&
+        che.c_roles_count[w_role_name.starter] === 0
     ) {
         return w_role_name.starter;
     }
