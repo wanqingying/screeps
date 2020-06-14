@@ -95,7 +95,7 @@ class TransList {
     };
     // structures 偏好的建筑类型
     public getTask = (creep: Creep, structures?: string[]): TransTask => {
-        let che = getCache(creep.room);
+        let che: CacheGlobalRoom = global.w_cache.get(creep.room.name) || {};
         let ws: typeof w_in;
         if (this.trans_dec === 'in') {
             ws = w_in;
@@ -112,13 +112,12 @@ class TransList {
             if (a.amount <= a.amount_rec) {
                 return false;
             }
-            // 生产中的母巢不能出资源
+            // 生产中的母巢停止出资源
             if (
-                che.spawning &&
+                che.spawning_role &&
                 [STRUCTURE_SPAWN, STRUCTURE_EXTENSION].includes(a.structureType as any) &&
                 this.trans_dec === 'out'
             ) {
-                global.w_log('can not get energy from spawn when spawning');
                 return false;
             }
             const wa = ws[a.structureType];
@@ -135,8 +134,8 @@ class TransList {
         bs = bs.filter(s => {
             const wa = ws[s.structureType];
 
-            // 筛选优先的
             if (prior_structure > 0) {
+                // 筛选优先的
                 if (structures.includes(s.structureType)) {
                     return true;
                 }

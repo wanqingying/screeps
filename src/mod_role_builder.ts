@@ -30,11 +30,11 @@ export function load_builder() {
 
 // 工作优先级 :修复低血建筑,建造,修复高血建筑,修墙
 function run_builder(creep: Creep) {
-    if (creep.room.find(FIND_HOSTILE_CREEPS).length > 0) {
-        const pos = w_config.freePlace?.builder || { x: 25, y: 25 };
-        moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
-        return;
-    }
+    // if (creep.room.find(FIND_HOSTILE_CREEPS).length > 0) {
+    //     const pos = w_config.freePlace?.builder || { x: 25, y: 25 };
+    //     moveToTarget(creep, new RoomPosition(pos.x, pos.y, creep.room.name));
+    //     return;
+    // }
 
     if (creep.memory.building && is_empty_tate(creep)) {
         creep.memory.building = false;

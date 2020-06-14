@@ -2,10 +2,11 @@ import { findAttackTarget } from './lib_room';
 import { spawnCreep } from './mod_spawn_creep';
 import { moveToTarget } from './lib_creep';
 
-const attack=2;
-const range_attack=3;
+const attack = 2;
+const range_attack = 3;
 interface Cache {
     attack: any;
+    my_attack_creeps: number;
 }
 const cache: { [name: string]: Cache } = {};
 
@@ -33,15 +34,15 @@ export function load_defence() {
 
 function defenceSpawnAttack(room: Room) {
     let che = cache[room.name];
-    if (che.attack) {
-        return spawnCreep(room, w_role_name.attack);
+    if (che.attack && room.name !== 'sim') {
+        return spawnCreep(room, w_role_name.attack, {}, true);
     }
 }
 
 function run_defence(creep: Creep) {
     let che = cache[creep.room.name];
     let target = che.attack;
-    if (target) {
+    if (target && che.my_attack_creeps >= 3) {
         creep.attack(target);
         moveToTarget(creep, target);
     }
@@ -50,8 +51,11 @@ function run_defence(creep: Creep) {
 function prepareCache(room: Room) {
     let che = cache[room.name];
     if (!che) {
-        che = { attack: null };
+        che = { attack: null, my_attack_creeps: 0 };
     }
     che.attack = findAttackTarget(room);
+    che.my_attack_creeps = room.find(FIND_MY_CREEPS, {
+        filter: s => s.memory.role === w_role_name.attack,
+    }).length;
     cache[room.name] = che;
 }

@@ -34,40 +34,44 @@ export function load_harvest() {
 
 const cache = new Map();
 function harvestSource(creep: Creep) {
-    const che2 = cache2[creep.room.name];
-    let key = `${creep.id}_harvest`;
-    let id = cache.get(key);
+    const che2: CacheGlobalRoom = w_cache.get(creep.room.name);
+    let source = che2.source;
+    let key = `${creep.id}_harvest_source_id`;
+    let id = w_cache.get(key);
     let target;
+    let ch = che2.source.find(s => s.creep_ids.length > 1);
+    let sh = che2.source.find(s => s.creep_ids.length === 0);
+
     if (id) {
-        target = Game.getObjectById(id);
-    } else {
-        let sh = che2.find(s => s.creeps.length < 1);
-        if (!sh) {
-            sh = che2.sort((a, b) => {
-                return a.creeps.length - b.creeps.length;
-            })[0];
+        let source = Game.getObjectById<Source>(id);
+        if (ch && id === ch.source.id) {
+            // 多人采一个矿 重新分配
+            w_cache.delete(key);
+        } else {
+            target = source;
         }
-        sh.creeps.push(creep);
-        target = sh.source;
-        cache.set(key, target.id);
     }
     if (!target) {
-        cache.delete(key);
+        if (!sh) {
+            sh = source.sort((a, b) => {
+                return a.creep_ids.length - b.creep_ids.length;
+            })[0];
+        }
+        sh.creep_ids.push(creep.id);
+        target = sh.source;
+        w_cache.set(key, target.id);
+    }
+    if (!target) {
+        w_cache.delete(key);
         return ERR_NOT_FOUND;
     }
-    // 临死前发布定时任务 重新配对 避免拥挤
-    if (creep.ticksToLive < 5) {
-        setTickOut(10, () => {
-            Array.from(cache.keys()).forEach(k => cache.delete(k));
-        });
-    }
 
-    findAndMoveToSourcePos(creep, target, che2);
+    findAndMoveToSourcePos(creep, target, source);
 
     return creep.harvest(target);
 }
 
-function findAndMoveToSourcePos(creep: Creep, target: any, sources: Cache2[]) {
+function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[]) {
     let sh = sources.find(t => t.source.id === target.id);
     if (sh?.container) {
         return moveToTarget(creep, sh.container.pos);

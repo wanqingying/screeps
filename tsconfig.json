@@ -11,7 +11,7 @@
     "outDir": "127_0_0_1___21025/default"
   },
   "include": [
-    "src",
+    "src/*",
     "typings"
   ],
   "exclude": [

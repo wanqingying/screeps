@@ -73,6 +73,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             return;
         }
     }
+    w_utils.update_cache(room.name, { spawning_role: role } as CacheGlobalRoom);
     const body = getCreepBody(room, role);
     const cost = getBodyCost(body);
     const index = getCreepIndex();
@@ -91,6 +92,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             che.c_spawning_role = '';
             che.c_spawn_fail_tick = 0;
             Memory.creeps_spawn_index = k + 1;
+            w_utils.update_cache(room.name, { spawning_role: '' } as CacheGlobalRoom);
         } else {
             che.c_spawning_role = role;
             che.c_spawn_fail_tick++;

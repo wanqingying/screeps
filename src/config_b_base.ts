@@ -37,12 +37,6 @@ export const config_global: ConfigGlobal = {
     renew_max_rate: 0.4,
     energy_lack_tick: 100,
     renew_interval: 200,
-    creep_order: [
-        w_role_name.harvester,
-        w_role_name.carrier,
-        w_role_name.builder,
-        w_role_name.upgrader,
-    ],
     upgrader_only_container: true,
     creep_cfg_body: cfg.creep_cfg_body as any,
     creep_cfg_num: cfg.creep_cfg_num as any,

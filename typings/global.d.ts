@@ -11,7 +11,6 @@ declare interface ConfigGlobal {
     energy_lack_tick: number;
     renew_max_rate: number;
     renew_interval: number;
-    creep_order: any[];
     upgrader_only_container: boolean;
     creep_cfg_num: CreepCfgNum;
     freePlace: FreePlace;
@@ -70,10 +69,6 @@ declare interface SourceWithContainer {
     source: Source;
     container: StructureContainer;
     cap: number;
-}
-
-declare interface CacheGlobalRoom{
-    spawning:boolean
 }
 
 declare type CreepCfgNum = { [role in role_name_key]: number };

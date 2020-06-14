@@ -58,7 +58,7 @@ export function run_repair(creep: Creep) {
         target = Game.getObjectById<AnyStructure>(cache_id);
     }
 
-    if (!target) {
+    if (!target && che.c_structure) {
         const structure = che.c_structure;
         const rate_a = structure.hits / structure.hitsMax;
         if (rate_a < min_hits_rate) {
@@ -66,7 +66,7 @@ export function run_repair(creep: Creep) {
         }
     }
 
-    if (!target) {
+    if (!target && che.c_war_rampart) {
         const war_target = che.c_war_rampart;
         if (war_target && war_target.hits < war_target.hitsMax) {
             target = war_target;
