@@ -7,36 +7,31 @@ declare interface ConfigGlobal {
         body_cost: { [k: string]: number };
         extension_energy: number[];
     };
-    energy_lack_rate: number;
-    energy_lack_tick: number;
-    renew_max_rate: number;
-    renew_interval: number;
     upgrader_only_container: boolean;
-    creep_cfg_num: CreepCfgNum;
-    freePlace: FreePlace;
-    // auto spawn role
-    role_auto: role_name_key[];
-    reserve_rooms: string[];
     rooms: {
         [name: string]: CfgRoom;
     };
+}
+interface CfgReserve {
+    name: string;
+    sources: { id: string }[];
 }
 
 interface CfgRoom {
     creep_cfg_num: CreepCfgNum;
     claims: Claims;
+    reserve: CfgReserve[];
 }
 
-interface Claims{
-    name:string,
-    creep:any[][]
+interface Claims {
+    name: string;
+    creep: any[][];
 }
-
 
 declare interface W_Utils {
     count_distance: count_distance;
     get_code_msg: get_code_msg_screeps;
-    update_cache: (key:any,cache:any)=>any;
+    update_cache: (key: any, cache: any) => any;
     print: any;
 }
 

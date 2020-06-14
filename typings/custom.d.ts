@@ -9,7 +9,9 @@
 
 declare type role_name_key =
     | 'carrier'
+    | 'remote_carrier'
     | 'harvester'
+    | 'remote_harvester'
     | 'starter'
     | 'upgrader'
     | 'builder'

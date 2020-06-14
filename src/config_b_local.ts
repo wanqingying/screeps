@@ -1,6 +1,6 @@
 //=============1==2====3====4=====5=====6
 // body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
-const w=global.w_role_name;
+const w = global.w_role_name;
 export const cfg_local = {
     W1N7: {
         creep_cfg_num: {
@@ -14,10 +14,6 @@ export const cfg_local = {
             [w_role_name.attack]: 0,
         },
         reserve_rooms: [],
-        freePlace: {
-            [w_role_name.carrier]: { x: 23, y: 40 },
-            [w_role_name.builder]: { x: 24, y: 27 },
-        },
         claims: {
             name: 'W1N8',
             creep: [
@@ -44,11 +40,6 @@ export const cfg_local = {
             [w.repair]: 1,
             [w.attack]: 0,
         },
-        reserve_rooms: [],
-        freePlace: {
-            [w.carrier]: { x: 23, y: 40 },
-            [w.builder]: { x: 24, y: 27 },
-        },
         claims: {
             name: 'W1N8',
             creep: [
@@ -67,18 +58,16 @@ export const cfg_local = {
     W2N7: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 2,
+            [w_role_name.carrier]: 3,
             [w_role_name.scout]: 0,
-            [w_role_name.builder]: 1,
+            [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 2,
+            [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 1,
         },
-        reserve_rooms: [],
-        freePlace: {
-            [w_role_name.carrier]: { x: 23, y: 40 },
-            [w_role_name.builder]: { x: 24, y: 27 },
-        },
+        reserve: [
+            { name: 'W3N7', sources: [{ id: 'eff307740862fd8' }, { id: 'eee50774086309c' }] },
+        ],
         claim: 'W2N7',
     },
 };

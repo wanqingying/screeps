@@ -102,8 +102,8 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             const msg = `${spawn} ${name} ${w_utils.get_code_msg(
                 act
             )}  need/current/total ${cost}/${eng}/${cap}`;
+            console.log(room.name);
             console.log(msg);
-            console.log('memory ', JSON.stringify(gems));
         }
         che.c_spawn_code = act;
     }

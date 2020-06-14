@@ -6,6 +6,8 @@ declare interface Memory {
 
 declare interface CreepMemory {
     role: role_name_key;
+    remote?:string
+    from?:string
     cost: number;
     index: number;
     building?: boolean;

@@ -16,9 +16,11 @@ const cache_rooms: { [name: string]: CacheRoom } = {};
 
 export function load_starter() {
     Object.values(Game.rooms).forEach(room => {
-        if (room.controller?.my) {
-            prepareCache(room);
+        if (!room.controller?.my) {
+            return;
         }
+        prepareCache(room);
+
         let che: CacheGlobalRoom = w_cache.get(room.name);
         let role_count = che.creep_role_count;
         let no_start = role_count[w_role_name.harvester] > 1 && role_count[w_role_name.carrier] > 1;

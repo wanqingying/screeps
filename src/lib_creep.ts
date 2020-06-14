@@ -8,6 +8,7 @@ export function harvestSource(creep: Creep) {
     let target;
     let ch = che2.source.find(s => s.creep_ids.length > 1);
     let sh = che2.source.find(s => s.creep_ids.length === 0);
+    // let rh = che2.remote_source.find(s => s.creep_ids.length === 0);
 
     if (id) {
         let source = Game.getObjectById<Source>(id);
@@ -45,6 +46,8 @@ export function harvestSource(creep: Creep) {
 
     return creep.harvest(target);
 }
+
+function getRemoteSource(room: Room) {}
 
 function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[]) {
     let sh = sources.find(t => t.source.id === target.id);
@@ -111,6 +114,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
         return {
             [w.carrier]: { [MOVE]: 1, [CARRY]: 2 },
             [w.harvester]: { [MOVE]: 1, [WORK]: 2, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 1, [WORK]: 2, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
@@ -133,6 +137,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
         return {
             [w.carrier]: { [MOVE]: 4, [CARRY]: 8 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },

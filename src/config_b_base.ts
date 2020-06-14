@@ -33,16 +33,7 @@ export const config_global: ConfigGlobal = {
         extension_energy: [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000],
     },
     // 持续 n tik 能量饱和率过低则判断此房间缺能量
-    energy_lack_rate: 0.5,
-    renew_max_rate: 0.4,
-    energy_lack_tick: 100,
-    renew_interval: 200,
     upgrader_only_container: true,
-    creep_cfg_body: cfg.creep_cfg_body as any,
-    creep_cfg_num: cfg.creep_cfg_num as any,
-    role_auto: [],
-    freePlace: cfg.freePlace as any,
-    reserve_rooms: cfg.reserve_rooms,
     rooms: cfg as any,
 };
 

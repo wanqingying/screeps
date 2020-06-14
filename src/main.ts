@@ -26,6 +26,8 @@ function main() {
     // mod.load_claim();
     mod.load_repair();
     mod.load_defence()
+    mod.load_scout()
+    mod.load_remote()
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
