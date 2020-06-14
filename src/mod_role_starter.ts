@@ -1,6 +1,6 @@
 import { getSourceWithContainer } from './lib_room';
-import { getActionLockTarget, getCreepBodyNum, isEmpty, isFull } from './lib_base';
-import { isCreepStop, moveToTarget } from './lib_creep';
+import { isEmpty, isFull } from './lib_base';
+import { isCreepStop, harvestSource } from './lib_creep';
 import { give_resource } from './mod_role_distribution';
 
 interface CacheSource {
@@ -19,20 +19,28 @@ export function load_starter() {
         if (room.controller?.my) {
             prepareCache(room);
         }
-    });
-    Object.values(Game.creeps).forEach(creep => {
-        if (isCreepStop(creep)) {
-            return false;
-        }
-        if (creep.memory?.role === w_role_name.starter) {
-            try {
-                run_starter(creep);
-            } catch (e) {
-                console.log('err load_harvest ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
+        let che: CacheGlobalRoom = w_cache.get(room.name);
+        let role_count = che.creep_role_count;
+        let no_start = role_count[w_role_name.harvester] > 1 && role_count[w_role_name.carrier] > 1;
+
+        room.find(FIND_MY_CREEPS).forEach(creep => {
+            if (isCreepStop(creep)) {
+                return false;
             }
-        }
+
+            if (creep.memory?.role === w_role_name.starter) {
+                if (no_start) {
+                    creep.suicide();
+                }
+                try {
+                    run_starter(creep);
+                } catch (e) {
+                    console.log('err load_harvest ', creep.name);
+                    console.log(e.message);
+                    console.log(e.stack);
+                }
+            }
+        });
     });
 }
 
@@ -48,43 +56,6 @@ function run_starter(creep: Creep) {
         harvestSource(creep);
     } else {
         give_resource(creep);
-    }
-}
-
-function harvestSource(creep: Creep) {
-    const che = getCache(creep.room);
-    const { target, unLock } = getActionLockTarget(creep, 'harvest_source', () => {
-        let sourceH = che.sources.sort((a, b) => {
-            return a.work - b.work;
-        });
-        let t = Array.from(sourceH).shift();
-        if (t) {
-            t.work += getCreepBodyNum(creep, WORK);
-        }
-        return t?.source;
-    });
-
-    if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-
-    if (target.energy === 0 && target.ticksToRegeneration > 500) {
-        // 资源采尽时切换目标
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-
-    findAndMoveToSourcePos(creep, target, che.sources);
-    return creep.harvest(target);
-}
-
-function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[]) {
-    let sh = sources.find(t => t.source.id === target.id);
-    if (sh?.container) {
-        return moveToTarget(creep, sh.container.pos);
-    } else {
-        return moveToTarget(creep, target);
     }
 }
 

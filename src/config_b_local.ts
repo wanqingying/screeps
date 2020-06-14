@@ -1,5 +1,6 @@
 //=============1==2====3====4=====5=====6
 // body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
+const w=global.w_role_name;
 export const cfg_local = {
     W1N7: {
         creep_cfg_num: {
@@ -12,17 +13,6 @@ export const cfg_local = {
             [w_role_name.repair]: 1,
             [w_role_name.attack]: 0,
         },
-        creep_cfg_body: {
-            [w_role_name.carrier]: { [MOVE]: 5, [CARRY]: 15 },
-            [w_role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 1 },
-            [w_role_name.harvester]: { [MOVE]: 2, [WORK]: 7, [CARRY]: 0 },
-            [w_role_name.builder]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
-            [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
-            [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
-            [w_role_name.claim]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w_role_name.repair]: { [MOVE]: 6, [WORK]: 4, [CARRY]: 4 },
-            [w_role_name.attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
-        },
         reserve_rooms: [],
         freePlace: {
             [w_role_name.carrier]: { x: 23, y: 40 },
@@ -31,9 +21,9 @@ export const cfg_local = {
         claims: {
             name: 'W1N8',
             creep: [
-                [w_role_name.harvester, 1],
-                [w_role_name.builder, 1],
-                [w_role_name.upgrader, 1],
+                // [w_role_name.harvester, 1],
+                // [w_role_name.builder, 1],
+                // [w_role_name.upgrader, 1],
             ],
         },
         // claim: 'W2N7',
@@ -45,43 +35,32 @@ export const cfg_local = {
     },
     W1N8: {
         creep_cfg_num: {
-            [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 2,
-            [w_role_name.scout]: 0,
-            [w_role_name.builder]: 2,
-            [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 1,
-            [w_role_name.repair]: 0,
-            [w_role_name.attack]: 0,
-        },
-        creep_cfg_body: {
-            [w_role_name.carrier]: { [MOVE]: 5, [CARRY]: 15 },
-            [w_role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
-            [w_role_name.harvester]: { [MOVE]: 1, [WORK]: 2, [CARRY]: 0 },
-            [w_role_name.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
-            [w_role_name.upgrader]: { [MOVE]: 1, [WORK]: 2, [CARRY]: 1 },
-            [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
-            [w_role_name.claim]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w_role_name.repair]: { [MOVE]: 6, [WORK]: 4, [CARRY]: 4 },
-            [w_role_name.attack]: { [MOVE]: 6, [TOUGH]: 15, [ATTACK]: 2 },
+            [w.starter]: 0,
+            [w.carrier]: 2,
+            [w.scout]: 0,
+            [w.builder]: 2,
+            [w.harvester]: 2,
+            [w.upgrader]: 2,
+            [w.repair]: 1,
+            [w.attack]: 0,
         },
         reserve_rooms: [],
         freePlace: {
-            [w_role_name.carrier]: { x: 23, y: 40 },
-            [w_role_name.builder]: { x: 24, y: 27 },
+            [w.carrier]: { x: 23, y: 40 },
+            [w.builder]: { x: 24, y: 27 },
         },
         claims: {
             name: 'W1N8',
             creep: [
-                [w_role_name.harvester, 1],
-                [w_role_name.builder, 1],
+                [w.harvester, 1],
+                [w.builder, 1],
                 // [w_role_name.upgrader, 1],
             ],
         },
         // claim: 'W2N7',
         ext_creep: [
-            { role: w_role_name.harvester, num: 3, target_room: 'W2N7' },
-            { role: 'carrier', num: 1, target_room: 'W2N7' },
+            { role: w.harvester, num: 3, target_room: 'W2N7' },
+            { role: w.carrier, num: 1, target_room: 'W2N7' },
             { role: w_role_name.builder, num: 3, target_room: 'W2N7' },
         ],
     },
@@ -94,16 +73,6 @@ export const cfg_local = {
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
             [w_role_name.repair]: 1,
-        },
-        creep_cfg_body: {
-            [w_role_name.carrier]: { [MOVE]: 4, [CARRY]: 6 },
-            [w_role_name.starter]: { [MOVE]: 2, [CARRY]: 1, [WORK]: 2 },
-            [w_role_name.harvester]: { [MOVE]: 1, [WORK]: 4, [CARRY]: 0 },
-            [w_role_name.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
-            [w_role_name.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
-            [w_role_name.scout]: { [MOVE]: 1, [CARRY]: 0 },
-            [w_role_name.claim]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w_role_name.repair]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 3 },
         },
         reserve_rooms: [],
         freePlace: {

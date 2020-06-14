@@ -1,256 +1,59 @@
-import {
-    findNearTarget,
-    isEmpty,
-    isNotEmpty,
-    isFull,
-    getActionLockTarget,
-    getCreepBodyNum,
-    findByOrder,
-    isContainerNearSource,
-    findRepairTarget, findRepairTargetC,
-} from './lib_base';
+import { isEmpty, getActionLockTarget, findRepairTargetC } from './lib_base';
 
-// 卸货
-export function transferNearby(
-    creep: Creep,
-    structureTypes?: StructureConstant[],
-    resourceType?: ResourceConstant | null
-): ScreepsReturnCode {
-    resourceType = resourceType || RESOURCE_ENERGY;
-    let structureFilters = structureTypes || [
-        STRUCTURE_EXTENSION,
-        STRUCTURE_SPAWN,
-        STRUCTURE_TOWER,
-        STRUCTURE_CONTAINER,
-        STRUCTURE_STORAGE,
-    ];
+export function harvestSource(creep: Creep) {
+    const che2: CacheGlobalRoom = w_cache.get(creep.room.name);
+    let source = che2.source;
+    let key = `${creep.id}_harvest_source_id`;
+    let id = w_cache.get(key);
+    let target;
+    let ch = che2.source.find(s => s.creep_ids.length > 1);
+    let sh = che2.source.find(s => s.creep_ids.length === 0);
 
-    let { target, unLock } = getActionLockTarget<StructureContainer>(
-        creep,
-        'transfer_nearby',
-        () => {
-            const targets = findByOrder(
-                creep.room,
-                (s: any) => {
-                    if (!s || !s.store) {
-                        return false;
-                    }
-                    if (isContainerNearSource(creep.room, s)) {
-                        // 矿源附近的 container 不用于卸货
-                        return false;
-                    }
-                    if (isFull(s, resourceType)) {
-                        return false;
-                    }
-                    return true;
-                },
-                structureFilters
-            );
-            return findNearTarget(creep, targets) as any;
+    if (id) {
+        let source = Game.getObjectById<Source>(id);
+        if (ch && id === ch.source.id) {
+            // 多人采一个矿 重新分配
+            w_cache.delete(key);
+        } else {
+            target = source;
         }
-    );
-
+    }
     if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if (isFull(target)) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if (isEmpty(creep)) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    // 房间能量未满不存入storage
-    if (target.structureType === STRUCTURE_STORAGE) {
-        if (creep.room.energyAvailable < creep.room.energyCapacityAvailable) {
-            unLock();
-            return ERR_NOT_FOUND;
-        }
-    }
-
-    const code = creep.transfer(target, resourceType);
-    if (code === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
-    }
-    if (isEmpty(creep)) {
-        unLock();
-    }
-    return code;
-}
-
-// 捡最大的垃圾 // 返回捡垃圾是否成功
-export function pickUpDropEnergy(creep: Creep): boolean {
-    let { target, unLock } = getActionLockTarget(creep, 'pick_up_builder_drop', () => {
-        let targets = creep.room.dropResources.filter(d => d.cap < d.resource.amount);
-        let target = findNearTarget<any>(
-            creep,
-            targets.map(t => t.resource)
-        );
-        if (target) {
-            target.cap += creep.store.getFreeCapacity(RESOURCE_ENERGY);
-            return target.resource;
-        }
-    });
-    // 垃圾被捡完重新分配
-    if (!target || target.amount === 0) {
-        unLock();
-        return false;
-    }
-    if (isFull(creep)) {
-        unLock();
-        return true;
-    }
-    let code = creep.pickup(target);
-    if (code === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
-        return true;
-    }
-    if (code === OK) {
-        return true;
-    }
-    return false;
-}
-// 从矿区拿资源
-export function pickUpFromMine(creep: Creep, type?: ResourceConstant) {
-    const h = type || RESOURCE_ENERGY;
-    let { target, unLock } = getActionLockTarget<ResourceConstant>(
-        creep,
-        'pick_drop_or_mine',
-        () => {
-            let drop = getMineDropNeedPick(creep, h);
-            if (drop) {
-                return drop;
+        if (!sh) {
+            let time_out_miner = source.find(s => {
+                return s.creep_ids.find(sid => Game.getObjectById<Creep>(sid).ticksToLive < 100);
+            });
+            // 无缝交接
+            if (time_out_miner) {
+                sh = time_out_miner;
             } else {
-                return getMineContainerNeedWithdraw(creep);
+                sh = source.sort((a, b) => {
+                    return a.creep_ids.length - b.creep_ids.length;
+                })[0];
             }
         }
-    );
+        sh.creep_ids.push(creep.id);
+        target = sh.source;
+        w_cache.set(key, target.id);
+    }
     if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if ((target as StructureContainer)?.store && isEmpty(target)) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if (typeof (target as Resource)?.amount === 'number' && target?.amount === 0) {
-        unLock();
+        w_cache.delete(key);
         return ERR_NOT_FOUND;
     }
 
-    let code;
-    if (target?.store) {
-        code = creep.withdraw(target, h);
-    } else {
-        code = creep.pickup(target);
-    }
-    if (code === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
-    }
-    if (code === OK) {
-        unLock();
-    }
-    return code;
-}
+    findAndMoveToSourcePos(creep, target, source);
 
-export function getMineDropNeedPick(creep: Creep, type?: ResourceConstant) {
-    let drops = Array.from(creep.room.dropResources).filter(a => {
-        return a.cap < a.resource?.amount && a.resource?.amount;
-    });
-    let drop = findNearTarget<Resource>(
-        creep,
-        drops.map(d => d.resource)
-    );
-    if (drop) {
-        drops.forEach(d => {
-            if (d.resource.id === drop.id) {
-                d.cap += creep.store.getFreeCapacity(type);
-            }
-        });
-        return drop;
-    }
-}
-export function getMineContainerNeedWithdraw(creep: Creep, type?: ResourceConstant) {
-    let sources = creep.room.sourceInfo;
-    for (let sh of sources) {
-        if (isMineContainerNeedWithdraw(sh)) {
-            sh.containerCap = sh.containerCap - creep.store.getFreeCapacity(type);
-            return sh.container;
-        }
-    }
-}
-export function isMineContainerNeedWithdraw(sh: SourceCache, type?: ResourceConstant) {
-    return (
-        sh.container &&
-        isNotEmpty(sh.container) &&
-        sh.containerCap < sh.container.store.getUsedCapacity(type)
-    );
-}
-
-// upgrader获取能量
-export function getEnergyUpgrader(creep: Creep, types?: any[]) {
-    let { target, unLock } = getActionLockTarget(creep, 'get_energy_up', () => {
-        let filter_types = types || [STRUCTURE_CONTAINER, STRUCTURE_STORAGE];
-        let targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure: StructureContainer) => {
-                if (!filter_types.includes(structure?.structureType)) {
-                    return false;
-                }
-                if (isEmpty(structure)) {
-                    return false;
-                }
-                return true;
-            },
-        });
-        return findNearTarget(creep, targets);
-    });
-    if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-
-    moveToTarget(creep, target);
-    return creep.withdraw(target, RESOURCE_ENERGY);
-}
-
-export function harvestSource(creep: Creep): ScreepsReturnCode {
-    const { target, unLock } = getActionLockTarget(creep, 'harvest_source', () => {
-        let sourceH = creep.room.sourceInfo.sort((a, b) => {
-            return a.speed - b.speed;
-        });
-        let t = Array.from(sourceH).shift();
-        if (t) {
-            t.speed += getCreepBodyNum(creep, WORK);
-        }
-        return t?.source;
-    });
-
-    if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-
-    if (target.energy === 0 && target.ticksToRegeneration > 500) {
-        // 资源采尽时切换目标
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-
-    findAndMoveToSourcePos(creep, target);
     return creep.harvest(target);
 }
 
-function findAndMoveToSourcePos(creep: Creep, target) {
-    let sh = creep.room.sourceInfo.find(t => t.source.id === target.id);
-    if (!sh?.container) {
-        return moveToTarget(creep, target);
-    } else {
+function findAndMoveToSourcePos(creep: Creep, target: any, sources: CacheSource[]) {
+    let sh = sources.find(t => t.source.id === target.id);
+    if (sh?.container) {
         return moveToTarget(creep, sh.container.pos);
+    } else {
+        return moveToTarget(creep, target);
     }
 }
-
 export function moveToTarget(creep: Creep, target: RoomPosition, dis?: number) {
     const far = w_utils.count_distance(creep.pos, target);
     if (far > (dis || 0)) {
@@ -276,11 +79,108 @@ export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): Scr
 }
 
 export function isCreepStop(creep: Creep) {
-    if (creep.spawning){
-        return true
+    if (creep.spawning) {
+        return true;
     }
     if (creep.memory.target_room && creep.memory.target_room !== creep.room.name) {
         return true;
     }
     return false;
+}
+const w = global.w_role_name;
+
+export function getCreepBodyByRole(role: role_name_key, maxEnergy: number) {
+    if (role === w_role_name.starter) {
+        return { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 };
+    }
+    if (role === w_role_name.scout) {
+        return { [MOVE]: 1, [CARRY]: 0 };
+    }
+    if (role === w_role_name.claim) {
+        return { [MOVE]: 1, [CLAIM]: 1 };
+    }
+    let cfg = getCreepBodyCfg(maxEnergy);
+    return cfg[role];
+}
+
+//========0====1====2====3====4=====5=====6====7======8
+// body [-300, 0, 250, 500, 1000, 1500, 2000, 5000, 12000]
+export function getCreepBodyCfg(maxEnergy: number) {
+    //300
+    if (maxEnergy < 550) {
+        return {
+            [w.carrier]: { [MOVE]: 1, [CARRY]: 2 },
+            [w.harvester]: { [MOVE]: 1, [WORK]: 2, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
+            [w.repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 550
+    if (maxEnergy < 800) {
+        return {
+            [w.carrier]: { [MOVE]: 3, [CARRY]: 6 },
+            [w.harvester]: { [MOVE]: 1, [WORK]: 5, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+            [w.upgrader]: { [MOVE]: 1, [WORK]: 4, [CARRY]: 1 },
+            [w.repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 800
+    if (maxEnergy < 1300) {
+        return {
+            [w.carrier]: { [MOVE]: 4, [CARRY]: 8 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
+            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 1300
+    if (maxEnergy < 1800) {
+        return {
+            [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
+            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 1800
+    if (maxEnergy < 2300) {
+        return {
+            [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
+            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 2300
+    if (maxEnergy < 5300) {
+        return {
+            [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
+            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
+    // 5300
+    if (maxEnergy <= 12300) {
+        return {
+            [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
+            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 5, [MOVE]: 3, [ATTACK]: 0 },
+        };
+    }
 }

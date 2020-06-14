@@ -14,7 +14,6 @@ declare interface ConfigGlobal {
     upgrader_only_container: boolean;
     creep_cfg_num: CreepCfgNum;
     freePlace: FreePlace;
-    creep_cfg_body: CreepCfgBody;
     // auto spawn role
     role_auto: role_name_key[];
     reserve_rooms: string[];
@@ -25,7 +24,6 @@ declare interface ConfigGlobal {
 
 interface CfgRoom {
     creep_cfg_num: CreepCfgNum;
-    creep_cfg_body: CreepCfgBody;
     claims: Claims;
 }
 
@@ -73,7 +71,6 @@ declare interface SourceWithContainer {
 
 declare type CreepCfgNum = { [role in role_name_key]: number };
 declare type FreePlace = { [role in role_name_key]: any };
-declare type CreepCfgBody = { [role in role_name_key]: { [k: string]: number } };
 
 declare namespace NodeJS {
     export interface Global {

@@ -26,6 +26,10 @@ function prepareCache(room: Room) {
     } else {
         che.source.forEach(c => (c.creep_ids = []));
     }
+    const creep_count: any = {};
+    Object.values(w_role_name).forEach(role => {
+        creep_count[role] = 0;
+    });
     room.find(FIND_MY_CREEPS).forEach(c => {
         let source_id_key = `${c.id}_harvest_source_id`;
         let source_id = w_cache.get(source_id_key);
@@ -33,5 +37,7 @@ function prepareCache(room: Room) {
             const sh = che.source.find(s => s.source.id === source_id);
             sh.creep_ids.push(c.id);
         }
+        creep_count[c.memory.role] += 1;
     });
+    che.creep_role_count = creep_count;
 }

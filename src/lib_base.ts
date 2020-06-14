@@ -118,21 +118,23 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
 
 const FULL_RATE = 0.85;
 
-export function is_empty_tate(creep: Creep) {
+export function is_empty_tate(creep: Creep, rate?: number) {
+    const percent = rate || FULL_RATE;
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
-    return used / cap < 1 - FULL_RATE;
+    return used / cap <= 1 - percent;
 }
-export function is_full_tate(creep: Creep) {
+export function is_full_tate(creep: Creep, rate?: number) {
+    const percent = rate || FULL_RATE;
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
-    return used / cap > FULL_RATE;
+    return used / cap >= percent;
 }
 
 // 按照优先级顺序找到建筑
- export function findByOrder<K extends FindConstant>(
+export function findByOrder<K extends FindConstant>(
     room: Room,
     filter?: FilterFunction<K>,
     structureTypesOrder?: StructureConstant[]

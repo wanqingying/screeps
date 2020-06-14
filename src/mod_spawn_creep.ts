@@ -1,4 +1,5 @@
 import { getBodyCost, getCreepIndex, ListA } from './lib_base';
+import { getCreepBodyByRole } from './lib_creep';
 
 interface RoomCache {
     // 房间当前角色数量
@@ -40,6 +41,7 @@ export function load_spawn_check() {
 // 根据配置获取单位部件
 function getCreepBody(room: Room, role: role_name_key) {
     let che = getCache(room);
+    // 房间停摆冷启动
     if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
         switch (role) {
             case 'carrier':
@@ -50,8 +52,8 @@ function getCreepBody(room: Room, role: role_name_key) {
                 return [MOVE, WORK, CARRY, CARRY];
         }
     }
-    console.log('gb', room.name);
-    const cfg = w_config.rooms[room.name].creep_cfg_body[role];
+
+    const cfg = getCreepBodyByRole(role, room.energyCapacityAvailable);
     let body = [];
     Object.keys(cfg || {}).forEach(b => {
         body = body.concat(new Array(cfg[b]).fill(b));

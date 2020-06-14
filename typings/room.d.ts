@@ -23,5 +23,4 @@ declare interface Room {
     ): Array<FindTypes[K]>;
     log(...p: any): void;
     start(): void;
-    refreshDropEnergy(): void;
 }

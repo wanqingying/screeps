@@ -38,12 +38,3 @@ export function find_by_cache_key<T extends FindConstant>(param: ParamRoomFilter
     w_cache.set(key, res);
     return res;
 }
-
-export function wrap_cache<T>(fn: T): T {
-    function f(param, fn) {
-        // const key=
-    }
-    return f as any;
-}
-
-export function prepare() {}
