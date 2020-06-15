@@ -5,11 +5,11 @@ export const cfg_online = {
     E18S5: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 4,
+            [w_role_name.carrier]: 2,
             [w_role_name.scout]: 0,
-            [w_role_name.builder]: 1,
+            [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 3,
+            [w_role_name.upgrader]: 2,
             [w_role_name.repair]: 1,
         },
         reserve_rooms: [],
@@ -28,5 +28,3 @@ export const cfg_online = {
         reserve_rooms: [],
     },
 };
-
-

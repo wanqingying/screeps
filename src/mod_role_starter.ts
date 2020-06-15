@@ -1,6 +1,6 @@
 import { getSourceWithContainer } from './lib_room';
 import { is_empty_tate, is_full_tate } from './lib_base';
-import { isCreepStop, harvestSource } from './lib_creep';
+import { harvestSource } from './lib_creep';
 import { give_resource } from './mod_role_distribution';
 
 interface CacheSource {
@@ -26,10 +26,9 @@ export function load_starter() {
         let no_start = role_count[w_role_name.harvester] > 1 && role_count[w_role_name.carrier] > 1;
 
         room.find(FIND_MY_CREEPS).forEach(creep => {
-            if (isCreepStop(creep)) {
+            if (creep.spawning) {
                 return false;
             }
-
             if (creep.memory?.role === w_role_name.starter) {
                 if (no_start) {
                     creep.suicide();

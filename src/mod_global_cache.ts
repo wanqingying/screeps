@@ -1,18 +1,30 @@
-import { getSourceWithContainer, RemoteResource } from './lib_base';
+import { getSourceWithContainer, RemoteMine, RemoteTransport } from './lib_base';
+import { get, set } from 'lodash';
 
 export function load_cache() {
+    try {
+        load_global_cache();
+    } catch (e) {
+        console.log('err load_global_cache');
+        console.log(e.message);
+        console.log(e.stack);
+    }
+}
+
+function load_global_cache() {
     if (!global.w_cache) {
         global.w_cache = new Map<any, any>();
     }
     Object.values(Game.rooms).forEach(room => {
-        const remotes = w_config.rooms[room.name]?.reserve || [];
         if (room.controller?.my) {
             prepareCache(room);
+
             const che: CacheGlobalRoom = w_cache.get(room.name) || {};
+            const remotes = w_config.rooms[room.name]?.reserve || {};
             che.remotes = [];
-            remotes.forEach(r => {
-                che.remotes.push({ name: r.name });
-                const remote_room = Game.rooms[r.name];
+            Object.keys(remotes).forEach(name => {
+                che.remotes.push({ name: name });
+                const remote_room = Game.rooms[name];
                 if (remote_room) {
                     prepareRemoteCache(remote_room, room);
                 }
@@ -22,12 +34,19 @@ export function load_cache() {
     Object.values(Game.creeps).forEach(c => {
         let remote_name = c.memory.remote;
         let role = c.memory.role;
-        if (role === w_role_name.harvester && remote_name) {
+        if (role === w_role_name.remote_harvester && remote_name) {
             const che: CacheGlobalRoom = w_cache.get(c.memory.from);
-            const count = che.remote[remote_name].remote_role_count[role] || 0;
+            let count: number =
+                (get(che.remote, `${remote_name}.remote_role_count.${role}`) as any) || 0;
+            set(che.remote, `${remote_name}.remote_role_count${role}`, count + 1);
             che.remote[remote_name].remote_role_count[role] = count + 1;
         }
     });
+    let rmc: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
+    if (!rmc) {
+        rmc = new RemoteMine();
+    }
+    rmc.updateState();
 }
 
 function prepareCache(room: Room) {
@@ -65,12 +84,12 @@ function prepareCache(room: Room) {
 }
 
 function prepareRemoteCache(room: Room, from_room: Room) {
-    let che: RemoteResource = w_cache.get(w_code.REMOTE_KEY_A);
+    let che: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
     let che_from: CacheGlobalRoom = w_cache.get(from_room.name);
     let che_remote: CacheGlobalRoom = w_cache.get(room.name) || {};
 
     if (!che) {
-        che = new RemoteResource();
+        che = new RemoteTransport();
     } else {
         // che.resources ;
     }
@@ -131,5 +150,5 @@ function prepareRemoteCache(room: Room, from_room: Room) {
                 .map(c => c.name),
         };
     });
-    w_cache.set(w_code.REMOTE_KEY_A, che);
+    w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
 }

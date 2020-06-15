@@ -1,34 +1,26 @@
-import { isEmpty, isFull, RemoteResource } from './lib_base';
+import { isEmpty, isFull, RemoteTransport, run_creep } from './lib_base';
 import { spawnCreep } from './mod_spawn_creep';
 
 export function load_remote_transport() {
-    const cps = Object.values(Game.creeps).filter(c => c.memory.role === w_role_name.remote_carry);
-    Object.values(Game.rooms).forEach(room => {
-        if (!room.controller?.my) {
-            return;
-        }
-        let che: CacheGlobalRoom = w_cache.get(room.name);
-        if (!Array.isArray(che.remotes) || che.remotes.length === 0) {
-            return;
-        }
-        const creeps = cps.filter(c => c.memory.from === room.name);
-        const th: RemoteResource = w_cache.get(w_code.REMOTE_KEY_A);
-        const tasks = th.getRoomTask(room);
-
-        if (creeps.length < che.remotes.length && tasks.length > 0) {
-            spawnCreep(room, w_role_name.remote_carry, { from: room.name });
-        }
-        creeps.forEach(creep => {
+    run_creep(w_role_name.remote_carry, function (creep) {
+        try {
             run_remote_transport(creep);
-        });
+        } catch (e) {
+            console.log('err run_remote_transport ');
+            console.log(e.message);
+            console.log(e.stack);
+        }
     });
 }
 
 function run_remote_transport(creep: Creep) {
-    const sh: RemoteResource = w_cache.get(w_code.REMOTE_KEY_A);
+    const sh: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
 
     if (isFull(creep)) {
         creep.memory.process = 'd';
+    }
+    if (isEmpty(creep)) {
+        creep.memory.process = 'p';
     }
 
     if (creep.memory.process === 'd') {

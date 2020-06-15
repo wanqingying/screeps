@@ -13,15 +13,17 @@ declare interface ConfigGlobal {
     };
 }
 
-interface CfgReserve {
-    name: string;
-    sources: { id: string }[];
+interface CfgR {
+    id: string;
+    container_id?: string;
+    creep_id?: string;
 }
 
 interface CfgRoom {
     creep_cfg_num: CreepCfgNum;
-    claims: Claims;
-    reserve: CfgReserve[];
+    claims?: Claims;
+    reserve?: { [name: string]: CfgR[] };
+    scout?: string[];
     remote_container?: string[];
 }
 
@@ -42,10 +44,8 @@ declare type W_CODE = {
     SPAWN_BY_FORCE: 9;
     SPAWN_BY_CONFIG: 8;
     SPAWN_BY_AUTO: 7;
-
-    ERR_TARGET_NOT_FOUND: -217;
-    ERR_TARGET_FULL: -217;
-    REMOTE_KEY_A: 12331;
+    REMOTE_KEY_TRANSPORT: 12331;
+    REMOTE_KEY_MINE: 12330;
 };
 
 declare interface Role {

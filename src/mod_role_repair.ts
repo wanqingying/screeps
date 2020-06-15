@@ -1,5 +1,4 @@
-import { is_empty_tate, is_full_tate, isEmpty, isFull } from './lib_base';
-import { isCreepStop } from './lib_creep';
+import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
 import { get_resource } from './mod_role_distribution';
 
 const war_part = [STRUCTURE_WALL, STRUCTURE_RAMPART];
@@ -19,19 +18,13 @@ export function load_repair() {
             prepareCache(room);
         }
     });
-
-    Object.values(Game.creeps).forEach(creep => {
-        if (isCreepStop(creep)) {
-            return;
-        }
-        if (creep.memory?.role === w_role_name.repair) {
-            try {
-                run_repair(creep);
-            } catch (e) {
-                console.log('err run_repair ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
-            }
+    run_creep(w_role_name.repair, function (creep) {
+        try {
+            run_repair(creep);
+        } catch (e) {
+            console.log('err run_repair ', creep.name);
+            console.log(e.message);
+            console.log(e.stack);
         }
     });
 }

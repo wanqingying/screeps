@@ -41,9 +41,7 @@ export function findHealTarget(room: Room): AnyCreep {
 export function findAttackTarget(room: Room) {
     let targets = room
         .findBy(FIND_HOSTILE_CREEPS, t => {
-            return t.body.some(b =>
-                [ATTACK, RANGED_ATTACK, HEAL].includes(b.type as any)
-            );
+            return t.body.some(b => [ATTACK, RANGED_ATTACK, HEAL].includes(b.type as any));
         })
         .sort((a, b) => {
             return a.hits - b.hits;

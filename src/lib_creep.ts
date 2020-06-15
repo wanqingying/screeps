@@ -87,9 +87,6 @@ export function isCreepStop(creep: Creep) {
     if (creep.spawning) {
         return true;
     }
-    if (creep.memory.target_room && creep.memory.target_room !== creep.room.name) {
-        return true;
-    }
     return false;
 }
 const w = global.w_role_name;

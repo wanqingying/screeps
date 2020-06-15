@@ -3,15 +3,14 @@ import './bootstrap';
 import * as mod from './mod';
 
 function main() {
-    console.log('==============================tick===============================================',Game.time);
+    console.log(
+        '===============================tick===============================================',
+        Game.time
+    );
     Object.values(Game.rooms).forEach(room => {
-        console.log(
-            room.name,
-            '--34--',
-            `${room.energyAvailable}/${room.energyCapacityAvailable}`
-        );
+        console.log(room.name, '--556-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
-    mod.load_cache()
+    mod.load_cache();
     // 生产单位
     mod.load_spawn_check();
     // 防御塔
@@ -25,9 +24,9 @@ function main() {
     mod.load_starter();
     // mod.load_claim();
     mod.load_repair();
-    mod.load_defence()
-    mod.load_scout()
-    mod.load_remote()
+    mod.load_defence();
+    mod.load_scout();
+    mod.load_remote();
     // mod.load_remote_transport()
     // mod.load_remote_harvest()
     Object.keys(Memory.creeps).forEach(name => {

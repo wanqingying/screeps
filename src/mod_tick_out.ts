@@ -70,5 +70,3 @@ export function load_tick_out() {
         });
     }
 }
-
-let cp = Object.values(Game.creeps).find(c => c.name === 'carrier_5');

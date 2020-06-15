@@ -1,20 +1,15 @@
-import { is_empty_tate, is_full_tate, isEmpty, isFull } from './lib_base';
-import { isCreepStop, moveToTarget } from './lib_creep';
+import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
+import { moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 
 export function load_upgrader() {
-    Object.values(Game.creeps).forEach(creep => {
-        if (isCreepStop(creep)) {
-            return;
-        }
-        if (creep.memory?.role === w_role_name.upgrader) {
-            try {
-                run_upgrader(creep);
-            } catch (e) {
-                console.log('err run_upgrader ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
-            }
+    run_creep(w_role_name.upgrader, function (creep) {
+        try {
+            run_upgrader(creep);
+        } catch (e) {
+            console.log('err run_upgrader ', creep.name);
+            console.log(e.message);
+            console.log(e.stack);
         }
     });
 }

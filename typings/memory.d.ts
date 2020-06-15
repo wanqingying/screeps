@@ -6,8 +6,9 @@ declare interface Memory {
 
 declare interface CreepMemory {
     role: role_name_key;
-    remote?:string
-    from?:string
+    remote?: string;
+    from?: string;
+    scout_target?: string;
     cost: number;
     index: number;
     building?: boolean;
@@ -17,8 +18,8 @@ declare interface CreepMemory {
     distance?: number;
     remote_task_id?: string;
     remote_source_id?: string;
-    target_room:string
-    obj:any
+    target_room: string;
+    obj: any;
 }
 
 declare interface RoomMemory {
@@ -27,7 +28,7 @@ declare interface RoomMemory {
     renew_count: number;
     // 正在生产的角色
     spawnRole: string;
-    ext_creep:any
+    ext_creep: any;
 }
 
 declare interface SpawnMemory {

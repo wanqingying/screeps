@@ -1,8 +1,11 @@
 global.w_utils = {
-    count_distance(a, b) {
+    count_distance(a: RoomPosition, b: RoomPosition) {
         a = (a as any)?.pos || a;
         b = (b as any)?.pos || b;
         if (!a || !b) {
+            return 999;
+        }
+        if (a.roomName !== b.roomName) {
             return 999;
         }
         let dx = a.x - b.x;

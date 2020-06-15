@@ -1,67 +1,40 @@
-import { harvestSource, isCreepStop, moveToTarget } from './lib_creep';
-import { role_name } from './config_a_role_name';
-import { spawnCreep } from './mod_spawn_creep';
-
-interface CacheRoom {
-    remote_harvests: Creep[];
-    source: CacheSource[];
-}
-const cache = new Map<string, CacheRoom>();
+import { moveToTarget } from './lib_creep';
+import { RemoteMine, run_creep } from './lib_base';
 
 export function load_remote_harvest() {
-    // const cps = Object.values(Game.creeps).filter(
-    //     c => c.memory.role === w_role_name.remote_harvester
-    // );
-    prepareCache();
-    Object.values(Game.rooms).forEach(room => {
-        if (!room.controller?.my) {
-            return;
-        }
-
-        let che: CacheGlobalRoom = w_cache.get(room.name);
-        if (!Array.isArray(che.remotes) || che.remotes.length === 0) {
-            return;
-        }
-
-        room.find(FIND_MY_CREEPS, {
-            filter: c => c.memory.role === w_role_name.remote_harvester,
-        }).forEach(creep => {
-            const target = che.remotes.find(r => r.sources.find(s => s.creep_names.length === 0));
-            if (!target) {
-                return;
-            }
-            let m = target.sources.find(s => s.creep_names.length === 0);
-            if (!m) {
-                return;
-            }
-            creep.memory.remote_source_id = m.source.id;
-            creep.moveTo(m.source);
-        });
-    });
-
-    Object.values(Game.creeps).forEach(creep => {
-        if (isCreepStop(creep)) {
-            return;
-        }
-        if (creep.memory?.role !== w_role_name.remote_harvester) {
-            return;
-        }
-        if (creep.memory.from !== creep.room.name) {
-            try {
-                harvestSource(creep, 'remote');
-            } catch (e) {
-                console.log('err remote_harvest ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
-            }
+    run_creep(w_role_name.remote_harvester, function (creep) {
+        try {
+            run_remote_harvester(creep);
+        } catch (e) {
+            console.log('err run_remote_harvester');
+            console.log(e.message);
+            console.log(e.stack);
         }
     });
 }
 
-function prepareCache() {
-    Object.values(Game.creeps).forEach(creep => {
-        if (creep.memory.role !== w_role_name.remote_harvester) {
-            return;
-        }
-    });
+function run_remote_harvester(creep: Creep) {
+    const ch: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
+    const task = ch.getTask(creep);
+    if (!task) {
+        creep.say('no task');
+    }
+    const target: Source = Game.getObjectById(task.id);
+    let container;
+    if (!target) {
+        creep.say('id not found');
+        return;
+    }
+    if (task.container_id) {
+        container = Game.getObjectById(task.container_id);
+    }
+    let far: number;
+    if (container) {
+        far = moveToTarget(creep, container);
+    } else {
+        far = moveToTarget(creep, target.pos);
+    }
+    if (far < 10) {
+        creep.harvest(target);
+    }
 }

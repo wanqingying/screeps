@@ -34,17 +34,18 @@ export const config_global: ConfigGlobal = {
     },
     // 持续 n tik 能量饱和率过低则判断此房间缺能量
     upgrader_only_container: true,
-    rooms: cfg as any,
+    rooms: cfg,
 };
 
 global.w_config = config_global;
-global.w_config.rooms = cfg as any;
+global.w_config.rooms = cfg;
 
 global.w_code = {
     SPAWN_BY_CONFIG: 8,
     SPAWN_BY_FORCE: 9,
     SPAWN_BY_AUTO: 7,
     SPAWN_BY_ROOM: 6,
-    REMOTE_KEY_A:12331
-} as any;
+    REMOTE_KEY_TRANSPORT: 12331,
+    REMOTE_KEY_MINE: 12330,
+};
 global.module_loaded = true;
