@@ -16,8 +16,10 @@ export function load_remote_harvest() {
 function run_remote_harvester(creep: Creep) {
     const ch: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
     const task = ch.getTask(creep);
-    if (creep.ticksToLive<5){
+    if (creep.ticksToLive<3){
+        // 临死遗言
         ch.forgetTask(creep)
+        return;
     }
     if (!task) {
         creep.say('no task');
@@ -25,8 +27,8 @@ function run_remote_harvester(creep: Creep) {
     const target: Source = Game.getObjectById(task.id);
     let container;
     if (!target) {
-        creep.say('id not found');
         if (task){
+            // 没有视野
             let pos=new RoomPosition(25,25,task.remote)
             creep.moveTo(pos)
         }

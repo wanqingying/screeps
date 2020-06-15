@@ -53,10 +53,11 @@ function run_remote_transport(creep: Creep) {
         let target = Game.getObjectById(task.id);
 
         if (!target) {
+            // 没有视野
             let pos=new RoomPosition(25, 25, task.remote);
             let far=moveToTarget(creep,pos)
             if (far<10){
-                console.log('forget');
+                // 有视野还找不到 可能是刷没了 重置
                 sh.forgetTask(creep)
             }else {
                 return;

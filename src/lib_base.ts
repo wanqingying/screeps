@@ -341,7 +341,6 @@ export class RemoteMine {
         });
     };
     public getTask = (creep: Creep): RemoteMineTask | undefined => {
-        console.log('get --');
         let e_id = creep.memory.remote_task_id;
         if (e_id) {
             let prev = this.getTaskById(e_id);
@@ -355,6 +354,7 @@ export class RemoteMine {
                 return false
             }
             if (t.creep_id){
+                // 接班 死掉的 或者将要死掉的
                 let cp:Creep=Game.getObjectById(t.creep_id);
                 if (!cp){
                     return true
@@ -364,6 +364,7 @@ export class RemoteMine {
                 }
                 return false
             }else{
+                // 一个矿安排一个
                 return true
             }
         });
