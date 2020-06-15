@@ -28,8 +28,8 @@ function main() {
     mod.load_defence()
     mod.load_scout()
     mod.load_remote()
-    mod.load_remote_transport()
-    mod.load_remote_harvest()
+    // mod.load_remote_transport()
+    // mod.load_remote_harvest()
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
