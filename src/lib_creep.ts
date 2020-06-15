@@ -124,7 +124,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.carrier]: { [MOVE]: 4, [CARRY]: 8 },
             [w.remote_carry]: { [MOVE]: 4, [CARRY]: 8 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
@@ -136,7 +136,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
         return {
             [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
             [w.remote_carry]: { [MOVE]: 5, [CARRY]: 10 },
-            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },

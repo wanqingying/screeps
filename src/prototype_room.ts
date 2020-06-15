@@ -2,6 +2,7 @@ Room.prototype.findBy = function (type, filter) {
     return this.find(type, { filter });
 };
 
+
 Room.prototype.findByFilter = function (type, property, propertyIn, filter) {
     const room = this;
     const res = room.findByCacheKey(type, property, propertyIn);
@@ -11,6 +12,7 @@ Room.prototype.findByFilter = function (type, property, propertyIn, filter) {
         return res;
     }
 };
+
 Room.prototype.findByCacheKey = function (type, property, propertyIn = []) {
     const room = this;
     const key = `${room.name}_${type}_${property || ''}_${propertyIn.join('#')}`;
@@ -25,4 +27,4 @@ Room.prototype.findByCacheKey = function (type, property, propertyIn = []) {
     res = room.find(type, opt);
     w_cache.set(key, res);
     return res;
-};
+}

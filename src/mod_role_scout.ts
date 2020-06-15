@@ -21,8 +21,6 @@ function start_scout() {
         const from = creep.memory.from;
         // in born room
         if (creep.room.name === from) {
-            console.log(creep.name);
-            console.log('target',creep.memory.scout_target);
             if (creep.memory.scout_target) {
                 // move to target room
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.scout_target));
@@ -38,10 +36,11 @@ function start_scout() {
                     creep.moveTo(new RoomPosition(25, 25, target));
                 }
             }
+        }else if (creep.room.name !== creep.memory.scout_target) {
+            moveToTarget(creep, new RoomPosition(25, 25, creep.memory.scout_target), 6);
         }
-        // in target room
         if (creep.room.name === creep.memory.scout_target) {
-            moveToTarget(creep, new RoomPosition(25, 25, creep.room.name), 8);
+            moveToTarget(creep, new RoomPosition(25, 25, creep.memory.scout_target), 9);
         }
     });
 }

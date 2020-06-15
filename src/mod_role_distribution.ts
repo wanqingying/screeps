@@ -74,7 +74,7 @@ const w_in = {
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 90,
     [STRUCTURE_TOWER]: 80,
-    [STRUCTURE_EXTENSION]: 100,
+    [STRUCTURE_EXTENSION]: 99,
     [STRUCTURE_CONTAINER]: 50,
 };
 const cache_creep_task = {} as any;
@@ -197,8 +197,10 @@ class TransList {
     // 重设任务状态，修正不可控因素的影响 比如单位死亡
     // 重设的周期待观察 需要保证处理边界情况
     public resetAmountRec = () => {
-        if (Game.time % 100 === 0) {
-            this.array.forEach(t => t.amount_rec === 0);
+        console.log('reset ');
+        if (Game.time % 3 === 0) {
+            // console.log('okss');
+            // this.array.forEach(t => (t.amount_rec = 0));
         }
     };
 }
@@ -415,6 +417,8 @@ function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]
             task = che.transOut.getTask(creep, structures);
         }
     }
+    console.log(creep.name);
+    log_task(task);
 
     if (!task) {
         return ERR_NOT_FOUND;
@@ -442,6 +446,7 @@ function run_task(creep: Creep, task: TransTask) {
         cache_creep_task[creep.name] = undefined;
         return;
     }
+
     if (task.trans_dec === 'out' && is_full_tate(creep)) {
         // 从建筑运出 如果单位已满则重置任务
         cache_creep_task[creep.name] = undefined;
@@ -472,12 +477,18 @@ function run_task(creep: Creep, task: TransTask) {
             code = creep.withdraw(target, task.resourceType as any);
         }
     }
-    if (code === ERR_NOT_IN_RANGE) {
-        moveToTarget(creep, pos);
+    switch (code) {
+        case ERR_NOT_IN_RANGE:
+            moveToTarget(creep,pos);
+            break;
+        case OK:
+            updateTask(creep, task);
+            break;
+        default:
+            closeTask(creep)
     }
-    if (code === OK) {
-        updateTask(creep, task);
-    }
+    console.log('task code ', w_utils.get_code_msg(code));
+    console.log(task.id);
     checkTaskIsComplete(creep, task);
 }
 
@@ -567,6 +578,7 @@ function generateTask(
 }
 
 function log_task(task: TransTask) {
+    task=task||{} as any
     console.log(
         `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec}`
     );

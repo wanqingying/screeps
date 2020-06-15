@@ -167,7 +167,6 @@ function getRefreshRole(room: Room) {
 function getSpawnRole(room: Room) {
     const current_exist = getCache(room).c_roles_count;
     const cfg = w_config.rooms[room.name].creep_cfg_num;
-
     const list = Object.entries(current_exist)
         .map(([role, num]) => {
             return { role: role, current: num };

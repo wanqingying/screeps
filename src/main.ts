@@ -8,7 +8,7 @@ function main() {
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, '--666-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log(room.name, '--6-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
     mod.load_cache();
     // 生产单位
@@ -28,7 +28,7 @@ function main() {
     mod.load_scout();
     mod.load_scout();
     // mod.load_remote_transport()
-    // mod.load_remote_harvest()
+    mod.load_remote_harvest()
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
