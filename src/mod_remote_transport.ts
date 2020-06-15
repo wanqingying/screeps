@@ -1,5 +1,6 @@
 import { isEmpty, isFull, RemoteTransport, run_creep } from './lib_base';
 import { spawnCreep } from './mod_spawn_creep';
+import {moveToTarget} from "./lib_creep";
 
 export function load_remote_transport() {
     run_creep(w_role_name.remote_carry, function (creep) {
@@ -18,6 +19,7 @@ function run_remote_transport(creep: Creep) {
 
     if (isFull(creep)) {
         creep.memory.process = 'd';
+        sh.forgetTask(creep);
     }
     if (isEmpty(creep)) {
         creep.memory.process = 'p';
@@ -26,7 +28,8 @@ function run_remote_transport(creep: Creep) {
     if (creep.memory.process === 'd') {
         let task = sh.getTask(creep);
         // drop
-        let container_ids = w_config.rooms[creep.memory.from].remote_container;
+        creep.say('drop');
+        let container_ids = w_config.rooms[task.from].remote_container;
         const cns: StructureContainer[] = container_ids
             .map(id => Game.getObjectById(id))
             .filter(c => c) as any;
@@ -42,7 +45,24 @@ function run_remote_transport(creep: Creep) {
     } else {
         // pick
         let task = sh.getTask(creep);
+        if (!task) {
+            creep.say('no task');
+            return;
+        }
+        creep.say('pick');
         let target = Game.getObjectById(task.id);
+
+        if (!target) {
+            let pos=new RoomPosition(25, 25, task.remote);
+            let far=moveToTarget(creep,pos)
+            if (far<10){
+                console.log('forget');
+                sh.forgetTask(creep)
+            }else {
+                return;
+            }
+        }
+
         let code;
 
         if (task.structureType === 'drop') {

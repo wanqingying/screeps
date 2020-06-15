@@ -257,12 +257,16 @@ export class RemoteTransport {
         }
     };
     public getTask = (creep: Creep): RemoteTransportTask => {
+        console.log('get task');
+        console.log(creep.name);
+        console.log(creep.memory.remote_task_id);
         if (creep.memory.remote_task_id) {
             const task = this.getTaskById(creep.memory.remote_task_id);
-            if (task.amount - task.amountRec > 200) {
-                task.amountRec += creep.store.getFreeCapacity(this.resType);
-                return task;
-            }
+            // if (task.amount > 200) {
+            //     task.amountRec += creep.store.getFreeCapacity(this.resType);
+            //     return task;
+            // }
+            return task;
         }
 
         const { from } = creep.memory;
@@ -271,7 +275,7 @@ export class RemoteTransport {
         let max_task: RemoteTransportTask = {} as any;
         this.array.forEach(s => {
             let a = s.from === from;
-            let b = s.amount > s.amountRec + 100;
+            let b = s.amount > 200;
             if (a && b) {
                 max = s.amount - s.amountRec;
                 max_task = s;
@@ -283,6 +287,10 @@ export class RemoteTransport {
             max_task.amountRec += creep.store.getFreeCapacity(this.resType);
             return max_task;
         }
+        return max_task
+    };
+    public forgetTask = creep => {
+        creep.memory.remote_task_id = undefined;
     };
     public getRoomTask = (room: Room): RemoteTransportTask[] => {
         return this.array.filter(t => t.from === room.name);
@@ -313,7 +321,7 @@ export class RemoteMine {
                 s.forEach(u => {
                     this.array.push({
                         id: u.id,
-                        container_id: u.container_id,
+                        container_id: u.container_ids,
                         from: name,
                         remote: _name,
                         creep_id: '',
@@ -333,6 +341,7 @@ export class RemoteMine {
         });
     };
     public getTask = (creep: Creep): RemoteMineTask | undefined => {
+        console.log('get --');
         let e_id = creep.memory.remote_task_id;
         if (e_id) {
             let prev = this.getTaskById(e_id);
@@ -340,14 +349,39 @@ export class RemoteMine {
                 return prev;
             }
         }
-
         const from = creep.memory.from;
-        const task = this.array.find(t => !t.creep_id && t.from === from);
+        const task = this.array.find(t =>  {
+            if (t.from!==from){
+                return false
+            }
+            if (t.creep_id){
+                let cp:Creep=Game.getObjectById(t.creep_id);
+                if (!cp){
+                    return true
+                }
+                if (cp.ticksToLive<200){
+                    return true
+                }
+                return false
+            }else{
+                return true
+            }
+        });
         if (task) {
             task.creep_id = creep.id;
             creep.memory.remote_task_id = task.id;
         }
         return task;
+    };
+    public forgetTask = (creep:Creep) => {
+        let t_id=creep.memory.remote_task_id
+        creep.memory.remote_task_id=undefined;
+        if (t_id){
+            let task=this.getTaskById(t_id)
+            if (task){
+                task.creep_id=undefined
+            }
+        }
     };
     private getTaskById = (id: string) => {
         return this.array.find(t => t.id === id);

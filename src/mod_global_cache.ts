@@ -15,6 +15,11 @@ function load_global_cache() {
     if (!global.w_cache) {
         global.w_cache = new Map<any, any>();
     }
+    let che: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
+    if (!che) {
+        che = new RemoteTransport();
+        w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
+    }
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
             prepareCache(room);
@@ -47,6 +52,7 @@ function load_global_cache() {
         rmc = new RemoteMine();
     }
     rmc.updateState();
+    w_cache.set(w_code.REMOTE_KEY_MINE, rmc);
 }
 
 function prepareCache(room: Room) {
@@ -108,6 +114,9 @@ function prepareRemoteCache(room: Room, from_room: Room) {
     const res_type = RESOURCE_ENERGY;
 
     const drops = room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
+    console.log('remote');
+    console.log(room.name);
+    console.log(drops.length);
     drops.forEach(d => {
         che.updateResource({
             from: from_room.name,

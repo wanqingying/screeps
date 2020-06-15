@@ -38,17 +38,18 @@ export const cfg_local: { [k: string]: CfgRoom } = {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
             [w_role_name.carrier]: 3,
-            [w_role_name.scout]: 3,
-            [w_role_name.builder]: 1,
+            [w_role_name.remote_carry]: 2,
+            [w_role_name.scout]: 0,
+            [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
-            [w_role_name.remote_harvester]: 1,
+            [w_role_name.remote_harvester]: 2,
             [w_role_name.upgrader]: 1,
-            [w_role_name.repair]: 1,
+            [w_role_name.repair]: 0,
         },
         reserve: {
             W3N7: [{ id: 'eff307740862fd8', container_id: '' }, { id: 'eee50774086309c' }],
         },
         scout: ['W4N7'],
-        remote_container: ['84a3c8a17973bab'],
+        remote_container: ['3ae357adc2e6a21'],
     },
 };

@@ -88,8 +88,8 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
     ) as any;
     if (spawns.length) {
         const spawn: StructureSpawn = spawns.find(s => !s.spawning) as StructureSpawn;
-        if (!spawn){
-            return ;
+        if (!spawn) {
+            return;
         }
         const gems = Object.assign({ role: role, index: index, cost: cost, from: room.name }, mem);
         const act = spawn.spawnCreep(body, name, {
@@ -159,6 +159,8 @@ function getRefreshRole(room: Room) {
         if (current_count > target_count) {
             return;
         }
+        // delete che.c_refresh_creep[t.id]
+
         che.c_refresh_creep[t.id].progress = true;
         return role;
     }
@@ -166,6 +168,8 @@ function getRefreshRole(room: Room) {
 // 根据配置生产单位
 function getSpawnRole(room: Room) {
     const current_exist = getCache(room).c_roles_count;
+    console.log('spawn', room.name);
+    console.log(JSON.stringify(current_exist));
     const cfg = w_config.rooms[room.name].creep_cfg_num;
     const list = Object.entries(current_exist)
         .map(([role, num]) => {
@@ -183,14 +187,14 @@ function getSpawnRole(room: Room) {
 
 function check_creep_timeout(creep: Creep, room?: Room) {
     let che = getCache(room || creep.room);
-    if (che.c_refresh_creep[creep.id]) {
-        return;
-    }
+    // if (che.c_refresh_creep[creep.id]) {
+    //     return;
+    // }
     const body_length = creep.body.length;
     let remain = body_length * 3 + spawn_before_die;
     if (creep.memory.role.includes('remote')) {
         // 外矿预留时间加长
-        remain += 100;
+        remain += 50;
     }
     const timeout = creep.ticksToLive < remain;
     if (timeout) {
@@ -205,12 +209,12 @@ function check_creep_timeout(creep: Creep, room?: Room) {
 // 准备缓存
 function prepareCache(room: Room) {
     let che = getCache(room);
-    const creeps = Object.values(room.find(FIND_MY_CREEPS));
-    creeps.forEach(creep => {
-        const role = creep.memory.role;
-        che.c_roles_count[role] += 1;
-        check_creep_timeout(creep);
-    });
+    // const creeps = Object.values(room.find(FIND_MY_CREEPS));
+    // creeps.forEach(creep => {
+    //     const role = creep.memory.role;
+    //     che.c_roles_count[role] += 1;
+    //     check_creep_timeout(creep);
+    // });
     che.c_energy.push(room.energyAvailable);
     let c_ng = che.c_energy;
     che.c_energy_stop =
@@ -229,20 +233,6 @@ function prepareRemoteCache() {
             check_creep_timeout(creep, from_room);
             cache[from_room.name] = che;
         },
-        creep => {
-            if (
-                ![w_role_name.remote_harvester, w_role_name.remote_carry,w_role_name.scout].includes(
-                    creep.memory.role
-                )
-            ) {
-                return false;
-            }
-            if (creep.memory.from === creep.room.name) {
-                // 只检查外面的出生房间内的已经检查过了
-                return false;
-            }
-            return true;
-        }
     );
 }
 
@@ -262,12 +252,19 @@ function getCache(room: Room): RoomCache {
             c_spawn_code: null,
             c_spawning_role: '',
             c_refresh_creep: {},
+            c_tick: Game.time,
         };
 
         Object.values(w_role_name).forEach(k => {
             che.c_roles_count[k] = 0;
         });
     }
+    if (che.c_tick !== Game.time) {
+        Object.keys(che.c_roles_count).forEach(role => {
+            che.c_roles_count[role] = 0;
+        });
+    }
+    che.c_tick = Game.time;
     cache[room.name] = che;
     return che;
 }

@@ -109,7 +109,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
     if (maxEnergy < 800) {
         return {
             [w.carrier]: { [MOVE]: 3, [CARRY]: 6 },
-            [w.remote_carry]: { [MOVE]: 3, [CARRY]: 6 },
+            [w.remote_carry]: { [MOVE]: 4, [CARRY]: 4 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
             [w.harvester]: { [MOVE]: 1, [WORK]: 5, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
@@ -122,9 +122,9 @@ export function getCreepBodyCfg(maxEnergy: number) {
     if (maxEnergy < 1300) {
         return {
             [w.carrier]: { [MOVE]: 4, [CARRY]: 8 },
-            [w.remote_carry]: { [MOVE]: 4, [CARRY]: 8 },
+            [w.remote_carry]: { [MOVE]: 6, [CARRY]: 6 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 4, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
@@ -135,9 +135,9 @@ export function getCreepBodyCfg(maxEnergy: number) {
     if (maxEnergy < 1800) {
         return {
             [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
-            [w.remote_carry]: { [MOVE]: 5, [CARRY]: 10 },
-            [w.harvester]: { [MOVE]: 2, [WORK]: 2, [CARRY]: 0 },
-            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.remote_carry]: { [MOVE]: 6, [CARRY]: 6 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 4, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
@@ -148,9 +148,9 @@ export function getCreepBodyCfg(maxEnergy: number) {
     if (maxEnergy < 2300) {
         return {
             [w.carrier]: { [MOVE]: 5, [CARRY]: 10 },
-            [w.remote_carry]: { [MOVE]: 5, [CARRY]: 10 },
+            [w.remote_carry]: { [MOVE]: 8, [CARRY]: 8 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
+            [w.remote_harvester]: { [MOVE]: 2, [WORK]: 4, [CARRY]: 0 },
             [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },

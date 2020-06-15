@@ -197,10 +197,9 @@ class TransList {
     // 重设任务状态，修正不可控因素的影响 比如单位死亡
     // 重设的周期待观察 需要保证处理边界情况
     public resetAmountRec = () => {
-        console.log('reset ');
-        if (Game.time % 3 === 0) {
-            // console.log('okss');
-            // this.array.forEach(t => (t.amount_rec = 0));
+        if (Game.time % 300 === 0) {
+            this.array.forEach(t => (t.amount_rec = 0));
+            Object.keys(cache_creep_task).forEach(k => delete cache_creep_task[k]);
         }
     };
 }
@@ -417,9 +416,6 @@ function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]
             task = che.transOut.getTask(creep, structures);
         }
     }
-    console.log(creep.name);
-    log_task(task);
-
     if (!task) {
         return ERR_NOT_FOUND;
     }
@@ -460,18 +456,22 @@ function run_task(creep: Creep, task: TransTask) {
     if (task.trans_dec === 'in') {
         const type = task.resourceType;
         if (type === 'any') {
+
             RESOURCES_ALL.forEach(t => {
                 if (creep.store[t] > 0) {
                     code = creep.transfer(target, t);
                 }
             });
         } else {
+
             code = creep.transfer(target, type);
         }
     }
 
     if (task.trans_dec === 'out') {
+
         if (task.structureType === 'drop') {
+
             code = creep.pickup(target as Resource);
         } else {
             code = creep.withdraw(target, task.resourceType as any);
@@ -479,16 +479,14 @@ function run_task(creep: Creep, task: TransTask) {
     }
     switch (code) {
         case ERR_NOT_IN_RANGE:
-            moveToTarget(creep,pos);
+            moveToTarget(creep, pos);
             break;
         case OK:
             updateTask(creep, task);
             break;
         default:
-            closeTask(creep)
+        // closeTask(creep,task)
     }
-    console.log('task code ', w_utils.get_code_msg(code));
-    console.log(task.id);
     checkTaskIsComplete(creep, task);
 }
 
@@ -496,19 +494,19 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
     if (task.trans_dec === 'in') {
         // 卸载任务完成
         if (is_empty_tate(creep)) {
-            return closeTask(creep);
+            return closeTask(creep, task);
         }
         if (task.amount_rec >= task.amount) {
-            return closeTask(creep);
+            return closeTask(creep, task);
         }
     }
     if (task.trans_dec === 'out') {
         // 装运任务完成
         if (is_full_tate(creep)) {
-            return closeTask(creep);
+            return closeTask(creep, task);
         }
         if (task.amount_rec >= task.amount) {
-            return closeTask(creep);
+            return closeTask(creep, task);
         }
     }
 }
@@ -536,8 +534,9 @@ function updateTask(creep: Creep, task: TransTask) {
 }
 
 // 关闭任务
-function closeTask(creep: Creep) {
+function closeTask(creep: Creep, task: TransTask) {
     delete cache_creep_task[creep.name];
+    task.amount = task.amount_rec = 0;
     creep.memory.process = null;
 }
 
@@ -578,8 +577,8 @@ function generateTask(
 }
 
 function log_task(task: TransTask) {
-    task=task||{} as any
+    task = task || ({ pos: [] } as any);
     console.log(
-        `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec}`
+        `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec} [${task.pos[0]},${task?.pos[1]}]`
     );
 }
