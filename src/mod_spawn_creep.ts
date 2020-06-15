@@ -88,6 +88,9 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
     ) as any;
     if (spawns.length) {
         const spawn: StructureSpawn = spawns.find(s => !s.spawning) as StructureSpawn;
+        if (!spawn){
+            return ;
+        }
         const gems = Object.assign({ role: role, index: index, cost: cost, from: room.name }, mem);
         const act = spawn.spawnCreep(body, name, {
             memory: gems,
@@ -229,7 +232,7 @@ function prepareRemoteCache() {
         },
         creep => {
             if (
-                ![w_role_name.remote_harvester, w_role_name.remote_carry].includes(
+                ![w_role_name.remote_harvester, w_role_name.remote_carry,w_role_name.scout].includes(
                     creep.memory.role
                 )
             ) {

@@ -8,7 +8,7 @@ function main() {
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, '--556-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log(room.name, '--666-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
     mod.load_cache();
     // 生产单位
@@ -25,6 +25,7 @@ function main() {
     // mod.load_claim();
     mod.load_repair();
     mod.load_defence();
+    mod.load_scout();
     mod.load_scout();
     // mod.load_remote_transport()
     // mod.load_remote_harvest()
