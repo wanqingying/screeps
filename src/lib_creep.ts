@@ -92,13 +92,13 @@ export function isCreepStop(creep: Creep) {
 const w = global.w_role_name;
 
 export function getCreepBodyByRole(role: role_name_key, maxEnergy: number) {
-    if (role === w_role_name.starter) {
+    if (role === w.starter) {
         return { [MOVE]: 2, [WORK]: 1, [CARRY]: 2 };
     }
-    if (role === w_role_name.scout) {
+    if (role === w.scout) {
         return { [MOVE]: 1, [CARRY]: 0 };
     }
-    if (role === w_role_name.claim) {
+    if (role === w.claim) {
         return { [MOVE]: 1, [CLAIM]: 1 };
     }
     let cfg = getCreepBodyCfg(maxEnergy);
