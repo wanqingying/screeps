@@ -1,4 +1,4 @@
-import { getBodyCost, getCreepIndex, ListA } from './lib_base';
+import { getBodyCost, getCreepIndex, ListA, run_creep } from './lib_base';
 import { getCreepBodyByRole } from './lib_creep';
 
 interface RoomCache {
@@ -16,7 +16,7 @@ interface RoomCache {
     c_spawning_role: string;
     // 需要预先生产的单位
     c_refresh_creep: {
-        [id: string]: { role: string; body: any[]; id: string; progress: boolean; life: number };
+        [id: string]: { role: string; id: string; progress: boolean; life: number };
     };
 }
 let cache: { [name: string]: RoomCache } = {};
@@ -25,6 +25,7 @@ const max_fail_tick = 150;
 
 // 外部模块
 export function load_spawn_check() {
+    prepareRemoteCache();
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
             try {
@@ -68,6 +69,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
     }
     const che = getCache(room);
     if (outer) {
+        // 优先执行正常安排的生产,外部生产空闲时处理
         if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
             return;
         }
@@ -80,12 +82,12 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
     const cost = getBodyCost(body);
     const index = getCreepIndex();
     const name = `${role}_${index}`;
-    const spawns = room.findBy(FIND_STRUCTURES, t => t.structureType === STRUCTURE_SPAWN);
+    const spawns: StructureSpawn[] = room.findBy(
+        FIND_STRUCTURES,
+        t => t.structureType === STRUCTURE_SPAWN
+    ) as any;
     if (spawns.length) {
-        const spawn: StructureSpawn = spawns.pop() as StructureSpawn;
-        if (spawn.spawning) {
-            return ERR_BUSY;
-        }
+        const spawn: StructureSpawn = spawns.find(s => !s.spawning) as StructureSpawn;
         const gems = Object.assign({ role: role, index: index, cost: cost, from: room.name }, mem);
         const act = spawn.spawnCreep(body, name, {
             memory: gems,
@@ -123,14 +125,17 @@ function checkSpawnCreep(room: Room) {
     }
     role = getRoleBoost(room);
     if (role) {
+        // 冷启动
         return spawnCreep(room, role);
     }
     role = getSpawnRole(room);
     if (role) {
+        // 按计划安排
         return spawnCreep(room, role);
     }
     role = getRefreshRole(room);
     if (role) {
+        // 刷新即将耗尽的单位
         return spawnCreep(room, role);
     }
 }
@@ -173,51 +178,37 @@ function getSpawnRole(room: Room) {
     let target = list.shift();
     return target?.role;
 }
+
+function check_creep_timeout(creep: Creep, room?: Room) {
+    let che = getCache(room || creep.room);
+    if (che.c_refresh_creep[creep.id]) {
+        return;
+    }
+    const body_length = creep.body.length;
+    let remain = body_length * 3 + spawn_before_die;
+    if (creep.memory.role.includes('remote')) {
+        // 外矿预留时间加长
+        remain += 100;
+    }
+    const timeout = creep.ticksToLive < remain;
+    if (timeout) {
+        che.c_refresh_creep[creep.id] = {
+            role: creep.memory.role,
+            id: creep.id,
+            progress: false,
+            life: creep.ticksToLive,
+        };
+    }
+}
 // 准备缓存
 function prepareCache(room: Room) {
     let che = getCache(room);
-    if (!che) {
-        che = {
-            c_energy_stop: false,
-            c_roles_count: {},
-            c_spawn_fail_tick: 0,
-            c_energy: new ListA<number>(max_fail_tick),
-            c_spawn_code: null,
-            c_spawning_role: '',
-            c_refresh_creep: {},
-        };
-    }
-
-    const roles_current_count = {};
-    Object.values(w_role_name).forEach(k => {
-        roles_current_count[k] = 0;
-    });
     const creeps = Object.values(room.find(FIND_MY_CREEPS));
     creeps.forEach(creep => {
         const role = creep.memory.role;
-        if (!roles_current_count[role]) {
-            roles_current_count[role] = 1;
-        } else {
-            roles_current_count[role] += 1;
-        }
-        // 计算提前生产的单位 符合当前配置的就提前生产
-        let tk = creep.body.length;
-        if (creep.ticksToLive < tk * 3 + spawn_before_die && !che.c_refresh_creep[creep.id]) {
-            let cur_body = getCreepBody(room, creep.memory.role);
-            let cost = getBodyCost(cur_body);
-            if (cost === creep.memory.cost) {
-                che.c_refresh_creep[creep.id] = {
-                    role: creep.memory.role,
-                    id: creep.id,
-                    body: creep.body.map(b => b.type),
-                    progress: false,
-                    life: creep.ticksToLive,
-                };
-            }
-        }
+        che.c_roles_count[role] += 1;
+        check_creep_timeout(creep);
     });
-
-    che.c_roles_count = roles_current_count;
     che.c_energy.push(room.energyAvailable);
     let c_ng = che.c_energy;
     che.c_energy_stop =
@@ -225,12 +216,41 @@ function prepareCache(room: Room) {
     cache[room.name] = che;
     return che;
 }
+// 检查外矿缓存
+function prepareRemoteCache() {
+    run_creep(
+        undefined,
+        function (creep) {
+            const from_room = Game.rooms[creep.memory.from];
+            let che = getCache(from_room);
+            che.c_roles_count[creep.memory.role] += 1;
+            check_creep_timeout(creep, from_room);
+            cache[from_room.name] = che;
+        },
+        creep => {
+            if (
+                ![w_role_name.remote_harvester, w_role_name.remote_carry].includes(
+                    creep.memory.role
+                )
+            ) {
+                return false;
+            }
+            if (creep.memory.from === creep.room.name) {
+                // 只检查外面的出生房间内的已经检查过了
+                return false;
+            }
+            return true;
+        }
+    );
+}
+
 // 获取缓存
 function getCache(room: Room): RoomCache {
     if (!cache) {
         cache = {};
     }
-    let che = cache[room.name];
+    let che;
+    che = cache[room.name];
     if (!che) {
         che = {
             c_energy_stop: false,
@@ -241,7 +261,12 @@ function getCache(room: Room): RoomCache {
             c_spawning_role: '',
             c_refresh_creep: {},
         };
+
+        Object.values(w_role_name).forEach(k => {
+            che.c_roles_count[k] = 0;
+        });
     }
+    cache[room.name] = che;
     return che;
 }
 // 检查当前房间的状况来生成单位

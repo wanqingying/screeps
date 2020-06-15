@@ -152,3 +152,5 @@ function prepareRemoteCache(room: Room, from_room: Room) {
     });
     w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
 }
+
+function load_repair_cache() {}

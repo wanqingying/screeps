@@ -67,22 +67,6 @@ export function moveToTarget(creep: Creep, target: RoomPosition, dis?: number) {
     return far;
 }
 
-export function checkRepair(creep: Creep, include?: any[], exclude?: any[]): ScreepsReturnCode {
-    const { target, unLock } = getActionLockTarget(creep, 'check_repair_creep', () => {
-        return findRepairTargetC(creep, include, exclude);
-    });
-
-    if (!target) {
-        return ERR_NOT_FOUND;
-    }
-    moveToTarget(creep, target);
-    let act = creep.repair(target);
-    if (isEmpty(creep)) {
-        unLock();
-    }
-    return act;
-}
-
 export function isCreepStop(creep: Creep) {
     if (creep.spawning) {
         return true;

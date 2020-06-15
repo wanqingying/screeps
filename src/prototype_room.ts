@@ -1,5 +1,3 @@
-import { findNearTarget } from './lib_base';
-
 Room.prototype.findBy = function (type, filter) {
     return this.find(type, { filter });
 };

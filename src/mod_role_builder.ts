@@ -1,29 +1,22 @@
 import {
     findNearTarget,
-    findRepairTargetC,
     getActionLockTarget,
     is_empty_tate,
     is_full_tate,
-    isEmpty,
-    isFull,
+    run_creep,
 } from './lib_base';
-import { checkRepair, isCreepStop, moveToTarget } from './lib_creep';
+import { moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 import { run_repair } from './mod_role_repair';
 
 export function load_builder() {
-    Object.values(Game.creeps).forEach(creep => {
-        if (isCreepStop(creep)) {
-            return;
-        }
-        if (creep.memory?.role === 'builder') {
-            try {
-                run_builder(creep);
-            } catch (e) {
-                console.log('err run_builder ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
-            }
+    run_creep(w_role_name.builder, function (creep) {
+        try {
+            run_builder(creep);
+        } catch (e) {
+            console.log('err run_builder ', creep.name);
+            console.log(e.message);
+            console.log(e.stack);
         }
     });
 }
@@ -69,29 +62,4 @@ function run_builder(creep: Creep) {
         creep.say('g');
         get_resource(creep);
     }
-}
-
-function repair_target(creep: Creep, _target: any) {
-    const { target, unLock } = getActionLockTarget<StructureContainer>(
-        creep,
-        'check_repair_creep_cc',
-        () => {
-            return _target;
-        }
-    );
-
-    if (!target) {
-        unLock();
-        return ERR_NOT_FOUND;
-    }
-    if (target.his / target.hisMax > 0.6) {
-        unLock();
-        return;
-    }
-    moveToTarget(creep, target, 2);
-    let act = creep.repair(target);
-    if (isEmpty(creep)) {
-        unLock();
-    }
-    return act;
 }

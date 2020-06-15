@@ -1,3 +1,7 @@
+// 游戏的核心物流调度
+// 设计目标 1保证基地的房间资源正常周转 2尽最大可能提高资源运转效率
+// 不包括外矿的资源(接入很简单 但是浪费cpu) 外矿直接运回自己基地接入物流即可
+
 import { isCreepStop, moveToTarget } from './lib_creep';
 import {
     findNearTarget,
@@ -5,6 +9,7 @@ import {
     is_full_tate,
     isContainerNearController,
     isContainerNearSource,
+    run_creep,
 } from './lib_base';
 
 // any 表示任意资源
@@ -44,11 +49,9 @@ interface CacheRoom {
 // 4 重复以上步骤
 // 单位资源存量大于x后 单位会倾向于卸货 0:有资源就卸货,1:只有装满才会卸货
 // 单位可以接多个任务
-const FULL_RATE = 0.9;
+
 // 发布任务的最小数量,小于此数量不发布运输任务 目前适用于 drop 防止反复捡
 const minAmo = 40;
-// 接收任务的最小空间,小于此空间不接收任务
-const minCap = 40;
 // 调度优先级 0-100
 // todo 支持自定义调度 callback
 const w_out = {
@@ -192,7 +195,7 @@ class TransList {
         return task;
     };
     // 重设任务状态，修正不可控因素的影响 比如单位死亡
-    // 重设的周期一般取单个任务的平均运行时间
+    // 重设的周期待观察 需要保证处理边界情况
     public resetAmountRec = () => {
         if (Game.time % 100 === 0) {
             this.array.forEach(t => t.amount_rec === 0);
@@ -207,6 +210,10 @@ export function load_distribution_transport() {
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
             try {
+                // 任务是否实时刷新 待定
+                // if (Game.time%5===0){
+                //     prepareCacheRoom(room);
+                // }
                 prepareCacheRoom(room);
             } catch (e) {
                 console.log('err load_distribution_transport ', room.name);
@@ -214,7 +221,7 @@ export function load_distribution_transport() {
                 console.log(e.stack);
             }
             room.find(FIND_MY_CREEPS).forEach(creep => {
-                if (isCreepStop(creep)) {
+                if (creep.spawning) {
                     return;
                 }
                 if (creep.memory?.role !== w_role_name.carrier) {
@@ -228,7 +235,7 @@ export function load_distribution_transport() {
                     console.log(e.stack);
                 }
             });
-            tryResetTaskAmount(room)
+            tryResetTaskAmount(room);
         }
     });
 }
@@ -244,6 +251,7 @@ function getCache(room: Room) {
         };
         cache[room.name] = che;
     }
+    che.tick = Game.time;
     return che;
 }
 
@@ -361,7 +369,7 @@ function prepareCacheRoom(room: Room) {
         });
 }
 // 物流运输单位逻辑
-function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
+function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]) {
     const che = getCache(creep.room);
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
@@ -380,28 +388,30 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
         return run_task(creep, task);
     }
 
-    let swh = cache_creep_switch[creep.name];
+    let out_or_in = cache_creep_switch[creep.name];
     if (is_full_tate(creep)) {
-        swh = cache_creep_switch[creep.name] = 'in';
+        out_or_in = cache_creep_switch[creep.name] = 'in';
     }
     if (is_empty_tate(creep)) {
-        swh = cache_creep_switch[creep.name] = 'out';
+        out_or_in = cache_creep_switch[creep.name] = 'out';
     }
-    if (sop === 'give') {
-        swh = 'in';
+    if (handle === 'give') {
+        out_or_in = 'in';
     }
-    if (sop === 'get') {
-        swh = 'out';
+    if (handle === 'get') {
+        out_or_in = 'out';
     }
 
-    if (swh === 'out') {
+    if (out_or_in === 'out') {
         task = che.transOut.getTask(creep, structures);
         if (!task && used > 0) {
+            //没接到卸货任务且装有资源时 尝试接资源需求任务
             task = che.transIn.getTask(creep, structures);
         }
     } else {
         task = che.transIn.getTask(creep, structures);
         if (!task && free > 0) {
+            //没接到资源需求任务且有空间时 尝试接卸货任务
             task = che.transOut.getTask(creep, structures);
         }
     }
@@ -410,7 +420,6 @@ function run_transport(creep: Creep, sop?: 'get' | 'give', structures?: any[]) {
         return ERR_NOT_FOUND;
     }
     cache_creep_task[creep.name] = task.trans_id;
-    debugger;
     creep.memory.obj = task;
     return run_task(creep, task);
 }
@@ -493,7 +502,7 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
     }
 }
 
-// 计算本次处理的数量
+// 计算本次处理的数量 更新任务状态 todo 待观察
 function updateTask(creep: Creep, task: TransTask) {
     let handle_amount = 0;
     if (task.trans_dec === 'in') {
@@ -514,10 +523,13 @@ function updateTask(creep: Creep, task: TransTask) {
     }
     task.amount_rec = task.amount_rec - handle_amount;
 }
+
+// 关闭任务
 function closeTask(creep: Creep) {
     delete cache_creep_task[creep.name];
     creep.memory.process = null;
 }
+
 function tryResetTaskAmount(room) {
     const che = getCache(room);
     che.transOut.resetAmountRec();

@@ -20,9 +20,12 @@ test()
 
 let k=4*3;
 //1500 tick
-let total=6000*5;
+//total=6000*(1500/300)=30000;
+// builder 700*2=1400
+// carry   750*2=1500
+// upgrader 1200*2=2400
+// repair  800
+// cost     5100
+// upgrade 20*1500=30000;
+//
 let upgrade_cost=k*300;
-let creep_cost=(3+3+1+2)*550;
-
-const rest=total-creep_cost;
-console.log(rest/300);

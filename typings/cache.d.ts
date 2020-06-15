@@ -20,4 +20,5 @@ declare interface CacheGlobalRoom {
     creep_role_count?: { [name: string]: number };
     remote?: { [name: string]: CacheRoomRemote };
     remotes?: { name: string; sources?: RMs[] }[];
+    repair: {};
 }
