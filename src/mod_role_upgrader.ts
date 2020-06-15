@@ -1,4 +1,4 @@
-import { isEmpty, isFull } from './lib_base';
+import { is_empty_tate, is_full_tate, isEmpty, isFull } from './lib_base';
 import { isCreepStop, moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 
@@ -20,10 +20,10 @@ export function load_upgrader() {
 }
 
 function run_upgrader(creep: Creep) {
-    if (isEmpty(creep)) {
+    if (is_empty_tate(creep)) {
         creep.memory.upgrading = false;
     }
-    if (isFull(creep)) {
+    if (is_full_tate(creep)) {
         creep.memory.upgrading = true;
     }
     if (creep.memory.upgrading) {

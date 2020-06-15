@@ -1,4 +1,4 @@
-import { getSourceWithContainer } from './lib_base';
+import { getSourceWithContainer, RemoteResource } from './lib_base';
 
 export function load_cache() {
     if (!global.w_cache) {
@@ -8,10 +8,13 @@ export function load_cache() {
         const remotes = w_config.rooms[room.name]?.reserve || [];
         if (room.controller?.my) {
             prepareCache(room);
+            const che: CacheGlobalRoom = w_cache.get(room.name) || {};
+            che.remotes = [];
             remotes.forEach(r => {
+                che.remotes.push({ name: r.name });
                 const remote_room = Game.rooms[r.name];
                 if (remote_room) {
-                    prepareCache(remote_room);
+                    prepareRemoteCache(remote_room, room);
                 }
             });
         }
@@ -29,7 +32,6 @@ export function load_cache() {
 
 function prepareCache(room: Room) {
     const che: CacheGlobalRoom = w_cache.get(room.name) || {};
-
     che.construction_site = room.find(FIND_MY_CONSTRUCTION_SITES);
 
     // source缓存
@@ -42,36 +44,6 @@ function prepareCache(room: Room) {
     } else {
         che.source.forEach(c => (c.creep_ids = []));
     }
-    // if (!room.controller?.my) {
-    //     w_utils.update_cache(room.name, che);
-    //
-    //     return;
-    // }
-    // 外矿缓存
-    // const cfg_a = w_config.rooms[room.name]?.reserve || [];
-    // if (!che.remote) {
-    //     che.remote = {};
-    // }
-    // cfg_a.forEach(cfg => {
-    //     che.remote[cfg.name] = { remote_role_count: {} };
-    // });
-    // let remote_sources = [];
-    // cfg_a.forEach(cfg => {
-    //     const remote_room = Game.rooms[cfg.name];
-    //     if (!remote_room) {
-    //         return;
-    //     }
-    //     const cps=remote_room.find(FIND_MY_CREEPS,{filter:c=>c.memory.role===w_role_name.harvester});
-    //
-    //     const rs = getSourceWithContainer(room).map(r => ({
-    //         source: r.source,
-    //         container: r.container,
-    //         creep_ids: [],
-    //     }));
-    //     remote_sources = remote_sources.concat(rs);
-    // });
-    // che.remote_source = remote_sources;
-    // reserve缓存
 
     // 单位缓存
     const creep_count: any = {};
@@ -90,4 +62,74 @@ function prepareCache(room: Room) {
     che.creep_role_count = creep_count;
 
     w_utils.update_cache(room.name, che);
+}
+
+function prepareRemoteCache(room: Room, from_room: Room) {
+    let che: RemoteResource = w_cache.get(w_code.REMOTE_KEY_A);
+    let che_from: CacheGlobalRoom = w_cache.get(from_room.name);
+    let che_remote: CacheGlobalRoom = w_cache.get(room.name) || {};
+
+    if (!che) {
+        che = new RemoteResource();
+    } else {
+        // che.resources ;
+    }
+    // source缓存
+    if (!che_remote.source) {
+        che_remote.source = getSourceWithContainer(room).map(r => ({
+            source: r.source,
+            container: r.container,
+            creep_ids: [],
+        }));
+    } else {
+        che_remote.source.forEach(c => (c.creep_ids = []));
+    }
+    w_cache.set(room.name, che_remote);
+
+    const res_type = RESOURCE_ENERGY;
+
+    const drops = room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
+    drops.forEach(d => {
+        che.updateResource({
+            from: from_room.name,
+            remote: room.name,
+            id: d.id,
+            amount: d.amount,
+            amountRec: 0,
+            resourceType: d.resourceType,
+            structureType: 'drop',
+            pos: d.pos,
+        });
+    });
+    const container: StructureContainer[] = room.find(FIND_MY_STRUCTURES, {
+        filter: c => c.structureType === (STRUCTURE_CONTAINER as any),
+    }) as any;
+    container.forEach(t => {
+        che.updateResource({
+            from: from_room.name,
+            remote: room.name,
+            id: t.id,
+            amount: t.store.getUsedCapacity(res_type),
+            amountRec: 0,
+            resourceType: res_type,
+            structureType: t.structureType,
+            pos: t.pos,
+        });
+    });
+
+    let cps = Object.values(Game.creeps).filter(
+        v => v.memory.role === w_role_name.remote_harvester
+    );
+
+    let cf = che_from.remotes.find(c => c.name === room.name);
+    cf.sources = getSourceWithContainer(room).map(s => {
+        return {
+            source: s.source,
+            container: s.container,
+            creep_names: cps
+                .filter(c => c.memory.remote_source_id === s.source.id)
+                .map(c => c.name),
+        };
+    });
+    w_cache.set(w_code.REMOTE_KEY_A, che);
 }

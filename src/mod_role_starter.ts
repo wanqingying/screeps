@@ -1,5 +1,5 @@
 import { getSourceWithContainer } from './lib_room';
-import { is_empty_tate } from './lib_base';
+import { is_empty_tate, is_full_tate } from './lib_base';
 import { isCreepStop, harvestSource } from './lib_creep';
 import { give_resource } from './mod_role_distribution';
 
@@ -49,6 +49,9 @@ export function load_starter() {
 function run_starter(creep: Creep) {
     if (is_empty_tate(creep)) {
         creep.memory.process = 'dig';
+    }
+    if (is_full_tate(creep)) {
+        creep.memory.process = null;
     }
 
     if (creep.memory.process === 'dig') {

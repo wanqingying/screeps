@@ -13,7 +13,7 @@ export const cfg_local = {
             [w_role_name.repair]: 1,
             [w_role_name.attack]: 0,
         },
-        reserve_rooms: [],
+        // reserve_rooms: [],
         claims: {
             name: 'W1N8',
             creep: [
@@ -62,12 +62,14 @@ export const cfg_local = {
             [w_role_name.scout]: 0,
             [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
+            [w_role_name.remote_harvester]: 1,
             [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 1,
         },
         reserve: [
             // { name: 'W3N7', sources: [{ id: 'eff307740862fd8' }, { id: 'eee50774086309c' }] },
         ],
+        remote_container: ['84a3c8a17973bab'],
         claim: 'W2N7',
     },
 };

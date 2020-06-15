@@ -1,4 +1,4 @@
-import { isEmpty, isFull } from './lib_base';
+import { is_empty_tate, is_full_tate, isEmpty, isFull } from './lib_base';
 import { isCreepStop } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 
@@ -40,15 +40,14 @@ export function load_repair() {
 export function run_repair(creep: Creep) {
     const che = cache[creep.room.name];
 
-    if (isFull(creep)) {
-        creep.memory.process = 'work';
-    }
-    if (isEmpty(creep)) {
+    if (is_empty_tate(creep)) {
         creep.memory.process = 'pick';
         cache_creep[creep.id] = undefined;
     }
+    if (is_full_tate(creep)) {
+        creep.memory.process = 'r';
+    }
     if (creep.memory.process === 'pick') {
-        // cache_creep[creep.id] = undefined;
         return get_resource(creep);
     }
 
@@ -80,9 +79,6 @@ export function run_repair(creep: Creep) {
         }
     } else {
         creep.say('no target');
-    }
-    if (isEmpty(creep)) {
-        cache_creep[creep.id] = undefined;
     }
 }
 

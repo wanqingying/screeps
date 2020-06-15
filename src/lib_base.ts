@@ -249,3 +249,60 @@ export function getSourceWithContainer(
         }
     });
 }
+
+interface RemoteTask {
+    from: string;
+    remote: string;
+    id: string;
+    resourceType: ResourceConstant;
+    structureType: string;
+    amount: number;
+    amountRec: number;
+    pos: RoomPosition;
+}
+export class RemoteResource {
+    private array: RemoteTask[] = [];
+    private resType = RESOURCE_ENERGY;
+    public updateResource = (newRes: RemoteTask) => {
+        const prev = this.array.find(b => b.id === newRes.id);
+        if (prev) {
+            prev.amount = newRes.amount;
+        } else {
+            this.array.push(newRes);
+        }
+    };
+    public getTask = (creep: Creep): RemoteTask => {
+        if (creep.memory.remote_task_id) {
+            const task = this.getTaskById(creep.memory.remote_task_id);
+            if (task.amount - task.amountRec > 200) {
+                task.amountRec += creep.store.getFreeCapacity(this.resType);
+                return task;
+            }
+        }
+
+        const { from } = creep.memory;
+
+        let max = 0;
+        let max_task: RemoteTask;
+        this.array.forEach(s => {
+            let a = s.from === from;
+            let b = s.amount > s.amountRec + 100;
+            if (a && b) {
+                max = s.amount - s.amountRec;
+                max_task = s;
+                return true;
+            }
+            return false;
+        });
+        if (max > 200) {
+            max_task.amountRec += creep.store.getFreeCapacity(this.resType);
+            return max_task;
+        }
+    };
+    public getRoomTask = (room: Room): RemoteTask[] => {
+        return this.array.filter(t => t.from === room.name);
+    };
+    private getTaskById = (id: string): RemoteTask => {
+        return this.array.find(t => t.id === id);
+    };
+}

@@ -15,6 +15,8 @@ declare interface CreepMemory {
     // get_transport 物流系统get
     process?: string;
     distance?: number;
+    remote_task_id?: string;
+    remote_source_id?: string;
     target_room:string
     obj:any
 }

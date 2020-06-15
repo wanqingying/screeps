@@ -12,6 +12,7 @@ declare interface ConfigGlobal {
         [name: string]: CfgRoom;
     };
 }
+
 interface CfgReserve {
     name: string;
     sources: { id: string }[];
@@ -21,6 +22,7 @@ interface CfgRoom {
     creep_cfg_num: CreepCfgNum;
     claims: Claims;
     reserve: CfgReserve[];
+    remote_container?: string[];
 }
 
 interface Claims {
@@ -43,6 +45,7 @@ declare type W_CODE = {
 
     ERR_TARGET_NOT_FOUND: -217;
     ERR_TARGET_FULL: -217;
+    REMOTE_KEY_A: 12331;
 };
 
 declare interface Role {

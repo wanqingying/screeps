@@ -86,7 +86,7 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
         if (spawn.spawning) {
             return ERR_BUSY;
         }
-        const gems = Object.assign({ role: role, index: index, cost: cost }, mem);
+        const gems = Object.assign({ role: role, index: index, cost: cost, from: room.name }, mem);
         const act = spawn.spawnCreep(body, name, {
             memory: gems,
         });

@@ -45,5 +45,6 @@ global.w_code = {
     SPAWN_BY_FORCE: 9,
     SPAWN_BY_AUTO: 7,
     SPAWN_BY_ROOM: 6,
+    REMOTE_KEY_A:12331
 } as any;
 global.module_loaded = true;

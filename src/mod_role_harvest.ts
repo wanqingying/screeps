@@ -16,7 +16,6 @@ export function load_harvest() {
             //     return;
             // }
 
-            // console.log(creep.name, remote);
             try {
                 harvestSource(creep);
             } catch (e) {
