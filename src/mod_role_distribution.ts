@@ -194,7 +194,7 @@ class TransList {
     // 重设任务状态，修正不可控因素的影响 比如单位死亡
     // 重设的周期一般取单个任务的平均运行时间
     public resetAmountRec = () => {
-        if (Game.time % 25 === 0) {
+        if (Game.time % 100 === 0) {
             this.array.forEach(t => t.amount_rec === 0);
         }
     };
