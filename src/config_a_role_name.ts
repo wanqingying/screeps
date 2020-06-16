@@ -4,6 +4,7 @@ export const role_name = {
     harvester: 'harvester',
     remote_harvester: 'remote_harvester',
     remote_reserve: 'remote_reserve',
+    remote_builder: 'remote_builder',
     starter: 'starter',
     upgrader: 'upgrader',
     builder: 'builder',

@@ -84,10 +84,9 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             return;
         }
     }
-    w_utils.update_cache(room.name, { spawning_role: role } as CacheGlobalRoom);
     const body = getCreepBody(room, role);
-    if (!body){
-        return console.log('spawnCreep err 90')
+    if (!body) {
+        return console.log('spawnCreep err 90');
     }
     const cost = getBodyCost(body);
     const index = getCreepIndex();
@@ -109,9 +108,10 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
             che.c_spawning_role = '';
             che.c_spawn_fail_tick = 0;
             Memory.creeps_spawn_index = k + 1;
-            w_utils.update_cache(room.name, { spawning_role: '' } as CacheGlobalRoom);
+            room.memory.spawning_role = '';
         } else {
             che.c_spawning_role = role;
+            room.memory.spawning_role = role;
             che.c_spawn_fail_tick++;
             const { energyAvailable: eng, energyCapacityAvailable: cap } = room;
             const msg = `${spawn} ${name} ${w_utils.get_code_msg(
@@ -175,9 +175,11 @@ function getRefreshRole(room: Room) {
 }
 // 根据配置生产单位
 function getSpawnRole(room: Room) {
+    console.log(1);
     const sh: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
     const ch: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
     const current_exist = getCache(room).c_roles_count;
+    console.log(JSON.stringify(current_exist));
     const cfg = w_config.rooms[room.name].creep_cfg_num;
     const list = Object.entries(current_exist)
         .map(([role, num]) => {
@@ -189,6 +191,8 @@ function getSpawnRole(room: Room) {
         .sort((a, b) => {
             return a.current - b.current;
         });
+    console.log(2,list.length);
+
     let target = list.shift();
     while (target && target.role === w_role_name.remote_reserve && sh.stop_spawn_reserve(room)) {
         target = list.shift();
@@ -196,6 +200,7 @@ function getSpawnRole(room: Room) {
     while (target && target.role === w_role_name.remote_carry && ch.stop_spawn(room)) {
         target = list.shift();
     }
+    console.log(3,target?.role);
     return target?.role;
 }
 
@@ -257,15 +262,11 @@ function getCache(room: Room): RoomCache {
             c_spawn_code: null,
             c_spawning_role: '',
             c_refresh_creep: {},
-            c_tick: Game.time,
+            c_tick: 0,
         };
-
-        Object.values(w_role_name).forEach(k => {
-            che.c_roles_count[k] = 0;
-        });
     }
     if (che.c_tick !== Game.time) {
-        Object.keys(che.c_roles_count).forEach(role => {
+        Object.keys(w_role_name).forEach(role => {
             che.c_roles_count[role] = 0;
         });
     }
@@ -302,4 +303,28 @@ function getRoleBoost(room: Room): role_name_key | undefined {
     if (current_harvester < 2) {
         return w_role_name.harvester;
     }
+}
+
+interface CacheRoom {}
+export class SpawnAuto {
+    // 房间缓存数据
+    private cache_room: { [name: string]: CacheRoom } = {};
+    //
+    private spawn_pool: any;
+    constructor() {}
+    private updateCacheRoom = () => {};
+
+    private getSpawn = () => {};
+    // 每次 tick
+    public updateState = () => {};
+    private _spawn_creep = () => {};
+    // 供外部调用
+    public spawnCreep = () => {};
+    public getCache = (room: Room) => {
+        const che = this.cache_room[room.name];
+    };
+    // 检查即将耗尽的单位 30tick 执行一次
+    public check_timeout_creep = () => {};
+    // 主方法 每 tick 调用一次
+    public run = () => {};
 }

@@ -36,7 +36,7 @@ function start_scout() {
                     creep.moveTo(new RoomPosition(25, 25, target));
                 }
             }
-        }else if (creep.room.name !== creep.memory.scout_target) {
+        } else if (creep.room.name !== creep.memory.scout_target) {
             moveToTarget(creep, new RoomPosition(25, 25, creep.memory.scout_target), 6);
         }
         if (creep.room.name === creep.memory.scout_target) {

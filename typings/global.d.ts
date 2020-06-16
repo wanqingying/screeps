@@ -11,6 +11,7 @@ declare interface ConfigGlobal {
     rooms: {
         [name: string]: CfgRoom;
     };
+    body:{key:string:}[]
 }
 
 interface CfgR {
@@ -47,7 +48,9 @@ declare type W_CODE = {
     REMOTE_KEY_TRANSPORT: 12331;
     REMOTE_KEY_MINE: 12330;
     REMOTE_KEY_RESERVE: 12332;
-    REMOTE_KEY_ATTACK: 12335;
+    REMOTE_KEY_BUILDER: 12337;
+    DRIVER_KEY_SPAWN_AUTO: 12338;
+    DRIVER_KEY_TRANSPORT: 12339;
 };
 
 declare interface Role {

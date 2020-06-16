@@ -36,7 +36,7 @@ function run_remote_reserve(creep: Creep) {
             let pos = new RoomPosition(25, 25, task.remote);
             creep.moveTo(pos);
         } else {
-            creep.say('no target');
+            creep.say('no_target_' + target?.name);
         }
         return;
     }

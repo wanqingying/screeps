@@ -1,7 +1,5 @@
-import { isEmpty, isFull, RemoteTransport, run_creep } from './lib_base';
-import { spawnCreep } from './mod_spawn_creep';
-import { moveToTarget } from './lib_creep';
-import { checkRemoteDanger, findAttackTarget } from './lib_room';
+import { isEmpty, isFull, run_creep, RemoteTransport } from './lib_base';
+import { checkRemoteDanger } from './lib_room';
 import { give_resource } from './mod_role_distribution';
 
 export function load_remote_transport() {
@@ -16,6 +14,8 @@ export function load_remote_transport() {
     });
 }
 
+const DROP = 'drop';
+
 function run_remote_transport(creep: Creep) {
     if (checkRemoteDanger(creep)) {
         creep.say('danger');
@@ -23,16 +23,17 @@ function run_remote_transport(creep: Creep) {
     }
 
     const sh: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
-    creep.say('hi')
+
     if (isFull(creep)) {
-        creep.memory.process = 'd';
+        creep.memory.process = DROP;
         sh.forgetTask(creep);
     }
+
     if (isEmpty(creep)) {
         creep.memory.process = 'p';
     }
 
-    if (creep.memory.process === 'd') {
+    if (creep.memory.process === DROP) {
         let task = sh.getTask(creep);
         // drop
         creep.say('drop');
@@ -66,7 +67,6 @@ function run_remote_transport(creep: Creep) {
         }
     } else {
         // pick
-
         let task = sh.getTask(creep);
         if (creep.ticksToLive < 3) {
             sh.forgetTask(creep);
@@ -75,28 +75,19 @@ function run_remote_transport(creep: Creep) {
             creep.say('no task');
             return;
         }
-        creep.say('pick');
         let target = Game.getObjectById(task.id);
 
         if (!target) {
-            if (!task || !task.remote) {
-                sh.forgetTask(creep);
-                task = sh.getTask(creep);
-            } else {
-                // 没有视野 移动到目标
-                let pos = new RoomPosition(25, 25, task.remote);
-                let far = moveToTarget(creep, pos);
-                if (far < 10) {
-                    // 有视野还找不到 可能是刷没了 重置
-                    sh.forgetTask(creep);
-                } else {
-                    return;
-                }
+            creep.say('no_target_re_get');
+            sh.forgetTask(creep);
+            target = Game.getObjectById(task.id);
+            if (!target) {
+                creep.say('no_target');
+                return;
             }
         }
-
+        creep.say('pi_k');
         let code;
-
         if (task.structureType === 'drop') {
             code = creep.pickup(target as any);
         } else {
@@ -110,3 +101,5 @@ function run_remote_transport(creep: Creep) {
         }
     }
 }
+
+class RemoteTransport2 {}

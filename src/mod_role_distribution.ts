@@ -190,7 +190,7 @@ class TransList {
     public getTaskById = (creep: Creep, id?: string): TransTask => {
         let task = this.array.find(t => t.trans_id === id);
         if (task) {
-            this.addRecord(creep, task);
+            // this.addRecord(creep, task);
         }
         return task;
     };

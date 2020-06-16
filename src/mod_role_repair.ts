@@ -32,8 +32,8 @@ export function load_repair() {
 // 工作优先级 :修复低血建筑,建造,修复高血建筑,修墙
 export function run_repair(creep: Creep) {
     const che = cache[creep.room.name];
-    if (!che){
-        return ;
+    if (!che) {
+        return;
     }
 
     if (is_empty_tate(creep)) {

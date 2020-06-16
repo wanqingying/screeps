@@ -15,6 +15,8 @@ declare interface CreepMemory {
     upgrading?: boolean;
     // get_transport 物流系统get
     process?: string;
+    // transport in out
+    trans_direct?: string;
     distance?: number;
     ack_tick?: number;
     mv_tick?: number;
@@ -29,7 +31,7 @@ declare interface RoomMemory {
     structure: { extension: number };
     renew_count: number;
     // 正在生产的角色
-    spawnRole: string;
+    spawning_role: string;
     ext_creep: any;
 }
 

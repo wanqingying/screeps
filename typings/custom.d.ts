@@ -13,6 +13,7 @@ declare type role_name_key =
     | 'remote_attack'
     | 'harvester'
     | 'remote_harvester'
+    | 'remote_builder'
     | 'remote_reserve'
     | 'starter'
     | 'upgrader'

@@ -1,20 +1,35 @@
 
 
 const cache={};
-function getCache(key) {
-    let che=cache[key]
-    if (!che){
-        che={tick:555}
-        cache[key]=che;
+class BaseDriver {
+    constructor() {
     }
-    return che
+    static start = (Cls) => {
+        let che=cache[Cls.key]
+        if (!che){
+            che=new Cls()
+            console.log(Cls.name);
+            cache[Cls.key]=che
+        }
+        che.run();
+    };
+}
+
+class CarDriver2 extends BaseDriver{
+    name='car_driver'
+    run = () => {
+        console.log(this.name);
+    };
+    static key='car'
 }
 
 function test() {
-    let che=getCache('test');
-    console.log(che);
-    che.tick=88
-    console.log(che);
+  // CarDriver2.start(CarDriver2)
+    let obj={name:'abc'}
+    let arr=[obj];
+    let b=arr.pop()
+    obj.name='33'
+    console.log(b);
 }
 test()
 

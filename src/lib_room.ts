@@ -1,6 +1,6 @@
 // 房间是否可以开外矿
 import { findNearTarget } from './lib_base';
-import {moveToTarget} from "./lib_creep";
+import { moveToTarget } from './lib_creep';
 
 export function canReservation(room: Room): boolean {
     if (room.controller) {
@@ -39,7 +39,7 @@ export function findHealTarget(room: Room): AnyCreep {
         })[0];
 }
 
-export function findAttackTarget(room: Room):Creep {
+export function findAttackTarget(room: Room): Creep {
     let targets = room
         .findBy(FIND_HOSTILE_CREEPS, t => {
             return t.body.some(b => [ATTACK, RANGED_ATTACK, HEAL].includes(b.type as any));
@@ -50,27 +50,29 @@ export function findAttackTarget(room: Room):Creep {
     return targets.shift();
 }
 
-export function checkRemoteDanger(creep:Creep){
-    let pos= new RoomPosition(25,25,creep.memory.from);
+export function checkRemoteDanger(creep: Creep) {
+    let pos = new RoomPosition(25, 25, creep.memory.from);
 
-    if (creep.memory.ack_tick>0){
-        moveToTarget(creep,pos,6);
-        creep.memory.ack_tick-=1
-        creep.say('danger wait')
-        return true
+    if (creep.memory.ack_tick > 0) {
+        moveToTarget(creep, pos, 6);
+        creep.memory.ack_tick -= 1;
+        creep.say('danger wait');
+        return true;
+    }
+    if (creep.room.name === creep.memory.from) {
+        return false;
     }
 
-    let atk=findAttackTarget(creep.room);
-    if (atk){
-        creep.memory.ack_tick=30
-        creep.moveTo(pos)
-        creep.say('danger away')
-        return true
-    }else {
-        creep.memory.ack_tick-=1;
+    let atk = findAttackTarget(creep.room);
+    if (atk) {
+        creep.memory.ack_tick = 30;
+        creep.moveTo(pos);
+        creep.say('danger away');
+        return true;
+    } else {
+        creep.memory.ack_tick -= 1;
+        return false;
     }
-
-    return false
 }
 
 // 获取房间内 source 和旁边 container 配对信息

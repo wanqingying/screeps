@@ -27,7 +27,7 @@ function load_global_cache() {
         che = new RemoteTransport();
         w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
     }
-    che.updateState()
+    che.updateState();
 
     // reserve
     let che_reserve: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);

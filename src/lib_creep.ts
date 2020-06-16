@@ -1,4 +1,3 @@
-
 export function harvestSource(creep: Creep, remote?) {
     const che2: CacheGlobalRoom = w_cache.get(creep.room.name);
     let source = che2.source;
@@ -126,7 +125,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_carry]: { [MOVE]: 6, [CARRY]: 6 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 5, [CARRY]: 0 },
-            [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 1},
+            [w.remote_reserve]: { [MOVE]: 1, [CLAIM]: 1 },
             [w.builder]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
@@ -140,7 +139,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_carry]: { [MOVE]: 8, [CARRY]: 8 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 5, [CARRY]: 0 },
-            [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
+            [w.remote_reserve]: { [MOVE]: 1, [CLAIM]: 1 },
             [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
@@ -154,7 +153,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_carry]: { [MOVE]: 8, [CARRY]: 8 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 5, [CARRY]: 0 },
-            [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
+            [w.remote_reserve]: { [MOVE]: 1, [CLAIM]: 1 },
             [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
             [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },

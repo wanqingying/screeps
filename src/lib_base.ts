@@ -273,35 +273,48 @@ export class RemoteTransport {
         }
     };
     public updateState = () => {
-        if (Game.time % 300 === 0) {
+        if (Game.time % 50 === 0) {
             this.array.forEach(t => (t.amountRec = 0));
         }
     };
-    public updateTask = (creep:Creep) => {
+    public updateTask = (creep: Creep) => {
         let c_id = creep.memory.remote_task_id;
         let task = this.getTaskById(c_id);
         if (task) {
-            task.amountRec -= creep.store.getUsedCapacity(this.resType);
+            task.amountRec = 0;
         }
     };
-    public getTask = (creep: Creep): RemoteTransportTask => {
+    public getRemember = (creep: Creep) => {
         if (creep.memory.remote_task_id) {
             let task = this.getTaskById(creep.memory.remote_task_id);
             if (task && task.amount > 100) {
-                task.amountRec += creep.store.getFreeCapacity();
                 return task;
             } else {
                 this.forgetTask(creep);
             }
         }
+    };
+    public getTask = (creep: Creep): RemoteTransportTask => {
+        let prev = this.getRemember(creep);
+        if (prev) {
+            return prev;
+        }
+        // 不必每tick 都更新 只需要在有新需求的时候更新
+        this.updateState();
 
         const { from } = creep.memory;
 
-        let max = 0;
+        let max = -999;
         let max_task: RemoteTransportTask = {} as any;
+        let max_amount = 0;
+        let max_amount_task: RemoteTransportTask = {} as any;
         this.array.forEach(s => {
             let a = s.from === from;
             let b = s.amount > 200;
+            if (s.amount > max_amount) {
+                max_amount = s.amount;
+                max_amount_task = s;
+            }
             if (a && b) {
                 let k = s.amount - s.amountRec;
                 if (k > max) {
@@ -310,6 +323,9 @@ export class RemoteTransport {
                 }
             }
         });
+        if (!max_task || max_task.amount < 200) {
+            max_task = max_amount_task;
+        }
         if (max_task) {
             creep.memory.remote_task_id = max_task.id;
             max_task.amountRec += creep.store.getFreeCapacity();
@@ -401,10 +417,12 @@ interface RemoteReserveTask {
     remote: string;
     creep_id: string;
     process: number;
-    id: string | number;
+    id: string;
 }
 export class RemoteReserve {
     private array: RemoteReserveTask[] = [];
+    // reserve to this value
+    private max_contain = 3500;
     constructor() {
         this.array = [];
         Object.keys(w_config.rooms).forEach(name => {
@@ -416,7 +434,7 @@ export class RemoteReserve {
                     from: name,
                     creep_id: '',
                     process: 0,
-                    id: index + 1,
+                    id: String(index + 1),
                 });
             });
         });
@@ -440,33 +458,39 @@ export class RemoteReserve {
             }
         });
     };
+
     public getTask = (creep: Creep): RemoteReserveTask => {
         if (creep.memory.remote_task_id) {
-            return this.getTaskById(creep.memory.remote_task_id);
+            let prev = this.getTaskById(creep.memory.remote_task_id);
+            return prev;
         }
-
         const { from } = creep.memory;
+        const met_array = this.array.filter(t => t.from === from);
+        let min_no_creep = 5500;
         let min = 5500;
+        let min_task_no_creep: RemoteReserveTask = {} as any;
         let min_task: RemoteReserveTask = {} as any;
-        this.array.forEach(s => {
-            let a = s.from === from;
-            let b = s.process < 3800;
+        met_array.forEach(s => {
+            let b = s.process < this.max_contain;
             let c = !s.creep_id;
-            if (a && b && c) {
-                if (s.process < min) {
-                    min = s.process;
-                    min_task = s;
+            if (s.process < min) {
+                min = s.process;
+                min_task = s;
+            }
+            if (b && c) {
+                if (s.process < min_no_creep) {
+                    min_no_creep = s.process;
+                    min_task_no_creep = s;
                 }
             }
         });
-        if (!min_task) {
-            min_task = this.array.find(t => t.from === from && t.process < 4000);
+        if (!min_task_no_creep) {
+            min_task_no_creep = min_task;
         }
-        if (min_task) {
-            creep.memory.remote_task_id = min_task.id as any;
-            min_task.creep_id = creep.id;
+        if (min_task_no_creep) {
+            creep.memory.remote_task_id = min_task_no_creep.id;
         }
-        return min_task;
+        return min_task_no_creep;
     };
     public forgetTask = (creep: Creep) => {
         let c_id = creep.memory.remote_task_id;
@@ -481,7 +505,7 @@ export class RemoteReserve {
     };
     public stop_spawn_reserve = (room: Room) => {
         const tasks = this.getRoomTask(room);
-        return tasks.every(t => t.process > 3800);
+        return tasks.every(t => t.process > this.max_contain);
     };
     private getTaskById = (id: string): RemoteReserveTask => {
         return this.array.find(t => t.id === id);
