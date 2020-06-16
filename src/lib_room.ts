@@ -52,7 +52,6 @@ export function findAttackTarget(room: Room): Creep {
 
 export function checkRemoteDanger(creep: Creep) {
     let pos = new RoomPosition(25, 25, creep.memory.from);
-
     if (creep.memory.ack_tick > 0) {
         moveToTarget(creep, pos, 6);
         creep.memory.ack_tick -= 1;

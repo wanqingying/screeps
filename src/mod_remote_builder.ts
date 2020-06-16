@@ -1,10 +1,4 @@
-import {
-    getActionLockTarget,
-    is_full_tate,
-    isEmpty,
-    run_creep,
-    run_my_room,
-} from './lib_base';
+import { getActionLockTarget, is_full_tate, isEmpty, run_creep, run_my_room } from './lib_base';
 import { moveToTarget } from './lib_creep';
 import { TransportDriver } from './mod_role_transport';
 
@@ -20,10 +14,21 @@ interface TaskBuild {
     from: string;
     remote: string;
 }
+interface TaskRepair {
+    pos: any[];
+    id: string;
+    hits: number;
+    hitsMax: number;
+    creep_id: string;
+    updateTick: number;
+    from: string;
+    remote: string;
+}
 
 export class RemoteBuilder {
     private updateTick: number = undefined as any;
     private array: TaskBuild[] = [];
+    private repairArray: TaskRepair[] = [];
 
     public updateState = (force?: boolean) => {
         // 初始化以及每 50tick 更新一下数据 每次请求任务也需要更新数据
@@ -35,6 +40,7 @@ export class RemoteBuilder {
         }
         this.updateTick = Game.time;
         const site_list: { site: ConstructionSite; from: string }[] = [];
+        const repair_list: { site: AnyStructure; from: string }[] = [];
         run_my_room(room => {
             const remotes = w_config.rooms[room.name]?.reserve || {};
             Object.keys(remotes).forEach(name => {
@@ -42,6 +48,13 @@ export class RemoteBuilder {
                 if (remote_room) {
                     remote_room.find(FIND_MY_CONSTRUCTION_SITES).forEach(site => {
                         site_list.push({ site, from: room.name });
+                    });
+                    remote_room.find(FIND_STRUCTURES).forEach(s => {
+                        let los = s.hitsMax - s.hits;
+                        let los_rate = los / s.hitsMax;
+                        if (los > 3000 || los_rate > 0.5) {
+                            repair_list.push({ site: s, from: room.name });
+                        }
                     });
                 }
             });
@@ -65,8 +78,27 @@ export class RemoteBuilder {
                 });
             }
         });
+        repair_list.forEach(({ site, from }) => {
+            let exist = this.repairArray.find(t => t.id === site.id);
+            if (exist) {
+                exist.hits = site.hits;
+                exist.updateTick = Game.time;
+            } else {
+                this.repairArray.push({
+                    pos: [site.pos.x, site.pos.y, site.pos.roomName],
+                    id: site.id,
+                    hits: site.hits,
+                    hitsMax: site.hitsMax,
+                    creep_id: '',
+                    updateTick: Game.time,
+                    from: from,
+                    remote: site.room.name,
+                });
+            }
+        });
         // remove not exist site
         this.array = this.array.filter(t => t.updateTick === Game.time);
+        this.repairArray = this.repairArray.filter(t => t.updateTick === Game.time);
     };
     public getTask = (creep: Creep) => {
         let prev = this.getRememberTask(creep);
@@ -86,10 +118,36 @@ export class RemoteBuilder {
         }
         return task;
     };
+    public getRepairTask = (creep: Creep) => {
+        let prev = this.getRememberRepairTask(creep);
+        if (prev) {
+            if (prev.progress < prev.progressTotal) {
+                return prev;
+            } else {
+                this.forgetRepairTask(creep);
+            }
+        }
+
+        this.updateState(true);
+
+        let task = this.repairArray.find(t => t.hits < t.hitsMax);
+        if (task) {
+            creep.memory.remote_task_id = task.id;
+        }
+        return task;
+    };
     public getTaskById = (id: string) => {
         return this.array.find(t => t.id === id);
     };
+    public getRepairTaskById = (id: string) => {
+        return this.repairArray.find(t => t.id === id);
+    };
     public getRememberTask = (creep: Creep) => {
+        if (creep.memory.remote_task_id) {
+            return this.getTaskById(creep.memory.remote_task_id);
+        }
+    };
+    public getRememberRepairTask = (creep: Creep) => {
         if (creep.memory.remote_task_id) {
             return this.getTaskById(creep.memory.remote_task_id);
         }
@@ -97,6 +155,15 @@ export class RemoteBuilder {
     public forgetTask = (creep: Creep) => {
         if (creep.memory.remote_task_id) {
             let prev = this.getTaskById(creep.memory.remote_task_id);
+            if (prev) {
+                // prev.creep_id=undefined
+            }
+        }
+        creep.memory.remote_task_id = undefined;
+    };
+    public forgetRepairTask = (creep: Creep) => {
+        if (creep.memory.remote_task_id) {
+            let prev = this.getRepairTaskById(creep.memory.remote_task_id);
             if (prev) {
                 // prev.creep_id=undefined
             }
@@ -183,7 +250,7 @@ export class RemoteBuilder {
             if (!task) {
                 this.forgetTask(creep);
                 creep.say('no_task');
-                return;
+                return this.run_remote_repair(creep);
             }
             const target = Game.getObjectById(task.id);
             if (!target) {
@@ -198,6 +265,28 @@ export class RemoteBuilder {
             if (far < 7) {
                 code = creep.build(target as any);
             }
+        }
+    };
+    private run_remote_repair = (creep: Creep) => {
+        const task = this.getRepairTask(creep);
+        if (!task) {
+            this.forgetRepairTask(creep);
+            creep.say('no_rpair');
+            return;
+        }
+        creep.say('rp')
+        const target = Game.getObjectById(task.id);
+        if (!target) {
+            this.forgetRepairTask(creep);
+            creep.say('no_target');
+            return;
+        }
+        const [x, y, name] = task.pos;
+        const pos = new RoomPosition(x, y, name);
+        const far = moveToTarget(creep, pos,1);
+        let code;
+        if (far < 5) {
+            code = creep.repair(target as any);
         }
     };
     public run = () => {

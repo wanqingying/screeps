@@ -131,7 +131,9 @@ export class TransportDriver {
         const creepCache = this.getCreepCache(creep);
         let task = creepCache.precessTask;
         creepCache.precessTask = undefined;
-        task.amount = task.amount_rec = 0;
+        if (task){
+            task.amount = task.amount_rec = 0;
+        }
     };
     private receiveTask = (creep: Creep, handle?: 'give' | 'get', structures?: any[]) => {
         const che = this.getRoomCache(creep.room);
@@ -183,15 +185,16 @@ export class TransportDriver {
         }
     };
     private run_task = (creep: Creep, task: TransTask) => {
-        creep.say('task');
+        creep.say('*' + task.stcType);
         if (task.trans_dec === 'in' && is_empty_tate(creep)) {
             // 运入建筑 单位没有资源重置
-            this.closeCreepTask(creep);
-            return;
+            creep.say('reset_emp');
+            return this.closeCreepTask(creep);
         }
 
         if (task.trans_dec === 'out' && is_full_tate(creep)) {
             // 从建筑运出 如果单位已满则重置任务
+            creep.say('reset_ful');
             return this.closeCreepTask(creep);
         }
 
@@ -200,43 +203,74 @@ export class TransportDriver {
 
         let code;
         const target = Game.getObjectById(task.id) as any;
+        if (!target) {
+            return this.closeCreepTask(creep);
+        }
         const far = moveToTarget(creep, target);
 
         if (far > 3) {
             return;
         }
+        creep.say(far + '');
 
         if (task.trans_dec === 'in') {
             const type = task.resType;
             if (type === 'any') {
                 RESOURCES_ALL.forEach(t => {
                     if (creep.store[t] > 0) {
+                        console.log('trans1');
                         code = creep.transfer(target, t);
                     }
                 });
             } else {
+                console.log('trans2');
                 code = creep.transfer(target, type);
             }
         }
 
         if (task.trans_dec === 'out') {
             if (task.stcType === 'drop') {
+                console.log('pick3');
                 code = creep.pickup(target as Resource);
             } else {
+                console.log('withdraw4');
                 code = creep.withdraw(target, task.resType as any);
             }
+        }
+        console.log(JSON.stringify(task));
+        if (code===OK){
+            this.closeCreepTask(creep)
+        }
+        if (far===1){
+            this.closeCreepTask(creep)
         }
         switch (code) {
             case ERR_NOT_IN_RANGE:
                 moveToTarget(creep, pos);
                 break;
             case OK:
-                updateTask(creep, task);
+                this.finishTask(creep, task);
+                break;
+            case ERR_FULL:
+                break;
+            case ERR_INVALID_TARGET:
                 break;
             default:
-            // closeTask(creep,task)
+                this.closeCreepTask(creep);
         }
-        this.finishTask(creep, task);
+        console.log('5');
+        console.log(creep.name, w_utils.get_code_msg(code));
+        if (task.trans_dec === 'in' && is_empty_tate(creep)) {
+            // 运入建筑 单位没有资源重置
+            creep.say('reset_emp');
+            return this.closeCreepTask(creep);
+        }
+
+        if (task.trans_dec === 'out' && is_full_tate(creep)) {
+            // 从建筑运出 如果单位已满则重置任务
+            creep.say('reset_ful');
+            return this.closeCreepTask(creep);
+        }
     };
     private finishTask = (creep: Creep, task: TransTask) => {
         let task_done = false;

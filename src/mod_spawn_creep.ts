@@ -1,12 +1,4 @@
-import {
-    getBodyCost,
-    getCreepIndex,
-    ListA,
-    RemoteReserve,
-    RemoteTransport,
-    run_creep,
-    run_my_room,
-} from './lib_base';
+import { getBodyCost, ListA, RemoteReserve, RemoteTransport, run_my_room } from './lib_base';
 import { getCreepBodyByRole } from './lib_creep';
 
 interface RoomCache {
@@ -28,7 +20,7 @@ interface RoomCache {
     };
 }
 let cache: { [name: string]: RoomCache } = {};
-const max_fail_tick = 150;
+const max_fail_tick = 7;
 
 // 根据配置获取单位部件
 function getCreepBody(room: Room, role: role_name_key) {
@@ -109,6 +101,7 @@ export class SpawnAuto {
     private last_run_time = 0;
     private last_update_time = 0;
     private run_tick = 15;
+    private max_fail_tick = this.run_tick * 10;
     private spawn_before_tick = 30;
     private timeoutMap = new Map();
     // 房间缓存数据
@@ -120,7 +113,7 @@ export class SpawnAuto {
                 c_energy_stop: false,
                 c_roles_count: {},
                 c_spawn_fail_tick: 0,
-                c_energy: new ListA<number>(30),
+                c_energy: new ListA<number>(4),
                 c_spawn_code: null,
                 c_spawning_role: '',
                 c_wait_role: [],
@@ -139,7 +132,6 @@ export class SpawnAuto {
         che.c_tick = Game.time;
         return che;
     };
-    private max_fail_tick = 150;
     constructor() {}
     public spawnCreep = (room: Room, role: role_name_key, mem?: any) => {
         let k = Memory.creeps_spawn_index || 0;
@@ -150,7 +142,7 @@ export class SpawnAuto {
         che.c_ready = false;
         const body = getCreepBody(room, role);
         if (!body) {
-            return
+            return;
         }
         const cost = getBodyCost(body);
         const index = Memory.creeps_spawn_index;
@@ -282,8 +274,6 @@ export class SpawnAuto {
         let role = creep.memory.role;
         const current_exist = this.getRoomCache(room).c_roles_count;
         const cfg = w_config.rooms[room.name].creep_cfg_num;
-        let cur=current_exist[role];
-        let tar=cfg[role]
         if (current_exist[role] > cfg[role]) {
             return;
         }
@@ -294,7 +284,7 @@ export class SpawnAuto {
             remain += 50;
         }
         if (creep.ticksToLive < remain) {
-            let res = this.addSpawnTask(room, { role: creep.memory.role, memory: creep.memory });
+            let res = this.addSpawnTask(room, { role: creep.memory.role, memory: {} });
             if (res) {
                 this.timeoutMap.set(creep.id, true);
             }
@@ -307,8 +297,7 @@ export class SpawnAuto {
             let che = this.getRoomCache(room);
             che.c_energy.push(room.energyAvailable);
             let c_ng = che.c_energy;
-            che.c_energy_stop =
-                c_ng.length > max_fail_tick - 20 && c_ng.every(e => e === undefined || e <= 300);
+            che.c_energy_stop = c_ng.length > 6 && c_ng.every(e => e === undefined || e <= 300);
             let no_sp = room.find(FIND_MY_SPAWNS).every(s => !s.spawning);
             if (no_sp) {
                 che.c_ready = true;
@@ -350,7 +339,7 @@ export class SpawnAuto {
             w_cache.set(SpawnAuto.cache_key, driver);
         }
         driver.addSpawnTask(room, { role: role, memory: mem });
-        driver.run(true)
+        driver.run(true);
     };
     public static cache_key = w_code.DRIVER_KEY_SPAWN_AUTO;
     public static start = () => {
