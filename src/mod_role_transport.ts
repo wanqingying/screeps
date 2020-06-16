@@ -85,7 +85,7 @@ interface CacheRoom {
 
 class TransportDriver {
     private updateTick = 0;
-    private last_run_time=0
+    private last_run_time = 0;
     constructor() {}
     private cache_creep: Map<string, CacheCreep> = new Map();
     private cache_room: Map<string, CacheRoom> = new Map<string, CacheRoom>();
@@ -123,27 +123,21 @@ class TransportDriver {
         creepCache.precessTask = currentTask;
         return currentTask;
     };
-    private resetCreepTask = (creep:Creep) => {
-        const creepCache = this.getCreepCache(creep);
-        if (creepCache.precessTask){
-            // creepCache.precessTask.amount_rec=0
-        }
-        // creepCache.tasks.forEach(t=>t.amount_rec=0)
-        creepCache.tasks=[]
-        creepCache.precessTask=undefined
-    };
     private rememberCreepTask = (creep: Creep, tasks: TransTask[]) => {
         const creepCache = this.getCreepCache(creep);
         creepCache.tasks = tasks;
     };
-    private closeCreepTask = (creep:Creep) => {
+    private closeCreepTask = (creep: Creep) => {
         const creepCache = this.getCreepCache(creep);
-        let task=creepCache.precessTask;
-        creepCache.precessTask=undefined;
+        let task = creepCache.precessTask;
+        creepCache.precessTask = undefined;
         task.amount = task.amount_rec = 0;
     };
     private receiveTask = (creep: Creep, handle?: 'give' | 'get', structures?: any[]) => {
         const che = this.getRoomCache(creep.room);
+        if (this.updateTick !== Game.time) {
+            this.updateState();
+        }
         let tasks: TransTask[];
         if (is_full_tate(creep)) {
             creep.memory.trans_direct = 'in';
@@ -191,13 +185,13 @@ class TransportDriver {
     private run_task = (creep: Creep, task: TransTask) => {
         if (task.trans_dec === 'in' && is_empty_tate(creep)) {
             // 运入建筑 单位没有资源重置
-            this.closeCreepTask(creep)
+            this.closeCreepTask(creep);
             return;
         }
 
         if (task.trans_dec === 'out' && is_full_tate(creep)) {
             // 从建筑运出 如果单位已满则重置任务
-            return this.closeCreepTask(creep)
+            return this.closeCreepTask(creep);
         }
 
         const [x, y, name] = task.pos;
@@ -206,9 +200,9 @@ class TransportDriver {
         let code;
         const target = Game.getObjectById(task.id) as any;
 
-        const far=moveToTarget(creep,target);
+        const far = moveToTarget(creep, target);
 
-        if (far>3){
+        if (far > 3) {
             return;
         }
 
@@ -245,27 +239,27 @@ class TransportDriver {
         this.finishTask(creep, task);
     };
     private finishTask = (creep: Creep, task: TransTask) => {
-        let task_done=false;
+        let task_done = false;
         if (task.trans_dec === 'in') {
             // 卸载任务完成
             if (is_empty_tate(creep)) {
-                task_done=true;
+                task_done = true;
             }
             if (task.amount_rec >= task.amount) {
-                task_done=true;
+                task_done = true;
             }
         }
         if (task.trans_dec === 'out') {
             // 装运任务完成
             if (is_full_tate(creep)) {
-                task_done=true;
+                task_done = true;
             }
             if (task.amount_rec >= task.amount) {
-                task_done=true;
+                task_done = true;
             }
         }
-        if (task_done){
-            this.closeCreepTask(creep)
+        if (task_done) {
+            this.closeCreepTask(creep);
         }
     };
     private publicTask = (room: Room) => {
@@ -399,7 +393,7 @@ class TransportDriver {
         }
     };
     public run = () => {
-        this.last_run_time=Game.time
+        this.last_run_time = Game.time;
         this.tryUpdateState();
         run_creep(w_role_name.carrier, creep => {
             try {
@@ -419,33 +413,33 @@ class TransportDriver {
         }
         driver.run();
     };
-    public static get_resource = (creep:Creep) => {
+    public static get_resource = (creep: Creep) => {
         let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
         if (!driver) {
             driver = new TransportDriver();
             w_cache.set(TransportDriver.cache_key, driver);
         }
-        if (driver.last_run_time!==Game.time){
+        if (driver.last_run_time !== Game.time) {
             driver.run();
         }
-        driver.run_transport(creep,'get')
+        driver.run_transport(creep, 'get');
     };
-    public static give_resource = (creep:Creep) => {
+    public static give_resource = (creep: Creep) => {
         let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
         if (!driver) {
             driver = new TransportDriver();
             w_cache.set(TransportDriver.cache_key, driver);
         }
-        if (driver.last_run_time!==Game.time){
+        if (driver.last_run_time !== Game.time) {
             driver.run();
         }
-        driver.run_transport(creep,'give')
+        driver.run_transport(creep, 'give');
     };
     private static cache_key = w_code.DRIVER_KEY_TRANSPORT;
 }
 // 计算本次处理的数量 更新任务状态 todo 待观察
 function updateTask(creep: Creep, task: TransTask) {
-    task.amount=task.amount_rec=0
+    task.amount = task.amount_rec = 0;
 }
 
 // 关闭任务

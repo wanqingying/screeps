@@ -343,7 +343,7 @@ export class RemoteTransport {
     public getRoomTask = (room: Room): RemoteTransportTask[] => {
         return this.array.filter(t => t.from === room.name);
     };
-    public stop_spawn = (room: Room): boolean => {
+    public stop_spawn_carry = (room: Room): boolean => {
         return this.array.filter(t => t.from === room.name && t.amount > 200).length === 0;
     };
     private getTaskById = (id: string): RemoteTransportTask => {
