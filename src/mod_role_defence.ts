@@ -56,6 +56,8 @@ function prepareCache(room: Room) {
     let t = findAttackTarget(room);
     if (t && t.ticksToLive > 100 && t.hits > 1500) {
         che.attack = t;
+    } else {
+        che.attack = undefined;
     }
     che.my_attack_creeps = room.find(FIND_MY_CREEPS, {
         filter: s => s.memory.role === w_role_name.attack,

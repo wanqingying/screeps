@@ -6,14 +6,14 @@ export const cfg_online = {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
             [w_role_name.carrier]: 3,
-            [w_role_name.remote_carry]: 0,
-            [w_role_name.remote_harvester]: 0,
             [w_role_name.scout]: 0,
-            [w_role_name.remote_reserve]: 0,
             [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
             [w_role_name.repair]: 0,
+            [w_role_name.remote_carry]: 4,
+            [w_role_name.remote_reserve]: 1,
+            [w_role_name.remote_harvester]: 2,
         },
         reserve: {
             E18S4: [{ id: '5bbcadfd9099fc012e638421', container_id: '' }],

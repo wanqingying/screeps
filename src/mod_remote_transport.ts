@@ -18,7 +18,7 @@ export function load_remote_transport() {
 
 function run_remote_transport(creep: Creep) {
     if (checkRemoteDanger(creep)) {
-        creep.say('danger')
+        creep.say('danger');
         return;
     }
 
@@ -52,7 +52,7 @@ function run_remote_transport(creep: Creep) {
                 .map(id => Game.getObjectById(id))
                 .filter(c => c) as any;
             const target: StructureContainer = cns.find(c => {
-                return c.store.getFreeCapacity() > 0;
+                return c.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             });
 
             if (target) {
