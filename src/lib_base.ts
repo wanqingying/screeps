@@ -132,7 +132,7 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
     return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) === 0;
 }
 
-const FULL_RATE = 0.9;
+const FULL_RATE = 0.8;
 
 export function is_empty_tate(creep: Creep, rate?: number) {
     const percent = rate || FULL_RATE;
