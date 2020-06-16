@@ -5,11 +5,11 @@ export const cfg_online = {
     E18S5: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 2,
-            [w_role_name.remote_carry]: 4,
-            [w_role_name.remote_harvester]: 2,
+            [w_role_name.carrier]: 3,
+            [w_role_name.remote_carry]: 0,
+            [w_role_name.remote_harvester]: 0,
             [w_role_name.scout]: 0,
-            [w_role_name.remote_reserve]: 2,
+            [w_role_name.remote_reserve]: 0,
             [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
