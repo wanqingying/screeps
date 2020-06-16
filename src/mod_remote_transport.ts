@@ -23,7 +23,7 @@ function run_remote_transport(creep: Creep) {
     }
 
     const sh: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
-
+    creep.say('hi')
     if (isFull(creep)) {
         creep.memory.process = 'd';
         sh.forgetTask(creep);

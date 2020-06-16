@@ -426,12 +426,10 @@ function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]
 
 // 从物流中获取物资
 export function get_resource(creep: Creep, structures?: string[]) {
-    creep.memory.process = 'get_transport';
     run_transport(creep, 'get', structures);
 }
 // 存放物资
 export function give_resource(creep: Creep, structures?: string[]) {
-    creep.memory.process = 'give_transport';
     run_transport(creep, 'give', structures);
 }
 
@@ -535,7 +533,6 @@ function updateTask(creep: Creep, task: TransTask) {
 function closeTask(creep: Creep, task: TransTask) {
     delete cache_creep_task[creep.name];
     task.amount = task.amount_rec = 0;
-    creep.memory.process = null;
 }
 
 function tryResetTaskAmount(room) {
