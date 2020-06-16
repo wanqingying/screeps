@@ -6,13 +6,28 @@ export const cfg_online = {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
             [w_role_name.carrier]: 2,
+            [w_role_name.remote_carry]: 4,
+            [w_role_name.remote_harvester]: 2,
             [w_role_name.scout]: 0,
+            [w_role_name.remote_reserve]: 2,
             [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
-            [w_role_name.repair]: 1,
+            [w_role_name.repair]: 0,
         },
-        reserve_rooms: [],
+        reserve: {
+            E18S4: [{ id: '5bbcadfd9099fc012e638421', container_id: '' }],
+            E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_id: '' }],
+        },
+        remote_container: ['5ee82325c4fce716b1ac5389'],
+        // claims: {
+        //     name: 'E22S9',
+        //     creep: [
+        //         [w_role_name.harvester, 1],
+        //         [w_role_name.builder, 1],
+        //         [w_role_name.upgrader, 1],
+        //     ],
+        // },
     },
     sim: {
         creep_cfg_num: {

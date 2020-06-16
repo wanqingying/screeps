@@ -46,6 +46,8 @@ declare type W_CODE = {
     SPAWN_BY_AUTO: 7;
     REMOTE_KEY_TRANSPORT: 12331;
     REMOTE_KEY_MINE: 12330;
+    REMOTE_KEY_RESERVE: 12332;
+    REMOTE_KEY_ATTACK: 12335;
 };
 
 declare interface Role {

@@ -1,5 +1,6 @@
 import { moveToTarget } from './lib_creep';
 import { RemoteMine, run_creep } from './lib_base';
+import {checkRemoteDanger} from "./lib_room";
 
 export function load_remote_harvest() {
     run_creep(w_role_name.remote_harvester, function (creep) {
@@ -14,6 +15,9 @@ export function load_remote_harvest() {
 }
 
 function run_remote_harvester(creep: Creep) {
+    if (checkRemoteDanger(creep)){
+        return;
+    }
     const ch: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
     const task = ch.getTask(creep);
     if (creep.ticksToLive<3){
@@ -23,6 +27,7 @@ function run_remote_harvester(creep: Creep) {
     }
     if (!task) {
         creep.say('no task');
+        return;
     }
     const target: Source = Game.getObjectById(task.id);
     let container;

@@ -1,4 +1,10 @@
-import { getSourceWithContainer, RemoteMine, RemoteTransport } from './lib_base';
+import {
+    getSourceWithContainer,
+    RemoteAttack,
+    RemoteMine,
+    RemoteReserve,
+    RemoteTransport,
+} from './lib_base';
 import { get, set } from 'lodash';
 
 export function load_cache() {
@@ -15,11 +21,30 @@ function load_global_cache() {
     if (!global.w_cache) {
         global.w_cache = new Map<any, any>();
     }
+    // transport
     let che: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
     if (!che) {
         che = new RemoteTransport();
         w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
     }
+    che.updateState()
+
+    // reserve
+    let che_reserve: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
+    if (!che_reserve) {
+        che_reserve = new RemoteReserve();
+    }
+    che_reserve.updateState();
+    w_cache.set(w_code.REMOTE_KEY_RESERVE, che_reserve);
+    // remote_attack
+    let che_atk: RemoteAttack = w_cache.get(w_code.REMOTE_KEY_ATTACK);
+    if (!che_atk) {
+        che_atk = new RemoteAttack();
+    }
+    che_atk.updateState();
+    w_cache.set(w_code.REMOTE_KEY_ATTACK, che_atk);
+
+    w_cache.set(w_code.REMOTE_KEY_RESERVE, che_reserve);
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
             prepareCache(room);
@@ -114,9 +139,6 @@ function prepareRemoteCache(room: Room, from_room: Room) {
     const res_type = RESOURCE_ENERGY;
 
     const drops = room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
-    console.log('remote');
-    console.log(room.name);
-    console.log(drops.length);
     drops.forEach(d => {
         che.updateResource({
             from: from_room.name,

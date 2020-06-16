@@ -47,5 +47,6 @@ global.w_code = {
     SPAWN_BY_ROOM: 6,
     REMOTE_KEY_TRANSPORT: 12331,
     REMOTE_KEY_MINE: 12330,
+    REMOTE_KEY_RESERVE: 12332,
 };
 global.module_loaded = true;

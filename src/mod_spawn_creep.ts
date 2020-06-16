@@ -1,4 +1,11 @@
-import { getBodyCost, getCreepIndex, ListA, run_creep } from './lib_base';
+import {
+    getBodyCost,
+    getCreepIndex,
+    ListA,
+    RemoteReserve,
+    RemoteTransport,
+    run_creep,
+} from './lib_base';
 import { getCreepBodyByRole } from './lib_creep';
 
 interface RoomCache {
@@ -79,6 +86,9 @@ export function spawnCreep(room: Room, role: role_name_key, mem?: any, outer?: b
     }
     w_utils.update_cache(room.name, { spawning_role: role } as CacheGlobalRoom);
     const body = getCreepBody(room, role);
+    if (!body){
+        return console.log('spawnCreep err 90')
+    }
     const cost = getBodyCost(body);
     const index = getCreepIndex();
     const name = `${role}_${index}`;
@@ -159,17 +169,15 @@ function getRefreshRole(room: Room) {
         if (current_count > target_count) {
             return;
         }
-        // delete che.c_refresh_creep[t.id]
-
         che.c_refresh_creep[t.id].progress = true;
         return role;
     }
 }
 // 根据配置生产单位
 function getSpawnRole(room: Room) {
+    const sh: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
+    const ch: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
     const current_exist = getCache(room).c_roles_count;
-    console.log('spawn', room.name);
-    console.log(JSON.stringify(current_exist));
     const cfg = w_config.rooms[room.name].creep_cfg_num;
     const list = Object.entries(current_exist)
         .map(([role, num]) => {
@@ -182,14 +190,20 @@ function getSpawnRole(room: Room) {
             return a.current - b.current;
         });
     let target = list.shift();
+    while (target && target.role === w_role_name.remote_reserve && sh.stop_spawn_reserve(room)) {
+        target = list.shift();
+    }
+    while (target && target.role === w_role_name.remote_carry && ch.stop_spawn(room)) {
+        target = list.shift();
+    }
     return target?.role;
 }
 
 function check_creep_timeout(creep: Creep, room?: Room) {
     let che = getCache(room || creep.room);
-    // if (che.c_refresh_creep[creep.id]) {
-    //     return;
-    // }
+    if (che.c_refresh_creep[creep.id]) {
+        return;
+    }
     const body_length = creep.body.length;
     let remain = body_length * 3 + spawn_before_die;
     if (creep.memory.role.includes('remote')) {
@@ -209,12 +223,6 @@ function check_creep_timeout(creep: Creep, room?: Room) {
 // 准备缓存
 function prepareCache(room: Room) {
     let che = getCache(room);
-    // const creeps = Object.values(room.find(FIND_MY_CREEPS));
-    // creeps.forEach(creep => {
-    //     const role = creep.memory.role;
-    //     che.c_roles_count[role] += 1;
-    //     check_creep_timeout(creep);
-    // });
     che.c_energy.push(room.energyAvailable);
     let c_ng = che.c_energy;
     che.c_energy_stop =
@@ -224,16 +232,13 @@ function prepareCache(room: Room) {
 }
 // 检查外矿缓存
 function prepareRemoteCache() {
-    run_creep(
-        undefined,
-        function (creep) {
-            const from_room = Game.rooms[creep.memory.from];
-            let che = getCache(from_room);
-            che.c_roles_count[creep.memory.role] += 1;
-            check_creep_timeout(creep, from_room);
-            cache[from_room.name] = che;
-        },
-    );
+    run_creep(undefined, function (creep) {
+        const from_room = Game.rooms[creep.memory.from];
+        let che = getCache(from_room);
+        che.c_roles_count[creep.memory.role] += 1;
+        check_creep_timeout(creep, from_room);
+        cache[from_room.name] = che;
+    });
 }
 
 // 获取缓存

@@ -161,7 +161,7 @@ class TransList {
             return false;
         });
         const ps = Array.from(bs).map(t => {
-            return { pos: { x: t.pos[0], y: t.pos[1] }, id: t.id };
+            return { pos: { x: t.pos[0], y: t.pos[1], roomName: t.pos[2] }, id: t.id };
         });
         // 有多个就选最近的
         let near = findNearTarget(creep, ps);
@@ -456,22 +456,18 @@ function run_task(creep: Creep, task: TransTask) {
     if (task.trans_dec === 'in') {
         const type = task.resourceType;
         if (type === 'any') {
-
             RESOURCES_ALL.forEach(t => {
                 if (creep.store[t] > 0) {
                     code = creep.transfer(target, t);
                 }
             });
         } else {
-
             code = creep.transfer(target, type);
         }
     }
 
     if (task.trans_dec === 'out') {
-
         if (task.structureType === 'drop') {
-
             code = creep.pickup(target as Resource);
         } else {
             code = creep.withdraw(target, task.resourceType as any);
@@ -513,24 +509,26 @@ function checkTaskIsComplete(creep: Creep, task: TransTask) {
 
 // 计算本次处理的数量 更新任务状态 todo 待观察
 function updateTask(creep: Creep, task: TransTask) {
-    let handle_amount = 0;
-    if (task.trans_dec === 'in') {
-        if (task.resourceType === 'any') {
-            RESOURCES_ALL.forEach(t => {
-                handle_amount += creep.store.getUsedCapacity(t);
-            });
-        } else {
-            handle_amount = creep.store.getUsedCapacity(task.resourceType);
-        }
-        handle_amount = Math.min(task.amount, handle_amount);
-    }
-    if (task.trans_dec === 'out') {
-        handle_amount = creep.store.getFreeCapacity();
-        if (handle_amount > task.amount) {
-            handle_amount = task.amount;
-        }
-    }
-    task.amount_rec = task.amount_rec - handle_amount;
+    // let handle_amount = 0;
+    // if (task.trans_dec === 'in') {
+    //     if (task.resourceType === 'any') {
+    //         RESOURCES_ALL.forEach(t => {
+    //             handle_amount += creep.store.getUsedCapacity(t);
+    //         });
+    //     } else {
+    //         handle_amount = creep.store.getUsedCapacity(task.resourceType);
+    //     }
+    //     handle_amount = Math.min(task.amount, handle_amount);
+    // }
+    // if (task.trans_dec === 'out') {
+    //     handle_amount = creep.store.getFreeCapacity();
+    //     if (handle_amount > task.amount) {
+    //         handle_amount = task.amount;
+    //     }
+    // }
+    // task.amount_rec = task.amount_rec - handle_amount;
+    task.amount_rec = 0;
+    task.amount = 0;
 }
 
 // 关闭任务
