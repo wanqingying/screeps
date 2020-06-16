@@ -46,6 +46,8 @@ global.w_utils = {
         let room=Game.rooms[name];
         if ( room){
             SpawnAuto.spawnCreep(room,role)
+            return true
         }
+        return  false
     }
 };

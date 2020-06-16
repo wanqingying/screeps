@@ -349,10 +349,8 @@ export class SpawnAuto {
             driver = new SpawnAuto();
             w_cache.set(SpawnAuto.cache_key, driver);
         }
-        if (driver.last_run_time !== Game.time) {
-            driver.run(true);
-        }
         driver.addSpawnTask(room, { role: role, memory: mem });
+        driver.run(true)
     };
     public static cache_key = w_code.DRIVER_KEY_SPAWN_AUTO;
     public static start = () => {

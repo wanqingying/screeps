@@ -2,6 +2,8 @@ import { getSourceWithContainer } from './lib_room';
 import { is_empty_tate, is_full_tate } from './lib_base';
 import { harvestSource } from './lib_creep';
 import { give_resource } from './mod_role_distribution';
+import { TransportDriver } from './mod_role_transport';
+
 
 interface CacheSource {
     source: Source;
@@ -56,7 +58,7 @@ function run_starter(creep: Creep) {
     if (creep.memory.process === 'dig') {
         harvestSource(creep);
     } else {
-        give_resource(creep);
+        TransportDriver.give_resource(creep);
     }
 }
 

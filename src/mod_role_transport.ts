@@ -83,7 +83,7 @@ interface CacheRoom {
     spawning: boolean;
 }
 
-class TransportDriver {
+export class TransportDriver {
     private updateTick = 0;
     private last_run_time = 0;
     constructor() {}
@@ -183,6 +183,7 @@ class TransportDriver {
         }
     };
     private run_task = (creep: Creep, task: TransTask) => {
+        creep.say('task');
         if (task.trans_dec === 'in' && is_empty_tate(creep)) {
             // 运入建筑 单位没有资源重置
             this.closeCreepTask(creep);
@@ -199,7 +200,6 @@ class TransportDriver {
 
         let code;
         const target = Game.getObjectById(task.id) as any;
-
         const far = moveToTarget(creep, target);
 
         if (far > 3) {
@@ -264,6 +264,10 @@ class TransportDriver {
     };
     private publicTask = (room: Room) => {
         const che = this.getRoomCache(room);
+        if (Game.time % 30 === 0) {
+            che.transIn.resetTask();
+            che.transOut.resetTask();
+        }
         che.spawning = !!room.memory.spawning_role;
         const structures = room.findBy(FIND_STRUCTURES);
         // drop=============================================
@@ -413,7 +417,7 @@ class TransportDriver {
         }
         driver.run();
     };
-    public static get_resource = (creep: Creep) => {
+    public static get_resource = (creep: Creep, structures?: any[]) => {
         let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
         if (!driver) {
             driver = new TransportDriver();
@@ -422,7 +426,7 @@ class TransportDriver {
         if (driver.last_run_time !== Game.time) {
             driver.run();
         }
-        driver.run_transport(creep, 'get');
+        driver.run_transport(creep, 'get', structures);
     };
     public static give_resource = (creep: Creep) => {
         let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
@@ -589,6 +593,9 @@ class TransList {
             this.addRecord(creep, task);
         }
         return task;
+    };
+    public resetTask = () => {
+        this.array.forEach(t => (t.amount = t.amount_rec = 0));
     };
 }
 

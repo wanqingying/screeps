@@ -19,7 +19,8 @@ function main() {
     // 采矿
     mod.load_harvest();
     // 运输
-    mod.load_distribution_transport();
+    mod.TransportDriver.start();
+    // mod.load_distribution_transport();
     mod.load_builder();
     mod.load_upgrader();
     mod.load_starter();
@@ -32,6 +33,7 @@ function main() {
     mod.load_remote_harvest();
     mod.load_remote_reserve();
     mod.load_remote_attack();
+    mod.RemoteBuilder.start()
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];

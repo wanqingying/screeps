@@ -1,6 +1,7 @@
 import { isEmpty, isFull, run_creep, RemoteTransport } from './lib_base';
 import { checkRemoteDanger } from './lib_room';
-import { give_resource } from './mod_role_distribution';
+import { TransportDriver } from './mod_role_transport';
+
 
 export function load_remote_transport() {
     run_creep(w_role_name.remote_carry, function (creep) {
@@ -62,7 +63,7 @@ function run_remote_transport(creep: Creep) {
                     creep.moveTo(target);
                 }
             } else {
-                return give_resource(creep);
+                return TransportDriver.give_resource(creep);
             }
         }
     } else {

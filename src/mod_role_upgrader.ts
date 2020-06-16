@@ -1,6 +1,7 @@
 import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
 import { moveToTarget } from './lib_creep';
-import { get_resource } from './mod_role_distribution';
+import { TransportDriver } from './mod_role_transport';
+
 
 export function load_upgrader() {
     run_creep(w_role_name.upgrader, function (creep) {
@@ -27,7 +28,6 @@ function run_upgrader(creep: Creep) {
         moveToTarget(creep, creep.room.controller.pos);
     } else {
         creep.say('g');
-        get_resource(creep, ['controller_container', STRUCTURE_STORAGE]);
-        // get_resource(creep);
+        TransportDriver.get_resource(creep, ['controller_container', STRUCTURE_STORAGE]);
     }
 }

@@ -1380,7 +1380,7 @@ function betterMoveTo(firstArg, secondArg, opts) {
         return ERR_BUSY;
     }
 
-    if (typeof firstArg == 'object') {
+    if (typeof firstArg == 'object' && firstArg !== null) {
         toPos = firstArg.pos || firstArg;
         ops = secondArg || {};
     } else {

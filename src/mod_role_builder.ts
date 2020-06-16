@@ -6,7 +6,8 @@ import {
     run_creep,
 } from './lib_base';
 import { moveToTarget } from './lib_creep';
-import { get_resource } from './mod_role_distribution';
+import { TransportDriver } from './mod_role_transport';
+
 import { run_repair } from './mod_role_repair';
 
 export function load_builder() {
@@ -60,6 +61,6 @@ function run_builder(creep: Creep) {
         }
     } else {
         creep.say('g');
-        get_resource(creep);
+        TransportDriver.get_resource(creep);
     }
 }

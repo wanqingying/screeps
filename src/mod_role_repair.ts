@@ -1,5 +1,6 @@
 import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
-import { get_resource } from './mod_role_distribution';
+import { TransportDriver } from 'mod_role_transport';
+
 
 const war_part = [STRUCTURE_WALL, STRUCTURE_RAMPART];
 const max_hits_rate = 0.8;
@@ -44,7 +45,7 @@ export function run_repair(creep: Creep) {
         creep.memory.process = 'r';
     }
     if (creep.memory.process === 'pick') {
-        return get_resource(creep);
+        return TransportDriver.get_resource(creep);
     }
 
     let target;
