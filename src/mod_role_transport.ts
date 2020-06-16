@@ -144,9 +144,6 @@ class TransportDriver {
     };
     private receiveTask = (creep: Creep, handle?: 'give' | 'get', structures?: any[]) => {
         const che = this.getRoomCache(creep.room);
-        const free = creep.store.getFreeCapacity();
-        const cap = creep.store.getCapacity();
-        const used = cap - free;
         let tasks: TransTask[];
         if (is_full_tate(creep)) {
             creep.memory.trans_direct = 'in';
@@ -163,16 +160,16 @@ class TransportDriver {
         }
         if (direct === 'out') {
             tasks = che.transOut.getTask(creep, structures);
-            if (!tasks && used > 0) {
-                //没接到卸货任务且装有资源时 尝试接资源需求任务
-                tasks = che.transIn.getTask(creep, structures);
-            }
+            // if (!tasks && used > 0) {
+            //     //没接到卸货任务且装有资源时 尝试接资源需求任务
+            //     tasks = che.transIn.getTask(creep, structures);
+            // }
         } else {
             tasks = che.transIn.getTask(creep, structures);
-            if (!tasks && free > 0) {
-                //没接到资源需求任务且有空间时 尝试接卸货任务
-                tasks = che.transOut.getTask(creep, structures);
-            }
+            // if (!tasks && free > 0) {
+            //     //没接到资源需求任务且有空间时 尝试接卸货任务
+            //     tasks = che.transOut.getTask(creep, structures);
+            // }
         }
         this.rememberCreepTask(creep, tasks);
     };
@@ -194,13 +191,13 @@ class TransportDriver {
     private run_task = (creep: Creep, task: TransTask) => {
         if (task.trans_dec === 'in' && is_empty_tate(creep)) {
             // 运入建筑 单位没有资源重置
-            this.resetCreepTask(creep)
+            this.closeCreepTask(creep)
             return;
         }
 
         if (task.trans_dec === 'out' && is_full_tate(creep)) {
             // 从建筑运出 如果单位已满则重置任务
-            return this.resetCreepTask(creep)
+            return this.closeCreepTask(creep)
         }
 
         const [x, y, name] = task.pos;
@@ -402,6 +399,7 @@ class TransportDriver {
         }
     };
     public run = () => {
+        this.last_run_time=Game.time
         this.tryUpdateState();
         run_creep(w_role_name.carrier, creep => {
             try {
@@ -422,9 +420,27 @@ class TransportDriver {
         driver.run();
     };
     public static get_resource = (creep:Creep) => {
-
+        let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
+        if (!driver) {
+            driver = new TransportDriver();
+            w_cache.set(TransportDriver.cache_key, driver);
+        }
+        if (driver.last_run_time!==Game.time){
+            driver.run();
+        }
+        driver.run_transport(creep,'get')
     };
-    public static give_resource = () => {};
+    public static give_resource = (creep:Creep) => {
+        let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
+        if (!driver) {
+            driver = new TransportDriver();
+            w_cache.set(TransportDriver.cache_key, driver);
+        }
+        if (driver.last_run_time!==Game.time){
+            driver.run();
+        }
+        driver.run_transport(creep,'give')
+    };
     private static cache_key = w_code.DRIVER_KEY_TRANSPORT;
 }
 // 计算本次处理的数量 更新任务状态 todo 待观察

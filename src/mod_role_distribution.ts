@@ -61,7 +61,7 @@ const w_out = {
     harvester_container: 90,
     // 升级用的容器
     controller_container: 20,
-    [STRUCTURE_STORAGE]: 30,
+    [STRUCTURE_STORAGE]: 40,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
     [STRUCTURE_EXTENSION]: 9,
@@ -372,9 +372,6 @@ function prepareCacheRoom(room: Room) {
 // 物流运输单位逻辑
 function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]) {
     const che = getCache(creep.room);
-    const free = creep.store.getFreeCapacity();
-    const cap = creep.store.getCapacity();
-    const used = cap - free;
     let task: TransTask;
     let cache_id: string = cache_creep_task[creep.name];
     if (cache_id) {
@@ -405,16 +402,16 @@ function run_transport(creep: Creep, handle?: 'get' | 'give', structures?: any[]
 
     if (out_or_in === 'out') {
         task = che.transOut.getTask(creep, structures);
-        if (!task && used > 0) {
-            //没接到卸货任务且装有资源时 尝试接资源需求任务
-            task = che.transIn.getTask(creep, structures);
-        }
+        // if (!task && used > 0) {
+        //     //没接到卸货任务且装有资源时 尝试接资源需求任务
+        //     task = che.transIn.getTask(creep, structures);
+        // }
     } else {
         task = che.transIn.getTask(creep, structures);
-        if (!task && free > 0) {
-            //没接到资源需求任务且有空间时 尝试接卸货任务
-            task = che.transOut.getTask(creep, structures);
-        }
+        // if (!task && free > 0) {
+        //     //没接到资源需求任务且有空间时 尝试接卸货任务
+        //     task = che.transOut.getTask(creep, structures);
+        // }
     }
     if (!task) {
         return ERR_NOT_FOUND;
