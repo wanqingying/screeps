@@ -28,9 +28,6 @@ function run_remote_transport(creep: Creep) {
         creep.memory.process = 'd';
         sh.forgetTask(creep);
     }
-    if (isEmpty(creep)) {
-        creep.memory.process = 'p';
-    }
 
     if (creep.memory.process === 'd') {
         let task = sh.getTask(creep);
