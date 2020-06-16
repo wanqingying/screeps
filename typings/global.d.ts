@@ -11,7 +11,6 @@ declare interface ConfigGlobal {
     rooms: {
         [name: string]: CfgRoom;
     };
-    body:{key:string:}[]
 }
 
 interface CfgR {
@@ -38,6 +37,7 @@ declare interface W_Utils {
     get_code_msg: get_code_msg_screeps;
     update_cache: (key: any, cache: any) => any;
     print: any;
+    spawn(...p:any):void
 }
 
 declare type W_CODE = {
@@ -48,6 +48,7 @@ declare type W_CODE = {
     REMOTE_KEY_TRANSPORT: 12331;
     REMOTE_KEY_MINE: 12330;
     REMOTE_KEY_RESERVE: 12332;
+    REMOTE_KEY_ATTACK: 12322;
     REMOTE_KEY_BUILDER: 12337;
     DRIVER_KEY_SPAWN_AUTO: 12338;
     DRIVER_KEY_TRANSPORT: 12339;

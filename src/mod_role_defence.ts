@@ -1,9 +1,7 @@
 import { findAttackTarget } from './lib_room';
-import { spawnCreep } from './mod_spawn_creep';
+import { SpawnAuto } from './mod_spawn_creep';
 import { moveToTarget } from './lib_creep';
 
-const attack = 2;
-const range_attack = 3;
 interface Cache {
     attack: any;
     my_attack_creeps: number;
@@ -35,7 +33,7 @@ export function load_defence() {
 function defenceSpawnAttack(room: Room) {
     let che = cache[room.name];
     if (che.attack && room.name !== 'sim') {
-        return spawnCreep(room, w_role_name.attack, {}, true);
+        return SpawnAuto.spawnCreep(room, w_role_name.attack, {});
     }
 }
 

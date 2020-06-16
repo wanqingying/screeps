@@ -8,11 +8,12 @@ function main() {
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, '--6-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
+        console.log(room.name, '--666-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
     mod.load_cache();
     // 生产单位
-    mod.load_spawn_check();
+    // mod.load_spawn_check();
+    mod.SpawnAuto.start();
     // 防御塔
     mod.load_tower_logic();
     // 采矿

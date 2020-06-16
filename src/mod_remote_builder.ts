@@ -8,7 +8,6 @@ import {
     run_creep,
     run_my_room,
 } from './lib_base';
-import { spawnCreep } from './mod_spawn_creep';
 import { moveToTarget } from './lib_creep';
 import { get_resource } from './mod_role_distribution';
 import { checkRemoteDanger } from './lib_room';

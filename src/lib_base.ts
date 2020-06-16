@@ -631,7 +631,6 @@ export class RemoteAttack {
             let room = Game.rooms[task.remote];
             if (room) {
                 let target = findAttackTarget(room);
-                console.log('danger', target);
                 if (target) {
                     task.target = target;
                 } else {
@@ -702,7 +701,7 @@ export function run_creep(
 
 export function run_my_room(fn: (room: Room) => void, filter?) {
     const rooms = Object.values(Game.rooms).filter(room => {
-        if (room.controller?.my) {
+        if (!room.controller?.my) {
             return false;
         }
         return true;
