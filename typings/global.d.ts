@@ -16,6 +16,7 @@ declare interface ConfigGlobal {
 interface CfgR {
     id: string;
     container_id?: string;
+    container_pos?: number[];
     creep_id?: string;
 }
 
@@ -56,6 +57,7 @@ declare type W_CODE = {
     REMOTE_KEY_BUILDER: 'REMOTE_KEY_BUILDER';
     DRIVER_KEY_SPAWN_AUTO: 'DRIVER_KEY_SPAWN_AUTO';
     DRIVER_KEY_REMOTE_REPAIR: 'DRIVER_KEY_REMOTE_REPAIR';
+    DRIVER_KEY_REMOTE_Harvest: 'DRIVER_KEY_REMOTE_Harvest';
     DRIVER_KEY_TRANSPORT: 'DRIVER_KEY_TRANSPORT';
 };
 

@@ -55,7 +55,7 @@ export function checkRemoteDanger(creep: Creep) {
     if (creep.memory.ack_tick > 0) {
         moveToTarget(creep, pos, 6);
         creep.memory.ack_tick -= 1;
-        creep.say('danger wait');
+        creep.say('danger');
         return true;
     }
     if (creep.room.name === creep.memory.from) {
@@ -66,7 +66,7 @@ export function checkRemoteDanger(creep: Creep) {
     if (atk) {
         creep.memory.ack_tick = 30;
         creep.moveTo(pos);
-        creep.say('danger away');
+        creep.say('danger');
         return true;
     } else {
         creep.memory.ack_tick -= 1;

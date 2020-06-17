@@ -1,54 +1,199 @@
 import { moveToTarget } from './lib_creep';
-import { RemoteMine, run_creep } from './lib_base';
+import { run_creep } from './lib_base';
 import { checkRemoteDanger } from './lib_room';
 
-export function load_remote_harvest() {
-    run_creep(w_role_name.remote_harvester, function (creep) {
-        try {
-            run_remote_harvester(creep);
-        } catch (e) {
-            console.log('err run_remote_harvester');
-            console.log(e.message);
-            console.log(e.stack);
-        }
-    });
+interface RemoteMineSite {
+    source_id: string;
+    container_id: string;
+    container_pos: any[];
+    from: string;
+    remote: string;
+    creep_id: string;
 }
+export class RemoteHarvest {
+    private array: RemoteMineSite[];
+    constructor() {
+        this.array = [];
+        Object.keys(w_config.rooms).forEach(from_room_name => {
+            let cfg_room = w_config.rooms[from_room_name];
+            let reserves = cfg_room.reserve || {};
 
-function run_remote_harvester(creep: Creep) {
-    if (checkRemoteDanger(creep)) {
-        return;
+            Object.keys(reserves).forEach(remote_room_name => {
+                let s = reserves[remote_room_name];
+                s.forEach(u => {
+                    this.array.push({
+                        source_id: u.id,
+                        container_id: u.container_id,
+                        container_pos: u.container_pos,
+                        from: from_room_name,
+                        remote: remote_room_name,
+                        creep_id: '',
+                    });
+                });
+            });
+        });
     }
-    const ch: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
-    const task = ch.getTask(creep);
-    if (creep.ticksToLive < 3) {
-        // 临死遗言
-        ch.forgetTask(creep);
-        return;
-    }
-    if (!task) {
-        creep.say('no task');
-        return;
-    }
-    const target: Source = Game.getObjectById(task.id);
-    let container;
-    if (!target) {
-        if (task) {
-            // 没有视野
-            let pos = new RoomPosition(25, 25, task.remote);
-            creep.moveTo(pos);
+    public updateState = () => {
+        run_creep(w_role_name.remote_harvester, creep => {
+            if (creep.memory.remote_task_id) {
+                let task = this.getTaskById(creep.memory.remote_task_id);
+                if (task && creep.ticksToLive > 150) {
+                    task.creep_id = creep.id;
+                }
+            }
+        });
+    };
+    public getTask = (creep: Creep): RemoteMineSite | undefined => {
+        let e_id = creep.memory.remote_task_id;
+        if (e_id) {
+            let prev = this.getTaskById(e_id);
+            if (prev) {
+                return prev;
+            }
         }
-        return;
+        if (this.update_tick!==Game.time){
+            // 获取最新任务
+            this.updateState()
+        }
+        const task = this.getTaskByOrder(creep)
+        if (task) {
+            task.creep_id = creep.id;
+            creep.memory.remote_task_id = task.source_id;
+        }
+        return task;
+    };
+    // 选任务策略 优先本房间的
+    private getTaskByOrder = (creep:Creep) => {
+        let same_room_task=this.getSameRoomTask(creep);
+        if (same_room_task){
+            return same_room_task
+        }
+        return this.array.find(t => {
+            if (t.from !== creep.memory.from) {
+                return false;
+            }
+            if (t.creep_id) {
+                // 接班 死掉的 或者将要死掉的
+                let cp: Creep = Game.getObjectById(t.creep_id);
+                if (!cp) {
+                    return true;
+                }
+                return cp.ticksToLive < 200;
+
+            } else {
+                // 一个矿安排一个
+                return true;
+            }
+        });
+    };
+    public getSameRoomTask = (creep:Creep) => {
+        return this.array.find(t => {
+            if (t.from !== creep.memory.from) {
+                return false;
+            }
+            // 只考虑相同房间的
+            if (t.remote!==creep.room.name){
+                return false;
+            }
+            if (t.creep_id) {
+                // 接班 死掉的 或者将要死掉的
+                let cp: Creep = Game.getObjectById(t.creep_id);
+                if (!cp) {
+                    return true;
+                }
+                return cp.ticksToLive < 200;
+
+            } else {
+                // 一个矿安排一个
+                return true;
+            }
+        });
+    };
+    public forgetTask = (creep: Creep) => {
+        let t_id = creep.memory.remote_task_id;
+        creep.memory.remote_task_id = undefined;
+        if (t_id) {
+            let task = this.getTaskById(t_id);
+            if (task) {
+                task.creep_id = undefined;
+            }
+        }
+    };
+    private getTaskById = (id: string) => {
+        return this.array.find(t => t.source_id === id);
+    };
+    private update_tick=0;
+    private tryUpdateState = () => {
+        if (Game.time-this.update_tick>67){
+            this.update_tick=Game.time
+            this.updateState()
+        }
+    };
+
+    private run_remote_harvest = (creep:Creep) =>   {
+        if (checkRemoteDanger(creep)) {
+            creep.say('danger');
+            return;
+        }
+        const task = this.getTask(creep);
+        if (creep.ticksToLive < 3) {
+            // 临死遗言
+            this.forgetTask(creep);
+            creep.say('die');
+            return;
+        }
+        if (!task) {
+            creep.say('no_task');
+            return;
+        }
+        const target: Source = Game.getObjectById(task.source_id);
+        let container: StructureContainer;
+        if (!target) {
+            if (task.remote!==creep.room.name) {
+                // 没有视野
+                let pos = new RoomPosition(25, 25, task.remote);
+                creep.say('go_see')
+                return  creep.moveTo(pos);
+            }
+            creep.say('no');
+            return;
+        }
+        let pos = target.pos;
+        if (task.container_id) {
+            container = Game.getObjectById(task.container_id);
+            if (container) {
+                pos = container.pos;
+            }
+        }
+        if (Array.isArray(task.container_pos)) {
+            const [x, y] = task.container_pos;
+            if (x && y) {
+                pos = new RoomPosition(x, y, task.remote);
+            }
+        }
+        creep.say('do');
+        let far = moveToTarget(creep, pos);
+        if (far < 4) {
+            creep.harvest(target);
+        }
     }
-    if (task.container_id) {
-        container = Game.getObjectById(task.container_id);
-    }
-    let far: number;
-    if (container) {
-        far = moveToTarget(creep, container);
-    } else {
-        far = moveToTarget(creep, target.pos);
-    }
-    if (far < 10) {
-        creep.harvest(target);
-    }
+
+    private run = () => {
+        this.tryUpdateState();
+        run_creep(w_role_name.remote_harvester,this.run_remote_harvest)
+    };
+    private last_run_time = 0;
+    public static cache_key='key'
+    public static start = () => {
+        let driver: RemoteHarvest = w_cache.get(RemoteHarvest.cache_key);
+        if (!driver) {
+            driver = new RemoteHarvest();
+            w_cache.set(RemoteHarvest.cache_key, driver);
+        }
+        if (driver.last_run_time !== Game.time) {
+            driver.last_run_time = Game.time;
+            driver.run();
+        }
+        return driver;
+    };
 }

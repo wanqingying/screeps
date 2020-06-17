@@ -1,12 +1,12 @@
 import { moveToTarget } from './lib_creep';
-import { RemoteAttack, RemoteMine, run_creep, run_my_room } from './lib_base';
+import { RemoteAttack, run_creep, run_my_room } from './lib_base';
 import { SpawnAuto } from './mod_spawn_creep';
 
 export function load_remote_attack() {
     const ch: RemoteAttack = w_cache.get(w_code.REMOTE_KEY_ATTACK);
     run_my_room(function (room) {
         let spawn = ch.shouldSpawnAttack(room);
-        if (spawn && spawn.target && spawn.target.ticksToLive > 100) {
+        if (spawn && spawn.target && spawn.target.ticksToLive > 300) {
             return SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
         }
     });
@@ -27,6 +27,13 @@ function run_remote_attack(creep: Creep) {
     let task = ch.getTask(creep);
     if (task && task.target) {
         let code = creep.attack(task.target);
-        // moveToTarget(creep, task.target as any);
+        moveToTarget(creep, task.target as any);
+    } else {
+        let room = Game.rooms[creep.memory.from];
+        const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
+        let far = moveToTarget(creep, sp as any);
+        if (far < 3) {
+            sp.recycleCreep(creep);
+        }
     }
 }

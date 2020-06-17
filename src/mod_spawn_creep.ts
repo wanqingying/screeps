@@ -226,7 +226,7 @@ export class SpawnAuto {
         let role = creep.memory.role;
         const current_exist = this.getRoomCache(room).c_roles_count;
         const cfg = w_config.rooms[room.name].creep_cfg_num;
-        if (current_exist[role] > cfg[role]) {
+        if (current_exist[role] > (cfg[role] || 0)) {
             return;
         }
         const body_length = creep.body.length;

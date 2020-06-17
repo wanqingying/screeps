@@ -449,6 +449,17 @@ export class RemoteReserve {
                 task.creep_id = creep.id;
             }
         });
+        Object.keys(w_config.rooms).forEach(name => {
+            let cfg_room = w_config.rooms[name];
+            let reserves = cfg_room.reserve || {};
+            Object.keys(reserves).forEach((_name, index) => {
+                let room = Game.rooms[_name];
+                let target = this.array.find(s => s.remote === _name);
+                if (room && target) {
+                    target.process = room.controller?.reservation?.ticksToEnd;
+                }
+            });
+        });
         this.array.forEach(task => {
             let room = Game.rooms[task.remote];
             if (room && room.controller?.reservation?.ticksToEnd) {
@@ -457,6 +468,13 @@ export class RemoteReserve {
                 task.process = 0;
             }
         });
+    };
+    private update_tick = 0;
+    public tryUpdateState = () => {
+        if (Game.time - this.update_tick > 80) {
+            this.update_tick = Game.time;
+            this.updateState();
+        }
     };
 
     public getTask = (creep: Creep): RemoteReserveTask => {
@@ -512,94 +530,6 @@ export class RemoteReserve {
     };
 }
 
-interface RemoteMineTask {
-    from: string;
-    remote: string;
-    id: string;
-    container_id: string;
-    creep_id: string;
-}
-
-export class RemoteMine {
-    private array: RemoteMineTask[];
-    constructor() {
-        this.array = [];
-        Object.keys(w_config.rooms).forEach(name => {
-            let cfg_room = w_config.rooms[name];
-            let reserves = cfg_room.reserve || {};
-
-            Object.keys(reserves).forEach(_name => {
-                let s = reserves[_name];
-                s.forEach(u => {
-                    this.array.push({
-                        id: u.id,
-                        container_id: u.container_id,
-                        from: name,
-                        remote: _name,
-                        creep_id: '',
-                    });
-                });
-            });
-        });
-    }
-    public updateState = () => {
-        run_creep(w_role_name.remote_harvester, creep => {
-            if (creep.memory.remote_task_id) {
-                let task = this.getTaskById(creep.memory.remote_task_id);
-                if (task && creep.ticksToLive > 150) {
-                    task.creep_id = creep.id;
-                }
-            }
-        });
-    };
-    public getTask = (creep: Creep): RemoteMineTask | undefined => {
-        let e_id = creep.memory.remote_task_id;
-        if (e_id) {
-            let prev = this.getTaskById(e_id);
-            if (prev) {
-                return prev;
-            }
-        }
-        const from = creep.memory.from;
-        const task = this.array.find(t => {
-            if (t.from !== from) {
-                return false;
-            }
-            if (t.creep_id) {
-                // 接班 死掉的 或者将要死掉的
-                let cp: Creep = Game.getObjectById(t.creep_id);
-                if (!cp) {
-                    return true;
-                }
-                if (cp.ticksToLive < 200) {
-                    return true;
-                }
-                return false;
-            } else {
-                // 一个矿安排一个
-                return true;
-            }
-        });
-        if (task) {
-            task.creep_id = creep.id;
-            creep.memory.remote_task_id = task.id;
-        }
-        return task;
-    };
-    public forgetTask = (creep: Creep) => {
-        let t_id = creep.memory.remote_task_id;
-        creep.memory.remote_task_id = undefined;
-        if (t_id) {
-            let task = this.getTaskById(t_id);
-            if (task) {
-                task.creep_id = undefined;
-            }
-        }
-    };
-    private getTaskById = (id: string) => {
-        return this.array.find(t => t.id === id);
-    };
-}
 interface RemoteAttackTask {
     from: string;
     remote: string;

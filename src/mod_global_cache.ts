@@ -1,7 +1,6 @@
 import {
     getSourceWithContainer,
     RemoteAttack,
-    RemoteMine,
     RemoteReserve,
     RemoteTransport,
 } from './lib_base';
@@ -34,7 +33,7 @@ function load_global_cache() {
     if (!che_reserve) {
         che_reserve = new RemoteReserve();
     }
-    che_reserve.updateState();
+    che_reserve.tryUpdateState();
     w_cache.set(w_code.REMOTE_KEY_RESERVE, che_reserve);
     // remote_attack
     let che_atk: RemoteAttack = w_cache.get(w_code.REMOTE_KEY_ATTACK);
@@ -72,12 +71,6 @@ function load_global_cache() {
             che.remote[remote_name].remote_role_count[role] = count + 1;
         }
     });
-    let rmc: RemoteMine = w_cache.get(w_code.REMOTE_KEY_MINE);
-    if (!rmc) {
-        rmc = new RemoteMine();
-    }
-    rmc.updateState();
-    w_cache.set(w_code.REMOTE_KEY_MINE, rmc);
 }
 
 function prepareCache(room: Room) {
@@ -184,4 +177,3 @@ function prepareRemoteCache(room: Room, from_room: Room) {
     w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
 }
 
-function load_repair_cache() {}

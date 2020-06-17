@@ -58,6 +58,7 @@ const w_out = {
     [STRUCTURE_TOWER]: 0,
     [STRUCTURE_EXTENSION]: 9,
     [STRUCTURE_CONTAINER]: 40,
+    [BOTTOM]: 40,
 };
 const w_in = {
     drop: 0,
@@ -148,6 +149,7 @@ export class TransportDriver {
     private receiveTask = (creep: Creep, handle?: 'give' | 'get', structures?: any[]) => {
         const che = this.getRoomCache(creep.room);
         if (this.updateTick !== Game.time) {
+            // 接任务之前保证数据已经刷新
             this.updateState();
         }
         let tasks: TransTask[];
@@ -240,7 +242,7 @@ export class TransportDriver {
                 code = creep.transfer(target, type);
             }
         }
-
+        // Tombstone 特殊处理
         if (task.trans_dec === 'out') {
             if (task.stcType === 'drop') {
                 code = creep.pickup(target as Resource);
@@ -281,12 +283,15 @@ export class TransportDriver {
             RESOURCES_ALL.forEach(type => {
                 const used = tom.store.getUsedCapacity(type);
                 if (used > 0) {
-                    const taskOut = generateTask('out', tom as any, {
+                    che.transOut.updateTask({
+                        id: tom.id,
                         amount: used,
-                        resourceType: type,
-                        structureType: 'drop',
+                        pos: [tom.pos.x, tom.pos.y, tom.room.name],
+                        amount_rec: 0,
+                        w: 90,
+                        resType: type,
+                        stcType: 'drop',
                     });
-                    che.transOut.updateTask(taskOut);
                 }
             });
         });
@@ -620,6 +625,8 @@ interface TransTask {
     trans_dec?: 'in' | 'out';
     // 任务 id
     trans_id?: string;
+    // 描述
+    desc?: string;
 }
 
 interface GenTask {
@@ -634,7 +641,7 @@ function generateTask(
     { amount, resourceType, structureType }: GenTask
 ) {
     const pos = [structure.pos.x, structure.pos.y, structure.pos.roomName];
-    const type = structureType || structure?.structureType;
+    const stcType = structureType || structure?.structureType;
     let ws;
     if (dec === 'in') {
         ws = w_in;
@@ -647,8 +654,8 @@ function generateTask(
         amount: amount,
         pos,
         amount_rec: 0,
-        w: ws[type],
+        w: ws[stcType],
         resType: resourceType,
-        stcType: type,
+        stcType: stcType,
     } as TransTask;
 }

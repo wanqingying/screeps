@@ -44,6 +44,14 @@ function run_defence(creep: Creep) {
         creep.attack(target);
         moveToTarget(creep, target);
     }
+    if (!target) {
+        let room = Game.rooms[creep.memory.from];
+        const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
+        let far = moveToTarget(creep, sp as any);
+        if (far < 3) {
+            sp.recycleCreep(creep);
+        }
+    }
 }
 
 function prepareCache(room: Room) {

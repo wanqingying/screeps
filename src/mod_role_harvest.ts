@@ -12,3 +12,7 @@ export function load_harvest() {
         }
     });
 }
+
+// export class RoleHarvest {
+//     private
+// }

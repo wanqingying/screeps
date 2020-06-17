@@ -1,11 +1,24 @@
 export class BaseMod {
     private born_tick = Game.time;
-    private last_run_time = 0;
-    public static cache_key = w_code.DRIVER_KEY_SPAWN_AUTO;
     constructor() {
         this.born_tick = Game.time;
     }
-    private run = () => {};
+
+    private updateState = () => {
+
+    };
+    private update_tick=0;
+    private tryUpdateState = () => {
+        if (Game.time-this.update_tick>27){
+            this.update_tick=Game.time
+            this.updateState()
+        }
+    };
+    private run = () => {
+        this.tryUpdateState();
+    };
+    private last_run_time = 0;
+    public static cache_key='key'
     public static start = () => {
         let driver: BaseMod = w_cache.get(BaseMod.cache_key);
         if (!driver) {
