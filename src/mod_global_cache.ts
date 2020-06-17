@@ -1,9 +1,4 @@
-import {
-    getSourceWithContainer,
-    RemoteAttack,
-    RemoteReserve,
-    RemoteTransport,
-} from './lib_base';
+import { getSourceWithContainer, RemoteAttack, RemoteReserve } from './lib_base';
 import { get, set } from 'lodash';
 
 export function load_cache() {
@@ -20,13 +15,6 @@ function load_global_cache() {
     if (!global.w_cache) {
         global.w_cache = new Map<any, any>();
     }
-    // transport
-    let che: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
-    if (!che) {
-        che = new RemoteTransport();
-        w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
-    }
-    che.updateState();
 
     // reserve
     let che_reserve: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
@@ -108,15 +96,9 @@ function prepareCache(room: Room) {
 }
 
 function prepareRemoteCache(room: Room, from_room: Room) {
-    let che: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
     let che_from: CacheGlobalRoom = w_cache.get(from_room.name);
     let che_remote: CacheGlobalRoom = w_cache.get(room.name) || {};
 
-    if (!che) {
-        che = new RemoteTransport();
-    } else {
-        // che.resources ;
-    }
     // source缓存
     if (!che_remote.source) {
         che_remote.source = getSourceWithContainer(room).map(r => ({
@@ -128,37 +110,6 @@ function prepareRemoteCache(room: Room, from_room: Room) {
         che_remote.source.forEach(c => (c.creep_ids = []));
     }
     w_cache.set(room.name, che_remote);
-
-    const res_type = RESOURCE_ENERGY;
-
-    const drops = room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
-    drops.forEach(d => {
-        che.updateResource({
-            from: from_room.name,
-            remote: room.name,
-            id: d.id,
-            amount: d.amount,
-            amountRec: 0,
-            resourceType: d.resourceType,
-            structureType: 'drop',
-            pos: d.pos,
-        });
-    });
-    const container: StructureContainer[] = room.find(FIND_STRUCTURES, {
-        filter: c => c.structureType === (STRUCTURE_CONTAINER as any),
-    }) as any;
-    container.forEach(t => {
-        che.updateResource({
-            from: from_room.name,
-            remote: room.name,
-            id: t.id,
-            amount: t.store.getUsedCapacity(res_type),
-            amountRec: 0,
-            resourceType: res_type,
-            structureType: t.structureType,
-            pos: t.pos,
-        });
-    });
 
     let cps = Object.values(Game.creeps).filter(
         v => v.memory.role === w_role_name.remote_harvester
@@ -174,6 +125,4 @@ function prepareRemoteCache(room: Room, from_room: Room) {
                 .map(c => c.name),
         };
     });
-    w_cache.set(w_code.REMOTE_KEY_TRANSPORT, che);
 }
-

@@ -364,54 +364,6 @@ interface RemoteBuildOrRepairTask {
     progress?: number;
 }
 
-export class RemoteBuild {
-    private array: RemoteBuildOrRepairTask[] = [];
-    private resType = RESOURCE_ENERGY;
-    public updateState = (newRes: RemoteBuildOrRepairTask) => {
-        const prev = this.array.find(b => b.id === newRes.id);
-        if (prev) {
-            prev.hits = newRes.hits;
-            prev.hits_rate = newRes.hits_rate;
-        } else {
-            this.array.push(newRes);
-        }
-    };
-    public getTask = (creep: Creep): RemoteBuildOrRepairTask => {
-        if (creep.memory.remote_task_id) {
-            const task = this.getTaskById(creep.memory.remote_task_id);
-        }
-
-        const { from } = creep.memory;
-
-        let max = 0;
-        let max_task: RemoteBuildOrRepairTask = {} as any;
-        // this.array.forEach(s => {
-        //     let a = s.from === from;
-        //     let b = s.amount > 200;
-        //     if (a && b) {
-        //         max = s.amount - s.amountRec;
-        //         max_task = s;
-        //         return true;
-        //     }
-        //     return false;
-        // });
-        // if (max > 200) {
-        //     max_task.amountRec += creep.store.getFreeCapacity(this.resType);
-        //     return max_task;
-        // }
-        return max_task;
-    };
-    public forgetTask = creep => {
-        creep.memory.remote_task_id = undefined;
-    };
-    public getRoomTask = (room: Room): RemoteBuildOrRepairTask[] => {
-        return this.array.filter(t => t.from === room.name);
-    };
-    private getTaskById = (id: string): RemoteBuildOrRepairTask => {
-        return this.array.find(t => t.id === id);
-    };
-}
-
 interface RemoteReserveTask {
     from: string;
     remote: string;

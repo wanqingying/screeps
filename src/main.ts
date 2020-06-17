@@ -5,15 +5,14 @@ import { BaseLink } from './base_link';
 import { BaseClaim } from './claim';
 import { RoomCache } from './room_cache';
 
-
 function main() {
     console.log(
         '===============================tick===============================================',
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {});
-    RoomCache.start()
-    RoomCache.start()
+    RoomCache.start();
+    RoomCache.start();
     mod.load_cache();
     // 生产单位
     // mod.load_spawn_check();
@@ -33,12 +32,12 @@ function main() {
     mod.load_defence();
     mod.load_scout();
     mod.load_scout();
-    mod.load_remote_transport();
     mod.load_remote_reserve();
     mod.load_remote_attack();
     mod.RemoteRepair.start();
     mod.RemoteBuilder.start();
-    mod.RemoteHarvest.start()
+    mod.RemoteHarvest.start();
+    mod.RemoteTransport.start();
     BaseClaim.start();
     BaseLink.start();
     Object.keys(Memory.creeps).forEach(name => {

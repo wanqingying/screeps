@@ -9,6 +9,7 @@ interface RemoteMineSite {
     from: string;
     remote: string;
     creep_id: string;
+    update_tick: number;
 }
 export class RemoteHarvest {
     private array: RemoteMineSite[];
@@ -28,18 +29,30 @@ export class RemoteHarvest {
                         from: from_room_name,
                         remote: remote_room_name,
                         creep_id: '',
+                        update_tick: 0,
                     });
                 });
             });
         });
     }
     public updateState = () => {
+        if (this.update_tick === Game.time) {
+            return;
+        }
+        this.update_tick = Game.time;
         run_creep(w_role_name.remote_harvester, creep => {
             if (creep.memory.remote_task_id) {
                 let task = this.getTaskById(creep.memory.remote_task_id);
                 if (task && creep.ticksToLive > 150) {
                     task.creep_id = creep.id;
+                    task.update_tick = Game.time;
                 }
+            }
+        });
+        this.array.forEach(g => {
+            if (g.update_tick !== Game.time) {
+                g.update_tick = Game.time;
+                g.creep_id = '';
             }
         });
     };
@@ -51,11 +64,8 @@ export class RemoteHarvest {
                 return prev;
             }
         }
-        if (this.update_tick!==Game.time){
-            // 获取最新任务
-            this.updateState()
-        }
-        const task = this.getTaskByOrder(creep)
+        this.updateState();
+        const task = this.getTaskByOrder(creep);
         if (task) {
             task.creep_id = creep.id;
             creep.memory.remote_task_id = task.source_id;
@@ -63,10 +73,10 @@ export class RemoteHarvest {
         return task;
     };
     // 选任务策略 优先本房间的
-    private getTaskByOrder = (creep:Creep) => {
-        let same_room_task=this.getSameRoomTask(creep);
-        if (same_room_task){
-            return same_room_task
+    private getTaskByOrder = (creep: Creep) => {
+        let same_room_task = this.getSameRoomTask(creep);
+        if (same_room_task) {
+            return same_room_task;
         }
         return this.array.find(t => {
             if (t.from !== creep.memory.from) {
@@ -79,20 +89,19 @@ export class RemoteHarvest {
                     return true;
                 }
                 return cp.ticksToLive < 200;
-
             } else {
                 // 一个矿安排一个
                 return true;
             }
         });
     };
-    public getSameRoomTask = (creep:Creep) => {
+    public getSameRoomTask = (creep: Creep) => {
         return this.array.find(t => {
             if (t.from !== creep.memory.from) {
                 return false;
             }
             // 只考虑相同房间的
-            if (t.remote!==creep.room.name){
+            if (t.remote !== creep.room.name) {
                 return false;
             }
             if (t.creep_id) {
@@ -102,7 +111,6 @@ export class RemoteHarvest {
                     return true;
                 }
                 return cp.ticksToLive < 200;
-
             } else {
                 // 一个矿安排一个
                 return true;
@@ -122,15 +130,7 @@ export class RemoteHarvest {
     private getTaskById = (id: string) => {
         return this.array.find(t => t.source_id === id);
     };
-    private update_tick=0;
-    private tryUpdateState = () => {
-        if (Game.time-this.update_tick>67){
-            this.update_tick=Game.time
-            this.updateState()
-        }
-    };
-
-    private run_remote_harvest = (creep:Creep) =>   {
+    private run_remote_harvest = (creep: Creep) => {
         if (checkRemoteDanger(creep)) {
             creep.say('danger');
             return;
@@ -149,11 +149,11 @@ export class RemoteHarvest {
         const target: Source = Game.getObjectById(task.source_id);
         let container: StructureContainer;
         if (!target) {
-            if (task.remote!==creep.room.name) {
+            if (task.remote !== creep.room.name) {
                 // 没有视野
                 let pos = new RoomPosition(25, 25, task.remote);
-                creep.say('go_see')
-                return  creep.moveTo(pos);
+                creep.say('go_see');
+                return creep.moveTo(pos);
             }
             creep.say('no');
             return;
@@ -176,14 +176,23 @@ export class RemoteHarvest {
         if (far < 4) {
             creep.harvest(target);
         }
-    }
+    };
 
+    private update_tick = 0;
+    private tryUpdateState = () => {
+        // 单位 1500 tick 一直采一个矿
+        // 在接任务的时候热更新 不需要常更新
+        if (Game.time - this.update_tick > 200) {
+            this.update_tick = Game.time;
+            this.updateState();
+        }
+    };
     private run = () => {
         this.tryUpdateState();
-        run_creep(w_role_name.remote_harvester,this.run_remote_harvest)
+        run_creep(w_role_name.remote_harvester, this.run_remote_harvest);
     };
     private last_run_time = 0;
-    public static cache_key='key'
+    public static cache_key = 'remote_harvest_h';
     public static start = () => {
         let driver: RemoteHarvest = w_cache.get(RemoteHarvest.cache_key);
         if (!driver) {
