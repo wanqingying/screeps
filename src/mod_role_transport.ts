@@ -95,6 +95,7 @@ interface CacheRoom {
 export class TransportDriver {
     private updateTick = 0;
     private last_run_time = 0;
+    private last_reset_time=0
     constructor() {}
     private cache_creep: Map<string, CacheCreep> = new Map();
     private cache_room: Map<string, CacheRoom> = new Map<string, CacheRoom>();
@@ -252,7 +253,8 @@ export class TransportDriver {
     };
     private publicTask = (room: Room) => {
         const che = this.getRoomCache(room);
-        if (Game.time % 30 === 0) {
+        if (Game.time - this.last_reset_time > 80) {
+            this.last_reset_time=Game.time
             che.transIn.resetTask();
             che.transOut.resetTask();
         }
@@ -451,12 +453,6 @@ function updateTask(creep: Creep, task: TransTask) {
     task.amount = task.amount_rec = 0;
 }
 
-// 关闭任务
-function closeTask(creep: Creep, task: TransTask) {
-    delete cache_creep_task[creep.name];
-    task.amount = task.amount_rec = 0;
-}
-
 interface Cop {
     pos: { x: number; y: number; roomName: string };
     id: string;
@@ -630,6 +626,7 @@ interface GenTask {
     resourceType: resType;
     structureType?: stcType;
 }
+
 function generateTask(
     dec: 'in' | 'out',
     structure: AnyStructure,
