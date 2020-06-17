@@ -56,7 +56,7 @@ function run_starter(creep: Creep) {
     if (creep.memory.process === 'dig') {
         harvestSource(creep);
     } else {
-        TransportDriver.give_resource(creep);
+        TransportDriver.giv_resource(creep);
     }
 }
 

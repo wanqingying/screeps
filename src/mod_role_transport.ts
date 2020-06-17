@@ -95,7 +95,7 @@ interface CacheRoom {
 export class TransportDriver {
     private updateTick = 0;
     private last_run_time = 0;
-    private last_reset_time=0
+    private last_reset_time = 0;
     constructor() {}
     private cache_creep: Map<string, CacheCreep> = new Map();
     private cache_room: Map<string, CacheRoom> = new Map<string, CacheRoom>();
@@ -179,7 +179,12 @@ export class TransportDriver {
         }
         this.rememberCreepTask(creep, tasks);
     };
-    private run_transport = (creep: Creep, handle?: 'give' | 'get', structures?: any[]) => {
+    private run_transport = (
+        creep: Creep,
+        handle?: 'give' | 'get',
+        structures?: any[],
+        resType?: string
+    ) => {
         let task: TransTask = this.getCreepHandleTask(creep);
         if (task) {
             return this.run_task(creep, task);
@@ -254,7 +259,7 @@ export class TransportDriver {
     private publicTask = (room: Room) => {
         const che = this.getRoomCache(room);
         if (Game.time - this.last_reset_time > 80) {
-            this.last_reset_time=Game.time
+            this.last_reset_time = Game.time;
             che.transIn.resetTask();
             che.transOut.resetTask();
         }
@@ -416,36 +421,32 @@ export class TransportDriver {
             }
         });
     };
-    public static start = () => {
-        let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
-        if (!driver) {
-            driver = new TransportDriver();
-            w_cache.set(TransportDriver.cache_key, driver);
-        }
-        driver.run();
-    };
-    public static get_resource = (creep: Creep, structures?: any[]) => {
+
+    public static start = (): TransportDriver => {
         let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
         if (!driver) {
             driver = new TransportDriver();
             w_cache.set(TransportDriver.cache_key, driver);
         }
         if (driver.last_run_time !== Game.time) {
+            driver.last_run_time = Game.time;
             driver.run();
         }
-        driver.run_transport(creep, 'get', structures);
+        return driver;
     };
-    public static give_resource = (creep: Creep) => {
-        let driver: TransportDriver = w_cache.get(TransportDriver.cache_key);
-        if (!driver) {
-            driver = new TransportDriver();
-            w_cache.set(TransportDriver.cache_key, driver);
-        }
-        if (driver.last_run_time !== Game.time) {
-            driver.run();
-        }
-        driver.run_transport(creep, 'give');
+
+    // 任意 creep 获取资源
+    public static get_resource = (creep: Creep, structures?: any[], resType?: ResourceConstant) => {
+        const driver = TransportDriver.start();
+        driver.run_transport(creep, 'get', structures, resType);
     };
+
+    // 任意 creep 存放资源
+    public static giv_resource = (creep: Creep, structures?: any[], resType?: ResourceConstant) => {
+        const driver = TransportDriver.start();
+        driver.run_transport(creep, 'give', structures, resType);
+    };
+
     private static cache_key = w_code.DRIVER_KEY_TRANSPORT;
 }
 // 计算本次处理的数量 更新任务状态 todo 待观察

@@ -62,7 +62,7 @@ function run_remote_transport(creep: Creep) {
                     creep.moveTo(target);
                 }
             } else {
-                return TransportDriver.give_resource(creep);
+                return TransportDriver.giv_resource(creep);
             }
         }
     } else {

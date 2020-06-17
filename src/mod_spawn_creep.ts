@@ -64,9 +64,6 @@ export class SpawnAuto {
         let che = this.getRoomCache(room);
         let a = che.c_roles_count[w_role_name.carrier] < 1;
         let b = che.c_roles_count[w_role_name.harvester] < 1;
-        console.log('get body', room.name);
-        console.log(a, b);
-        console.log(JSON.stringify(che.c_roles_count));
         // 房间停摆冷启动
         if (a || b) {
             switch (role) {
@@ -95,7 +92,8 @@ export class SpawnAuto {
         const che = this.getRoomCache(room);
         che.c_ready = false;
         const body = this.getCreepBody(room, role);
-        if (!body) {
+        if (!body||body.length===0) {
+            console.log('body empty check config');
             return;
         }
         const cost = getBodyCost(body);
