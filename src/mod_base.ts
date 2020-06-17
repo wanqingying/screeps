@@ -4,21 +4,19 @@ export class BaseMod {
         this.born_tick = Game.time;
     }
 
-    private updateState = () => {
-
-    };
-    private update_tick=0;
+    private updateState = () => {};
+    private update_tick = 0;
     private tryUpdateState = () => {
-        if (Game.time-this.update_tick>27){
-            this.update_tick=Game.time
-            this.updateState()
+        if (Game.time - this.update_tick > 27) {
+            this.update_tick = Game.time;
+            this.updateState();
         }
     };
     private run = () => {
         this.tryUpdateState();
     };
     private last_run_time = 0;
-    public static cache_key='key'
+    public static cache_key = 'key';
     public static start = () => {
         let driver: BaseMod = w_cache.get(BaseMod.cache_key);
         if (!driver) {

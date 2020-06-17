@@ -1,29 +1,26 @@
 import { run_creep, run_my_room } from './lib_base';
 
-
 interface StructureSite {
-    pos:any[]
-    stcType:StructureConstant
-    id:string
+    pos: any[];
+    stcType: StructureConstant;
+    id: string;
 }
 interface SourceSite {
-    pos:any[]
-    id:string
+    pos: any[];
+    id: string;
 }
 
 export class RoomCache {
-    private update_tick=0
-    private update_site_tick=0
-    private structure_site:Map<string,StructureSite> =new Map<string, StructureSite>()
-    private structure_site:Map<string,StructureSite> =new Map<string, StructureSite>()
+    private update_tick = 0;
+    private update_site_tick = 0;
+    private structure_site: Map<string, StructureSite> = new Map<string, StructureSite>();
+    private structure_site: Map<string, StructureSite> = new Map<string, StructureSite>();
     public updateState = () => {
         this.update_tick = Game.time;
         // Object.values(Game.rooms).forEach(room)
     };
 
-    private updateRoomCache = () => {
-
-    };
+    private updateRoomCache = () => {};
 
     public tryUpdateState = (force?: boolean) => {
         if (force) {
@@ -36,13 +33,13 @@ export class RoomCache {
         }
     };
 
-    private last_run_time=0;
+    private last_run_time = 0;
 
     public run = () => {
         this.last_run_time = Game.time;
         this.tryUpdateState();
     };
-    private static cache_key='room_cache_global_w'
+    private static cache_key = 'room_cache_global_w';
     public static start = (): RoomCache => {
         let driver: RoomCache = w_cache.get(RoomCache.cache_key);
         if (!driver) {

@@ -194,7 +194,7 @@ export class RemoteTransport {
                 if (!remote_room) {
                     return;
                 }
-                const drops = room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
+                const drops = remote_room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
                 drops.forEach(d => {
                     let exist = this.array.find(t => t.id === d.id);
                     if (exist) {
@@ -214,7 +214,7 @@ export class RemoteTransport {
                         });
                     }
                 });
-                const container: StructureContainer[] = room.find(FIND_STRUCTURES, {
+                const container: StructureContainer[] = remote_room.find(FIND_STRUCTURES, {
                     filter: c => c.structureType === (STRUCTURE_CONTAINER as any),
                 }) as any;
                 container.forEach(d => {
@@ -256,7 +256,7 @@ export class RemoteTransport {
     };
     private run = () => {
         this.tryUpdateState();
-        run_creep(w_role_name.remote_harvester, this.run_remote_transport);
+        run_creep(w_role_name.remote_carry, this.run_remote_transport);
     };
     private last_run_time = 0;
     public static cache_key = 'remote_trans_t';
