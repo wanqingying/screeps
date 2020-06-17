@@ -134,14 +134,14 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
 
 const FULL_RATE = 0.8;
 
-export function is_empty_tate(creep: Creep, rate?: number) {
+export function is_empty_tate(creep: Creep | any, rate?: number) {
     const percent = rate || FULL_RATE;
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
     const used = cap - free;
     return used / cap <= 1 - percent;
 }
-export function is_full_tate(creep: Creep, rate?: number) {
+export function is_full_tate(creep: Creep | any, rate?: number) {
     const percent = rate || FULL_RATE;
     const free = creep.store.getFreeCapacity();
     const cap = creep.store.getCapacity();
@@ -679,7 +679,7 @@ export class RemoteAttack {
 }
 
 export function run_creep(
-    role: role_name_key,
+    role: role_name_key | 'all',
     fn: (creep: Creep) => void,
     filter?: (creep: Creep) => boolean
 ) {
@@ -688,7 +688,7 @@ export function run_creep(
             if (c.spawning) {
                 return false;
             }
-            if (role && c.memory.role !== role) {
+            if (role !== 'all' && c.memory.role !== role) {
                 return false;
             }
             if (filter && !filter(c)) {

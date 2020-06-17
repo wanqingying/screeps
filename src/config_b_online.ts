@@ -13,12 +13,20 @@ export const cfg_online = {
             [w_role_name.repair]: 1,
             [w_role_name.remote_carry]: 2,
             [w_role_name.remote_reserve]: 1,
-            [w_role_name.remote_builder]: 0,
+            [w_role_name.remote_builder]: 1,
             [w_role_name.remote_harvester]: 1,
         },
         reserve: {
             E18S4: [{ id: '5bbcadfd9099fc012e638421', container_id: '' }],
             // E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_id: '' }],
+        },
+        claims: {
+            name: 'E13S5',
+            creep: [
+                [w_role_name.claim_start, 1],
+                // [w_role_name.builder, 1],
+                // [w_role_name.upgrader, 1],
+            ],
         },
         remote_container: ['5ee82325c4fce716b1ac5389'],
     },

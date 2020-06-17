@@ -1,6 +1,9 @@
 import './bootstrap';
 
 import * as mod from './mod';
+import { BaseLink } from './base_link';
+import {BaseClaim} from "./claim";
+
 
 function main() {
     console.log(
@@ -8,7 +11,6 @@ function main() {
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, '--666-', `${room.energyAvailable}/${room.energyCapacityAvailable}`);
     });
     mod.load_cache();
     // 生产单位
@@ -24,7 +26,7 @@ function main() {
     mod.load_builder();
     mod.load_upgrader();
     mod.load_starter();
-    // mod.load_claim();
+    mod.load_claim();
     mod.load_repair();
     mod.load_defence();
     mod.load_scout();
@@ -34,6 +36,8 @@ function main() {
     mod.load_remote_reserve();
     mod.load_remote_attack();
     mod.RemoteBuilder.start()
+    BaseClaim.start()
+    BaseLink.start()
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];

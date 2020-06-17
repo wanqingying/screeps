@@ -52,7 +52,7 @@ function prepareCache(room: Room) {
         che = { attack: null, my_attack_creeps: 0 };
     }
     let t = findAttackTarget(room);
-    if (t && t.ticksToLive > 100 && t.hits > 1500) {
+    if (t && t.ticksToLive > 100 ) {
         che.attack = t;
     } else {
         che.attack = undefined;

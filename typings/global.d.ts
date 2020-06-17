@@ -25,6 +25,10 @@ interface CfgRoom {
     reserve?: { [name: string]: CfgR[] };
     scout?: string[];
     remote_container?: string[];
+    link_a?: string[];
+    link_b?: string[];
+    link_c?: string[];
+    link_pair?:string[][]
 }
 
 interface Claims {

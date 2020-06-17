@@ -151,7 +151,7 @@ function prepareRemoteCache(room: Room, from_room: Room) {
             pos: d.pos,
         });
     });
-    const container: StructureContainer[] = room.find(FIND_MY_STRUCTURES, {
+    const container: StructureContainer[] = room.find(FIND_STRUCTURES, {
         filter: c => c.structureType === (STRUCTURE_CONTAINER as any),
     }) as any;
     container.forEach(t => {

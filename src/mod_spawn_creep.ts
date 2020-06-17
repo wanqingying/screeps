@@ -1,78 +1,6 @@
 import { getBodyCost, ListA, RemoteReserve, RemoteTransport, run_my_room } from './lib_base';
 import { getCreepBodyByRole } from './lib_creep';
 
-interface RoomCache {
-    // 房间当前角色数量
-    c_roles_count: { [name: string]: number };
-    // 房间是否停摆(长期小于 300 触发冷启动)
-    c_energy_stop: boolean;
-    // 生产一个单位的失败tick总数
-    c_spawn_fail_tick?: number;
-    // 能量充盈度
-    c_energy: ListA<number>;
-    // 上次支持生产操作的返回码
-    c_spawn_code: any;
-    // 生产中 或者将要生产的单位
-    c_spawning_role: string;
-    // 需要预先生产的单位
-    c_refresh_creep: {
-        [id: string]: { role: string; id: string; progress: boolean; life: number };
-    };
-}
-let cache: { [name: string]: RoomCache } = {};
-const max_fail_tick = 7;
-
-// 根据配置获取单位部件
-function getCreepBody(room: Room, role: role_name_key) {
-    let che = getCache(room);
-    // 房间停摆冷启动
-    if (che.c_energy_stop || che.c_spawn_fail_tick > max_fail_tick) {
-        switch (role) {
-            case 'carrier':
-                return [MOVE, CARRY, MOVE, CARRY];
-            case 'harvester':
-                return [MOVE, MOVE, WORK, WORK];
-            default:
-                return [MOVE, WORK, CARRY, CARRY];
-        }
-    }
-
-    const cfg = getCreepBodyByRole(role, room.energyCapacityAvailable);
-    let body = [];
-    Object.keys(cfg || {}).forEach(b => {
-        body = body.concat(new Array(cfg[b]).fill(b));
-    });
-    return body;
-}
-// 获取缓存
-function getCache(room: Room): RoomCache {
-    if (!cache) {
-        cache = {};
-    }
-    let che;
-    che = cache[room.name];
-    if (!che) {
-        che = {
-            c_energy_stop: false,
-            c_roles_count: {},
-            c_spawn_fail_tick: 0,
-            c_energy: new ListA<number>(30),
-            c_spawn_code: null,
-            c_spawning_role: '',
-            c_refresh_creep: {},
-            c_tick: 0,
-        };
-    }
-    if (che.c_tick !== Game.time) {
-        Object.keys(w_role_name).forEach(role => {
-            che.c_roles_count[role] = 0;
-        });
-    }
-    che.c_tick = Game.time;
-    cache[room.name] = che;
-    return che;
-}
-
 interface CacheRoom {
     // 房间当前角色数量
     c_roles_count: { [name: string]: number };
@@ -100,7 +28,7 @@ interface SpawnTask {
 export class SpawnAuto {
     private last_run_time = 0;
     private last_update_time = 0;
-    private run_tick = 15;
+    private run_tick = 6;
     private max_fail_tick = this.run_tick * 10;
     private spawn_before_tick = 30;
     private timeoutMap = new Map();
@@ -132,6 +60,32 @@ export class SpawnAuto {
         che.c_tick = Game.time;
         return che;
     };
+    private getCreepBody= (room: Room, role: role_name_key)=> {
+        let che = this.getRoomCache(room);
+        let a = che.c_roles_count[w_role_name.carrier] < 1;
+        let b = che.c_roles_count[w_role_name.harvester] < 1;
+        console.log('get body',room.name);
+        console.log(a,b);
+        console.log(JSON.stringify(che.c_roles_count));
+        // 房间停摆冷启动
+        if (a || b) {
+            switch (role) {
+                case 'carrier':
+                    return [MOVE, CARRY, MOVE, CARRY];
+                case 'harvester':
+                    return [MOVE, MOVE, WORK, WORK];
+                default:
+                    return [MOVE, WORK, CARRY, CARRY];
+            }
+        }
+
+        const cfg = getCreepBodyByRole(role, room.energyCapacityAvailable);
+        let body = [];
+        Object.keys(cfg || {}).forEach(b => {
+            body = body.concat(new Array(cfg[b]).fill(b));
+        });
+        return body;
+    }
     constructor() {}
     public spawnCreep = (room: Room, role: role_name_key, mem?: any) => {
         let k = Memory.creeps_spawn_index || 0;
@@ -140,7 +94,7 @@ export class SpawnAuto {
         }
         const che = this.getRoomCache(room);
         che.c_ready = false;
-        const body = getCreepBody(room, role);
+        const body = this.getCreepBody(room, role);
         if (!body) {
             return;
         }
@@ -183,9 +137,9 @@ export class SpawnAuto {
     };
     private checkSpawnCreep = (room: Room) => {
         let che = this.getRoomCache(room);
-        if (che.c_energy_stop || che.c_spawn_fail_tick > this.max_fail_tick) {
-            return;
-        }
+        // if (che.c_energy_stop || che.c_spawn_fail_tick > this.max_fail_tick) {
+        //     return;
+        // }
         let role = che.c_spawning_role;
         let mem = {};
         if (!role) {

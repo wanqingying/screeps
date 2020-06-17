@@ -19,7 +19,12 @@ const DropSite = 'drop';
 const AnySource = 'any';
 // any 表示任意资源
 type resType = ResourceConstant | typeof AnySource;
-type strType = StructureConstant | typeof DropSite | typeof HarvesterSite | typeof ControllerSite;
+type stcType =
+    | StructureConstant
+    | typeof DropSite
+    | typeof HarvesterSite
+    | typeof ControllerSite
+    | 'link_b';
 
 interface CacheRoom {
     tick: number;
@@ -46,6 +51,8 @@ const w_out = {
     harvester_container: 90,
     // 升级用的容器
     controller_container: 20,
+    link_a: 0,
+    link_b: 90,
     [STRUCTURE_STORAGE]: 30,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
@@ -54,6 +61,8 @@ const w_out = {
 };
 const w_in = {
     drop: 0,
+    link_a: 0,
+    link_b: 0,
     harvester_container: 0,
     controller_container: 60,
     [STRUCTURE_STORAGE]: 30,
@@ -131,7 +140,7 @@ export class TransportDriver {
         const creepCache = this.getCreepCache(creep);
         let task = creepCache.precessTask;
         creepCache.precessTask = undefined;
-        if (task){
+        if (task) {
             task.amount = task.amount_rec = 0;
         }
     };
@@ -198,15 +207,15 @@ export class TransportDriver {
             return this.closeCreepTask(creep);
         }
 
-        const [x, y, name] = task.pos;
-        const pos = new RoomPosition(x, y, name);
+        // const [x, y, name] = task.pos;
+        // const pos = new RoomPosition(x, y, name);
 
         let code;
         const target = Game.getObjectById(task.id) as any;
         if (!target) {
             return this.closeCreepTask(creep);
         }
-        const far = moveToTarget(creep, target);
+        const far = moveToTarget(creep, target, 1);
 
         if (far > 3) {
             return;
@@ -218,82 +227,27 @@ export class TransportDriver {
             if (type === 'any') {
                 RESOURCES_ALL.forEach(t => {
                     if (creep.store[t] > 0) {
-                        console.log('trans1');
                         code = creep.transfer(target, t);
                     }
                 });
             } else {
-                console.log('trans2');
                 code = creep.transfer(target, type);
             }
         }
 
         if (task.trans_dec === 'out') {
             if (task.stcType === 'drop') {
-                console.log('pick3');
                 code = creep.pickup(target as Resource);
             } else {
-                console.log('withdraw4');
                 code = creep.withdraw(target, task.resType as any);
             }
         }
-        console.log(JSON.stringify(task));
-        if (code===OK){
-            this.closeCreepTask(creep)
-        }
-        if (far===1){
-            this.closeCreepTask(creep)
-        }
-        switch (code) {
-            case ERR_NOT_IN_RANGE:
-                moveToTarget(creep, pos);
-                break;
-            case OK:
-                this.finishTask(creep, task);
-                break;
-            case ERR_FULL:
-                break;
-            case ERR_INVALID_TARGET:
-                break;
-            default:
-                this.closeCreepTask(creep);
-        }
-        console.log('5');
-        console.log(creep.name, w_utils.get_code_msg(code));
-        if (task.trans_dec === 'in' && is_empty_tate(creep)) {
-            // 运入建筑 单位没有资源重置
-            creep.say('reset_emp');
-            return this.closeCreepTask(creep);
-        }
-
-        if (task.trans_dec === 'out' && is_full_tate(creep)) {
-            // 从建筑运出 如果单位已满则重置任务
-            creep.say('reset_ful');
-            return this.closeCreepTask(creep);
-        }
-    };
-    private finishTask = (creep: Creep, task: TransTask) => {
-        let task_done = false;
-        if (task.trans_dec === 'in') {
-            // 卸载任务完成
-            if (is_empty_tate(creep)) {
-                task_done = true;
-            }
-            if (task.amount_rec >= task.amount) {
-                task_done = true;
-            }
-        }
-        if (task.trans_dec === 'out') {
-            // 装运任务完成
-            if (is_full_tate(creep)) {
-                task_done = true;
-            }
-            if (task.amount_rec >= task.amount) {
-                task_done = true;
-            }
-        }
-        if (task_done) {
+        if (code === OK) {
             this.closeCreepTask(creep);
+        }
+        if (far <= 1) {
+            this.closeCreepTask(creep);
+            return;
         }
     };
     private publicTask = (room: Room) => {
@@ -306,7 +260,7 @@ export class TransportDriver {
         const structures = room.findBy(FIND_STRUCTURES);
         // drop=============================================
         room.find(FIND_DROPPED_RESOURCES).forEach(resource => {
-            if (resource.amount < minAmo) {
+            if (resource.amount < minAmo + 40) {
                 return;
             }
             let task = generateTask('out', resource as any, {
@@ -374,7 +328,7 @@ export class TransportDriver {
                 return (s as any).structureType === STRUCTURE_CONTAINER;
             })
             .forEach((s: StructureContainer) => {
-                let stc: strType = s.structureType;
+                let stc: stcType = s.structureType;
                 if (isContainerNearSource(room, s)) {
                     stc = 'harvester_container';
                 }
@@ -412,6 +366,23 @@ export class TransportDriver {
                         generateTask('in', s, { amount: free, resourceType: RESOURCE_ENERGY })
                     );
                 }
+            });
+        // link_b
+        const lin_b = w_config.rooms[room.name].link_b || [];
+        lin_b
+            .map(id => Game.getObjectById(id))
+            .forEach((link: StructureLink) => {
+                RESOURCES_ALL.forEach(type => {
+                    const used = link.store.getUsedCapacity(type);
+                    if (used > 0) {
+                        const taskOut = generateTask('out', link, {
+                            amount: used,
+                            resourceType: type,
+                            structureType: 'link_b',
+                        });
+                        che.transOut.updateTask(taskOut);
+                    }
+                });
             });
     };
     public updateState = () => {
@@ -647,7 +618,7 @@ interface TransTask {
     // 权重系数,用于任务优先级调度
     w: number;
     // 建筑类型
-    stcType: strType;
+    stcType: stcType;
     // 资源需求任务或者资源清空任务
     trans_dec?: 'in' | 'out';
     // 任务 id
@@ -657,7 +628,7 @@ interface TransTask {
 interface GenTask {
     amount: number;
     resourceType: resType;
-    structureType?: strType;
+    structureType?: stcType;
 }
 function generateTask(
     dec: 'in' | 'out',

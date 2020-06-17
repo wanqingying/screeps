@@ -45,13 +45,12 @@ export function load_claim() {
             }
         });
     }
-    if (cache.process === 2) {
+    if (cache.process === 1) {
         let cfg_creep = cfg_claim.creep;
         for (let i = 0; i < cfg_creep.length; i++) {
             let [role, num] = cfg_creep[i];
             let cur_num = cache.ext_creeps[role] || 0;
             if (cur_num < num) {
-                console.log('spawn claim creep', role);
                 SpawnAuto.spawnCreep(from_room, role, { target_room: cfg_claim.name });
                 break;
             }

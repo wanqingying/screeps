@@ -27,6 +27,6 @@ function run_remote_attack(creep: Creep) {
     let task = ch.getTask(creep);
     if (task && task.target) {
         let code = creep.attack(task.target);
-        moveToTarget(creep, task.target as any);
+        // moveToTarget(creep, task.target as any);
     }
 }

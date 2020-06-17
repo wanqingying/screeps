@@ -52,7 +52,7 @@ export class RemoteBuilder {
                     remote_room.find(FIND_STRUCTURES).forEach(s => {
                         let los = s.hitsMax - s.hits;
                         let los_rate = los / s.hitsMax;
-                        if (los > 3000 || los_rate > 0.5) {
+                        if (los > 3000 || los_rate > 0.3) {
                             repair_list.push({ site: s, from: room.name });
                         }
                     });
@@ -260,7 +260,7 @@ export class RemoteBuilder {
             }
             const [x, y, name] = task.pos;
             const pos = new RoomPosition(x, y, name);
-            const far = moveToTarget(creep, pos);
+            const far = moveToTarget(creep, pos, 1);
             let code;
             if (far < 7) {
                 code = creep.build(target as any);
@@ -274,7 +274,7 @@ export class RemoteBuilder {
             creep.say('no_rpair');
             return;
         }
-        creep.say('rp')
+        creep.say('rp');
         const target = Game.getObjectById(task.id);
         if (!target) {
             this.forgetRepairTask(creep);
@@ -283,7 +283,7 @@ export class RemoteBuilder {
         }
         const [x, y, name] = task.pos;
         const pos = new RoomPosition(x, y, name);
-        const far = moveToTarget(creep, pos,1);
+        const far = moveToTarget(creep, pos, 1);
         let code;
         if (far < 5) {
             code = creep.repair(target as any);
