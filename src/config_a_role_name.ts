@@ -7,6 +7,7 @@ export const role_name = {
     remote_builder: 'remote_builder',
     remote_attack: 'remote_attack',
     claim_start: 'claim_start',
+    remote_repair: 'remote_repair',
     starter: 'starter',
     upgrader: 'upgrader',
     builder: 'builder',

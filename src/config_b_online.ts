@@ -11,9 +11,10 @@ export const cfg_online = {
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
             [w_role_name.repair]: 1,
-            [w_role_name.remote_carry]: 2,
+            [w_role_name.remote_carry]: 1,
             [w_role_name.remote_reserve]: 1,
-            [w_role_name.remote_builder]: 1,
+            [w_role_name.remote_builder]: 0,
+            [w_role_name.remote_repair]: 1,
             [w_role_name.remote_harvester]: 1,
         },
         reserve: {

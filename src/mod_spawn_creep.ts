@@ -92,7 +92,7 @@ export class SpawnAuto {
         const che = this.getRoomCache(room);
         che.c_ready = false;
         const body = this.getCreepBody(room, role);
-        if (!body||body.length===0) {
+        if (!body || body.length === 0) {
             console.log('body empty check config');
             return;
         }

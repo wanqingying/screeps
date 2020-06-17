@@ -15,6 +15,7 @@ declare type role_name_key =
     | 'remote_harvester'
     | 'remote_builder'
     | 'remote_reserve'
+    | 'remote_repair'
     | 'claim_start'
     | 'starter'
     | 'upgrader'

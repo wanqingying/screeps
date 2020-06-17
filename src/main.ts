@@ -33,6 +33,7 @@ function main() {
     mod.load_remote_harvest();
     mod.load_remote_reserve();
     mod.load_remote_attack();
+    mod.RemoteRepair.start();
     mod.RemoteBuilder.start();
     BaseClaim.start();
     BaseLink.start();
