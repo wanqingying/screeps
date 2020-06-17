@@ -62,7 +62,7 @@ export const cfg_local: { [k: string]: CfgRoom } = {
         // 用于接受其他link
         link_b: ['351efa7ee58125c'],
         // 用于发送能量
-        link_c:[],
+        link_c: [],
         // 传输配对
         link_pair: [['1989f91647cdd7c', '351efa7ee58125c']],
     },

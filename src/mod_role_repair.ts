@@ -1,7 +1,6 @@
 import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
 import { TransportDriver } from 'mod_role_transport';
 
-
 const war_part = [STRUCTURE_WALL, STRUCTURE_RAMPART];
 const max_hits_rate = 0.8;
 const min_hits_rate = 0.4;

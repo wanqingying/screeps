@@ -28,7 +28,7 @@ interface CfgRoom {
     link_a?: string[];
     link_b?: string[];
     link_c?: string[];
-    link_pair?:string[][]
+    link_pair?: string[][];
 }
 
 interface Claims {
@@ -41,7 +41,7 @@ declare interface W_Utils {
     get_code_msg: get_code_msg_screeps;
     update_cache: (key: any, cache: any) => any;
     print: any;
-    spawn(...p:any):void
+    spawn(...p: any): void;
 }
 
 declare type W_CODE = {

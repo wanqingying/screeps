@@ -1,4 +1,4 @@
-import {SpawnAuto} from "./mod_spawn_creep";
+import { SpawnAuto } from './mod_spawn_creep';
 
 global.w_utils = {
     count_distance(a: RoomPosition, b: RoomPosition) {
@@ -42,12 +42,12 @@ global.w_utils = {
         return global.w_cache.get(key);
     },
     print() {},
-    spawn(role,name) {
-        let room=Game.rooms[name];
-        if ( room){
-            SpawnAuto.spawnCreep(room,role)
-            return true
+    spawn(role, name) {
+        let room = Game.rooms[name];
+        if (room) {
+            SpawnAuto.spawnCreep(room, role);
+            return true;
         }
-        return  false
-    }
+        return false;
+    },
 };

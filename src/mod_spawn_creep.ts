@@ -60,12 +60,12 @@ export class SpawnAuto {
         che.c_tick = Game.time;
         return che;
     };
-    private getCreepBody= (room: Room, role: role_name_key)=> {
+    private getCreepBody = (room: Room, role: role_name_key) => {
         let che = this.getRoomCache(room);
         let a = che.c_roles_count[w_role_name.carrier] < 1;
         let b = che.c_roles_count[w_role_name.harvester] < 1;
-        console.log('get body',room.name);
-        console.log(a,b);
+        console.log('get body', room.name);
+        console.log(a, b);
         console.log(JSON.stringify(che.c_roles_count));
         // 房间停摆冷启动
         if (a || b) {
@@ -85,7 +85,7 @@ export class SpawnAuto {
             body = body.concat(new Array(cfg[b]).fill(b));
         });
         return body;
-    }
+    };
     constructor() {}
     public spawnCreep = (room: Room, role: role_name_key, mem?: any) => {
         let k = Memory.creeps_spawn_index || 0;

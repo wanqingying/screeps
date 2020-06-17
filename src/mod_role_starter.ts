@@ -3,7 +3,6 @@ import { is_empty_tate, is_full_tate } from './lib_base';
 import { harvestSource } from './lib_creep';
 import { TransportDriver } from './mod_role_transport';
 
-
 interface CacheSource {
     source: Source;
     container: StructureContainer | undefined;

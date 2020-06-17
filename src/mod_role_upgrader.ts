@@ -2,7 +2,6 @@ import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
 import { moveToTarget } from './lib_creep';
 import { TransportDriver } from './mod_role_transport';
 
-
 export function load_upgrader() {
     run_creep(w_role_name.upgrader, function (creep) {
         try {

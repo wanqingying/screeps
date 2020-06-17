@@ -2,16 +2,14 @@ import './bootstrap';
 
 import * as mod from './mod';
 import { BaseLink } from './base_link';
-import {BaseClaim} from "./claim";
-
+import { BaseClaim } from './claim';
 
 function main() {
     console.log(
         '===============================tick===============================================',
         Game.time
     );
-    Object.values(Game.rooms).forEach(room => {
-    });
+    Object.values(Game.rooms).forEach(room => {});
     mod.load_cache();
     // 生产单位
     // mod.load_spawn_check();
@@ -35,9 +33,9 @@ function main() {
     mod.load_remote_harvest();
     mod.load_remote_reserve();
     mod.load_remote_attack();
-    mod.RemoteBuilder.start()
-    BaseClaim.start()
-    BaseLink.start()
+    mod.RemoteBuilder.start();
+    BaseClaim.start();
+    BaseLink.start();
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];

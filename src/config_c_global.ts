@@ -6,4 +6,4 @@ global.w_my_name = Object.values(Game.rooms).find(
 ).controller.owner.username;
 global.w_debug_creep = 'harvester_7';
 global.module_loaded = true;
-let w=w_role_name;
+let w = w_role_name;
