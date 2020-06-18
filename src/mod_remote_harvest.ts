@@ -81,6 +81,7 @@ export class RemoteHarvest {
     private getTaskByOrder = (creep: Creep) => {
         let same_room_task = this.getSameRoomTask(creep);
         if (same_room_task) {
+            // console.log('same');
             return same_room_task;
         }
         return this.array.find(t => {
@@ -93,7 +94,7 @@ export class RemoteHarvest {
                 if (!cp) {
                     return true;
                 }
-                return cp.ticksToLive < 200;
+                return cp.ticksToLive < 100;
             } else {
                 // 一个矿安排一个
                 return true;
