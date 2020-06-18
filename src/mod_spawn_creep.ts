@@ -58,7 +58,6 @@ export class SpawnAuto {
                 che.c_roles_count[role] = 0;
             });
         }
-
         che.c_tick = Game.time;
         return che;
     };
@@ -85,7 +84,6 @@ export class SpawnAuto {
         });
         return body;
     };
-    constructor() {}
     public spawnCreep = (room: Room, role: role_name_key, mem?: any) => {
         let k = Memory.creeps_spawn_index || 0;
         if (typeof k !== 'number') {
@@ -180,6 +178,7 @@ export class SpawnAuto {
         }
         return false;
     };
+    // 检查是否满足发展
     private updateRoleBoost = (room: Room) => {
         const che = this.getRoomCache(room);
         const current_exist = che.c_roles_count;
@@ -199,30 +198,31 @@ export class SpawnAuto {
         console.log('1');
 
         if (current_exist.starter < cfg.creep_cfg_num.starter) {
-            return this.addSpawnTask(room, { room: room.name, role: w_role_name.starter });
+            return w_role_name.starter
         }
         console.log('2');
 
         if (current_carrier < 1) {
-            return this.addSpawnTask(room, { room: room.name, role: w_role_name.carrier });
+            return w_role_name.carrier
         }
         console.log('3');
 
         if (current_harvester < 1) {
-            return this.addSpawnTask(room, { room: room.name, role: w_role_name.harvester });
+            return w_role_name.harvester
         }
         console.log('4');
 
         if (current_carrier < 2) {
-            return this.addSpawnTask(room, { room: room.name, role: w_role_name.carrier });
+            return w_role_name.carrier
         }
         console.log('5');
 
         if (current_harvester < 2) {
-            return this.addSpawnTask(room, { room: room.name, role: w_role_name.harvester });
+            return w_role_name.harvester
         }
 
     };
+    // 检查是否满足配置
     private updateRoleConfig = (room: Room) => {
         const sh: RemoteReserveW = w_cache.get('remote_ser_h');
         const ch: RemoteTransport = w_cache.get(w_code.remote_transport);
@@ -250,7 +250,7 @@ export class SpawnAuto {
             this.addSpawnTask(room, { role: target.role });
         }
     };
-    // 检查即将耗尽的单位 30tick 执行一次
+    // 检查即将耗尽的单位
     public check_timeout_creep = (creep: Creep, room?: Room) => {
         if (this.timeoutMap.get(creep.id)) {
             return;
