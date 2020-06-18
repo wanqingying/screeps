@@ -17,7 +17,7 @@ export class HarvestAtMyRoom {
             let cts: StructureContainer[] = room.find(FIND_STRUCTURES, {
                 filter: s => s.structureType === STRUCTURE_CONTAINER,
             }) as any;
-            room.find(FIND_DEPOSITS).forEach(s=>{
+            room.find(FIND_DEPOSITS).forEach(s => {
                 let near: StructureContainer = findNearTarget(s, cts);
                 let pos = [s.pos.x, s.pos.y, s.pos.roomName];
                 if (near) {
@@ -34,7 +34,7 @@ export class HarvestAtMyRoom {
                     update_tick: 0,
                     pos: pos,
                 });
-            })
+            });
             room.find(FIND_SOURCES).forEach(s => {
                 let near: StructureContainer = findNearTarget(s, cts);
                 let pos = [s.pos.x, s.pos.y, s.pos.roomName];
@@ -106,6 +106,8 @@ export class HarvestAtMyRoom {
                             if (code === OK) {
                                 // return false;
                             }
+                        } else {
+                            creep.drop(RESOURCE_ENERGY);
                         }
                     }
                 } else {

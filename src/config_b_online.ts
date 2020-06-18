@@ -14,9 +14,9 @@ export const cfg_online: { [k: string]: CfgRoom } = {
             [w_role_name.remote_carry]: 1,
             [w_role_name.remote_reserve]: 1,
             [w_role_name.claim_start]: 0,
-            [w_role_name.remote_builder]: 0,
+            [w_role_name.remote_builder]: 1,
             [w_role_name.remote_repair]: 1,
-            [w_role_name.remote_harvester]: 1,
+            [w_role_name.remote_harvester]: 2,
         },
         reserve: {
             E18S4: [{ id: '5bbcadfd9099fc012e638421', container_pos: [31, 39] }],
