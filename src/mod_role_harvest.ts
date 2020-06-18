@@ -66,13 +66,13 @@ export class HarvestAtMyRoom {
         });
     };
     private run_harvest = (creep: Creep) => {
-        creep.say('o')
+        creep.say('o');
         if (creep.body.find(b => b.type === CARRY)) {
             if (is_more_than(creep, 0.8)) {
                 creep.say('more');
                 const link = w_config.rooms[creep.room.name]?.link_a;
                 if (link && link.length > 0) {
-                    creep.say('link')
+                    creep.say('link');
                     const links = link.map(id => Game.getObjectById(id)).filter(s => s);
                     let near: any = findNearTarget(creep, links);
                     if (near) {
@@ -84,7 +84,6 @@ export class HarvestAtMyRoom {
                                 // creep.moveTo(near as any);
                                 // return true;
                                 return;
-
                             }
                             if (code === OK) {
                                 // return false;
@@ -102,8 +101,8 @@ export class HarvestAtMyRoom {
             creep.say('no_task');
             return;
         }
-        if (!task?.pos){
-            this.forgetTask(creep)
+        if (!task?.pos) {
+            this.forgetTask(creep);
             return;
         }
         let [x, y, name] = task.pos;
@@ -152,10 +151,12 @@ export class HarvestAtMyRoom {
         if (t_id) {
             let task = this.getTaskById(t_id);
             if (task) {
-                let cps=creep.room.find(FIND_MY_CREEPS).filter(c=>c.memory.role===w_role_name.harvester);
-                let h=cps.find(c=>c.memory.task_id===task.source_id&&c.id!==creep.id)
-                if (!h){
-                    return task
+                let cps = creep.room
+                    .find(FIND_MY_CREEPS)
+                    .filter(c => c.memory.role === w_role_name.harvester);
+                let h = cps.find(c => c.memory.task_id === task.source_id && c.id !== creep.id);
+                if (!h) {
+                    return task;
                 }
                 // return task;
             }

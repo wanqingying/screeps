@@ -11,7 +11,7 @@ function main() {
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name,room.energyAvailable, '/', room.energyCapacityAvailable);
+        console.log(room.name, room.energyAvailable, '/', room.energyCapacityAvailable);
     });
     RoomCache.start();
     RoomCache.start();
@@ -38,9 +38,9 @@ function main() {
     mod.RemoteBuilder.start();
     mod.RemoteHarvest.start();
     mod.RemoteTransport.start();
-    mod.RemoteReserveW.start()
-    mod.HarvestAtMyRoom.start()
-    mod.RemoteAttackW.start()
+    mod.RemoteReserveW.start();
+    mod.HarvestAtMyRoom.start();
+    mod.RemoteAttackW.start();
     BaseClaim.start();
     BaseLink.start();
     Object.keys(Memory.creeps).forEach(name => {

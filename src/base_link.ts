@@ -21,7 +21,7 @@ export class BaseLink {
             const link_a: StructureLink = Game.getObjectById(a_id);
             const link_b: StructureLink = Game.getObjectById(b_id);
             // a 必须有充足能量  b必须有足够空余
-            if (is_more_than(link_a,0.1)&&is_less_than(link_b,0.9)){
+            if (is_more_than(link_a, 0.1) && is_less_than(link_b, 0.9)) {
                 link_a.transferEnergy(link_b);
             }
         });

@@ -5,11 +5,10 @@ export class BaseMod {
     }
 
     private updateState = () => {
-        if (this.update_tick===Game.time){
+        if (this.update_tick === Game.time) {
             return;
         }
-        this.update_tick=Game.time;
-
+        this.update_tick = Game.time;
     };
     private update_tick = 0;
     private tryUpdateState = () => {

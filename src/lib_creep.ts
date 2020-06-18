@@ -3,7 +3,7 @@ import { findNearTarget, is_more_than, isFull } from './lib_base';
 export function harvestSource(creep: Creep, remote?) {
     if (creep.body.find(b => b.type === CARRY)) {
         if (is_more_than(creep, 0.8)) {
-            creep.say('more')
+            creep.say('more');
             const link = w_config.rooms[creep.room.name]?.link_a;
             if (link && link.length > 0) {
                 const links = link.map(id => Game.getObjectById(id)).filter(s => s);

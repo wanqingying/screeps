@@ -248,10 +248,10 @@ export class TransportDriver {
         }
         // Tombstone 特殊处理
         if (task.trans_dec === 'out') {
-            if (target.amount){
+            if (target.amount) {
                 code = creep.pickup(target as Resource);
             }
-            if (target.store){
+            if (target.store) {
                 code = creep.withdraw(target, task.resType as any);
             }
         }
@@ -260,8 +260,8 @@ export class TransportDriver {
         }
         if (far <= 1) {
             this.closeCreepTask(creep);
-            let msg=w_utils.get_code_msg(code)
-            creep.say(msg)
+            let msg = w_utils.get_code_msg(code);
+            creep.say(msg);
             return;
         }
     };

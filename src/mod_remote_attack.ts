@@ -85,9 +85,9 @@ export class RemoteAttackW {
     };
     private spawn_attack = (room: Room) => {
         let spawn = this.shouldSpawnAttack(room);
-        let has_atk=this.array.find(t=>t.from===room.name&&t.has_atk);
-        if (has_atk){
-            return ;
+        let has_atk = this.array.find(t => t.from === room.name && t.has_atk);
+        if (has_atk) {
+            return;
         }
         if (spawn && spawn.target && spawn.target.ticksToLive > 300) {
             return SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
