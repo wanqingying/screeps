@@ -20,7 +20,7 @@ export const cfg_online: { [k: string]: CfgRoom } = {
         },
         reserve: {
             E18S4: [{ id: '5bbcadfd9099fc012e638421', container_pos: [31, 39] }],
-            E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_pos: [10, 18] }],
+            // E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_pos: [10, 18] }],
         },
         // 用于采矿 只有采矿单位使用 发送到其他link
         link_a: [],
