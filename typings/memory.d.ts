@@ -21,6 +21,7 @@ declare interface CreepMemory {
     ack_tick?: number;
     mv_tick?: number;
     remote_task_id?: string;
+    task_id?: string;
     remote_source_id?: string;
     target_room: string;
     obj: any;

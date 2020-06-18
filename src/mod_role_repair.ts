@@ -1,4 +1,4 @@
-import { is_empty_tate, is_full_tate, run_creep } from './lib_base';
+import { is_less_than, is_more_than, run_creep } from './lib_base';
 import { TransportDriver } from 'mod_role_transport';
 
 const war_part = [STRUCTURE_WALL, STRUCTURE_RAMPART];
@@ -36,11 +36,11 @@ export function run_repair(creep: Creep) {
         return;
     }
 
-    if (is_empty_tate(creep)) {
+    if (is_less_than(creep)) {
         creep.memory.process = 'pick';
         cache_creep[creep.id] = undefined;
     }
-    if (is_full_tate(creep)) {
+    if (is_more_than(creep)) {
         creep.memory.process = 'r';
     }
     if (creep.memory.process === 'pick') {

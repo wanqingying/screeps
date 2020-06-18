@@ -132,19 +132,24 @@ export function isFull(target: any, type?: ResourceConstant): boolean {
     return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) === 0;
 }
 
-const FULL_RATE = 0.8;
+const FULL_RATE = 0.85;
+const Empty_rate = 0.15;
+let rsType = RESOURCE_ENERGY;
 
-export function is_empty_tate(creep: Creep | any, rate?: number) {
-    const percent = rate || FULL_RATE;
-    const free = creep.store.getFreeCapacity();
-    const cap = creep.store.getCapacity();
+// 存量/容量 <= rate
+export function is_less_than(creep: Creep | any, rate?: number) {
+    const percent = typeof rate === 'number' ? rate : Empty_rate;
+    const free = creep.store.getFreeCapacity(rsType);
+    const cap = creep.store.getCapacity(rsType);
     const used = cap - free;
-    return used / cap <= 1 - percent;
+    return used / cap <= percent;
 }
-export function is_full_tate(creep: Creep | any, rate?: number) {
-    const percent = rate || FULL_RATE;
-    const free = creep.store.getFreeCapacity();
-    const cap = creep.store.getCapacity();
+
+// 存量/容量>= rate
+export function is_more_than(creep: Creep | any, rate?: number) {
+    const percent = typeof rate === 'number' ? rate : FULL_RATE;
+    const free = creep.store.getFreeCapacity(rsType);
+    const cap = creep.store.getCapacity(rsType);
     const used = cap - free;
     return used / cap >= percent;
 }
@@ -364,124 +369,6 @@ interface RemoteBuildOrRepairTask {
     progress?: number;
 }
 
-interface RemoteReserveTask {
-    from: string;
-    remote: string;
-    creep_id: string;
-    process: number;
-    id: string;
-}
-export class RemoteReserve {
-    private array: RemoteReserveTask[] = [];
-    // reserve to this value
-    private max_contain = 3500;
-    constructor() {
-        this.array = [];
-        Object.keys(w_config.rooms).forEach(name => {
-            let cfg_room = w_config.rooms[name];
-            let reserves = cfg_room.reserve || {};
-            Object.keys(reserves).forEach((_name, index) => {
-                this.array.push({
-                    remote: _name,
-                    from: name,
-                    creep_id: '',
-                    process: 0,
-                    id: String(index + 1),
-                });
-            });
-        });
-    }
-    public updateState = () => {
-        run_creep(w_role_name.remote_reserve, creep => {
-            if (creep.memory.remote_task_id) {
-                let task = this.array.find(t => t.id === creep.memory.remote_task_id);
-                if (!task) {
-                    return this.forgetTask(creep);
-                }
-                task.creep_id = creep.id;
-            }
-        });
-        Object.keys(w_config.rooms).forEach(name => {
-            let cfg_room = w_config.rooms[name];
-            let reserves = cfg_room.reserve || {};
-            Object.keys(reserves).forEach((_name, index) => {
-                let room = Game.rooms[_name];
-                let target = this.array.find(s => s.remote === _name);
-                if (room && target) {
-                    target.process = room.controller?.reservation?.ticksToEnd;
-                }
-            });
-        });
-        this.array.forEach(task => {
-            let room = Game.rooms[task.remote];
-            if (room && room.controller?.reservation?.ticksToEnd) {
-                task.process = room.controller?.reservation?.ticksToEnd || 0;
-            } else {
-                task.process = 0;
-            }
-        });
-    };
-    private update_tick = 0;
-    public tryUpdateState = () => {
-        if (Game.time - this.update_tick > 80) {
-            this.update_tick = Game.time;
-            this.updateState();
-        }
-    };
-
-    public getTask = (creep: Creep): RemoteReserveTask => {
-        if (creep.memory.remote_task_id) {
-            let prev = this.getTaskById(creep.memory.remote_task_id);
-            return prev;
-        }
-        const { from } = creep.memory;
-        const met_array = this.array.filter(t => t.from === from);
-        let min_no_creep = 5500;
-        let min = 5500;
-        let min_task_no_creep: RemoteReserveTask = {} as any;
-        let min_task: RemoteReserveTask = {} as any;
-        met_array.forEach(s => {
-            let b = s.process < this.max_contain;
-            let c = !s.creep_id;
-            if (s.process < min) {
-                min = s.process;
-                min_task = s;
-            }
-            if (b && c) {
-                if (s.process < min_no_creep) {
-                    min_no_creep = s.process;
-                    min_task_no_creep = s;
-                }
-            }
-        });
-        if (!min_task_no_creep) {
-            min_task_no_creep = min_task;
-        }
-        if (min_task_no_creep) {
-            creep.memory.remote_task_id = min_task_no_creep.id;
-        }
-        return min_task_no_creep;
-    };
-    public forgetTask = (creep: Creep) => {
-        let c_id = creep.memory.remote_task_id;
-        creep.memory.remote_task_id = undefined;
-        let task = this.getTaskById(c_id);
-        if (task) {
-            task.creep_id = '';
-        }
-    };
-    public getRoomTask = (room: Room): RemoteReserveTask[] => {
-        return this.array.filter(t => t.from === room.name);
-    };
-    public stop_spawn_reserve = (room: Room) => {
-        const tasks = this.getRoomTask(room);
-        return tasks.every(t => t.process > this.max_contain);
-    };
-    private getTaskById = (id: string): RemoteReserveTask => {
-        return this.array.find(t => t.id === id);
-    };
-}
-
 interface RemoteAttackTask {
     from: string;
     remote: string;
@@ -553,6 +440,7 @@ export class RemoteAttack {
         }
     };
     public shouldSpawnAttack = (room: Room) => {
+        this.updateState();
         return this.array.find(t => t.target && t.from === room.name);
     };
     private getTaskById = (id: string) => {
@@ -588,8 +476,52 @@ export function run_my_room(fn: (room: Room) => void, filter?) {
         }
         return true;
     });
-    rooms.forEach(prepareCache);
     rooms.forEach(fn);
 }
 
-function prepareCache(room: Room) {}
+export function findNearDropOrContainerTarget(creep: Creep) {
+    let drop: Resource;
+    let max = 0;
+    let meets = [];
+    creep.room.find(FIND_DROPPED_RESOURCES).forEach(t => {
+        if (t.amount > max) {
+            max = t.amount;
+            drop = t;
+        }
+        if (t.amount > 400) {
+            meets.push(t);
+        }
+    });
+    if (meets.length > 1) {
+        return findNearTarget(creep, meets);
+    }
+    if (drop) {
+        return drop;
+    }
+    let max2 = 0;
+    let container: StructureContainer;
+    let mes = [];
+    creep.room
+        .find(FIND_MY_STRUCTURES, {
+            filter: s => s.structureType === (STRUCTURE_CONTAINER as any),
+        })
+        .forEach(s => {
+            let t: StructureContainer = s as any;
+            if (t.store) {
+                let c = t.store.getUsedCapacity(RESOURCE_ENERGY);
+                if (c > max2) {
+                    max2 = c;
+                    container = t;
+                }
+                if (c > 400) {
+                    mes.push(t);
+                }
+            }
+        });
+    if (mes.length > 1) {
+        return findNearTarget(creep, mes);
+    }
+    if (container) {
+        return container;
+    }
+}

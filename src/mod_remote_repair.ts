@@ -1,4 +1,12 @@
-import { getActionLockTarget, is_full_tate, isEmpty, run_creep, run_my_room } from './lib_base';
+import {
+    findNearDropOrContainerTarget,
+    findNearTarget,
+    getActionLockTarget,
+    is_more_than,
+    isEmpty,
+    run_creep,
+    run_my_room,
+} from './lib_base';
 import { TransportDriver } from './mod_role_transport';
 import { moveToTarget } from './lib_creep';
 import { checkRemoteDanger } from './lib_room';
@@ -124,38 +132,6 @@ export class RemoteRepair {
             code = creep.repair(target as any);
         }
     };
-    private getEnergyTarget = (creep: Creep) => {
-        let drop: Resource;
-        let max = 0;
-        creep.room.find(FIND_DROPPED_RESOURCES).forEach(t => {
-            if (t.amount > max) {
-                max = t.amount;
-                drop = t;
-            }
-        });
-        if (drop && drop.amount > 50) {
-            return drop;
-        }
-        let max2 = 0;
-        let container: StructureContainer;
-        creep.room
-            .find(FIND_MY_STRUCTURES, {
-                filter: s => s.structureType === (STRUCTURE_CONTAINER as any),
-            })
-            .forEach(s => {
-                let t: StructureContainer = s as any;
-                if (t.store) {
-                    let c = t.store.getUsedCapacity(RESOURCE_ENERGY);
-                    if (c > max2) {
-                        max2 = c;
-                        container = t;
-                    }
-                }
-            });
-        if (container) {
-            return container;
-        }
-    };
     private run_remote_repair = (creep: Creep) => {
         if (checkRemoteDanger(creep)) {
             return;
@@ -163,7 +139,7 @@ export class RemoteRepair {
         if (isEmpty(creep)) {
             creep.memory.process = 'get';
         }
-        if (is_full_tate(creep, 0.7)) {
+        if (is_more_than(creep, 0.7)) {
             creep.memory.process = 'bud';
         }
         if (creep.memory.process === 'get') {
@@ -171,7 +147,7 @@ export class RemoteRepair {
                 return TransportDriver.get_resource(creep);
             }
             const { target, unLock } = getActionLockTarget(creep, 'run_remote_builder', () =>
-                this.getEnergyTarget(creep)
+                findNearDropOrContainerTarget(creep)
             );
             if (target) {
                 let far = moveToTarget(creep, target);
@@ -339,49 +315,18 @@ export class RemoteBuilder {
         if (isEmpty(creep)) {
             creep.memory.process = 'get';
         }
-        if (is_full_tate(creep, 0.7)) {
+        if (is_more_than(creep, 0.7)) {
             creep.memory.process = 'bud';
         }
-        function getTarget() {
-            let drop: Resource;
-            let max = 0;
-            creep.room.find(FIND_DROPPED_RESOURCES).forEach(t => {
-                if (t.amount > max) {
-                    max = t.amount;
-                    drop = t;
-                }
-            });
-            if (drop) {
-                return drop;
-            }
-            let max2 = 0;
-            let container: StructureContainer;
-            creep.room
-                .find(FIND_MY_STRUCTURES, {
-                    filter: s => s.structureType === (STRUCTURE_CONTAINER as any),
-                })
-                .forEach(s => {
-                    let t: StructureContainer = s as any;
-                    if (t.store) {
-                        let c = t.store.getUsedCapacity(RESOURCE_ENERGY);
-                        if (c > max2) {
-                            max2 = c;
-                            container = t;
-                        }
-                    }
-                });
-            if (container) {
-                return container;
-            }
-        }
-
         if (creep.memory.process === 'get') {
             if (creep.memory.from === creep.room.name) {
                 return TransportDriver.get_resource(creep);
             }
-            const { target, unLock } = getActionLockTarget(creep, 'run_remote_builder', getTarget);
+            const { target, unLock } = getActionLockTarget(creep, 'run_remote_builder', () =>
+                findNearDropOrContainerTarget(creep)
+            );
             if (target) {
-                let far = moveToTarget(creep, target);
+                let far = moveToTarget(creep, target, 1);
                 if (far > 4) {
                     return;
                 }

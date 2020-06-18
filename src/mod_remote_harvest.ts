@@ -44,8 +44,13 @@ export class RemoteHarvest {
             if (creep.memory.remote_task_id) {
                 let task = this.getTaskById(creep.memory.remote_task_id);
                 if (task && creep.ticksToLive > 150) {
-                    task.creep_id = creep.id;
-                    task.update_tick = Game.time;
+                    if (task.update_tick === Game.time && task.creep_id !== creep.id) {
+                        //两个单位占用一个矿
+                        creep.memory.remote_task_id = undefined;
+                    } else {
+                        task.creep_id = creep.id;
+                        task.update_tick = Game.time;
+                    }
                 }
             }
         });
@@ -159,16 +164,15 @@ export class RemoteHarvest {
             return;
         }
         let pos = target.pos;
-        if (task.container_id) {
-            container = Game.getObjectById(task.container_id);
-            if (container) {
-                pos = container.pos;
-            }
-        }
         if (Array.isArray(task.container_pos)) {
             const [x, y] = task.container_pos;
             if (x && y) {
                 pos = new RoomPosition(x, y, task.remote);
+            }
+        } else if (task.container_id) {
+            container = Game.getObjectById(task.container_id);
+            if (container) {
+                pos = container.pos;
             }
         }
         creep.say('do');
@@ -205,4 +209,9 @@ export class RemoteHarvest {
         }
         return driver;
     };
+}
+let driver: RemoteHarvest = w_cache.get(RemoteHarvest.cache_key);
+if (!driver) {
+    driver = new RemoteHarvest();
+    w_cache.set(RemoteHarvest.cache_key, driver);
 }

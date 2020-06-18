@@ -1,8 +1,8 @@
 import {
     findNearTarget,
     getActionLockTarget,
-    is_empty_tate,
-    is_full_tate,
+    is_less_than,
+    is_more_than,
     run_creep,
 } from './lib_base';
 import { moveToTarget } from './lib_creep';
@@ -24,11 +24,11 @@ export function load_builder() {
 
 // 工作优先级 :修复低血建筑,建造,修复高血建筑,修墙
 function run_builder(creep: Creep) {
-    if (creep.memory.building && is_empty_tate(creep)) {
+    if (creep.memory.building && is_less_than(creep)) {
         creep.memory.building = false;
         creep.say('g');
     }
-    if (!creep.memory.building && is_full_tate(creep)) {
+    if (!creep.memory.building && is_more_than(creep)) {
         creep.memory.building = true;
         creep.say('b');
     }
@@ -62,5 +62,6 @@ function run_builder(creep: Creep) {
     } else {
         creep.say('g');
         TransportDriver.get_resource(creep);
+        // creep.say('get')
     }
 }

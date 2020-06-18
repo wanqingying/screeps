@@ -1,8 +1,9 @@
-import { findNearTarget, is_full_tate, isFull } from './lib_base';
+import { findNearTarget, is_more_than, isFull } from './lib_base';
 
 export function harvestSource(creep: Creep, remote?) {
     if (creep.body.find(b => b.type === CARRY)) {
-        if (is_full_tate(creep, 0.8)) {
+        if (is_more_than(creep, 0.8)) {
+            creep.say('more')
             const link = w_config.rooms[creep.room.name]?.link_a;
             if (link && link.length > 0) {
                 const links = link.map(id => Game.getObjectById(id)).filter(s => s);
@@ -183,55 +184,55 @@ export function getCreepBodyCfg(maxEnergy: number) {
     // 1800
     if (maxEnergy < 2300) {
         return {
-            [w.carrier]: { [MOVE]: 6, [CARRY]: 12 },
-            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
-            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.carrier]: { [MOVE]: 8, [CARRY]: 16 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
+            [w.builder]: { [MOVE]: 6, [WORK]: 6, [CARRY]: 6 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
-            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
-            [w.attack]: { [TOUGH]: 14, [MOVE]: 9, [ATTACK]: 4 },
-            [w.remote_carry]: { [MOVE]: 6, [CARRY]: 12 },
+            [w.repair]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
+            [w.remote_carry]: { [MOVE]: 8, [CARRY]: 16 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
-            [w.remote_repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
+            [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
             [w.remote_attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
-            [w.claim_start]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+            [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }
     // 2300
     if (maxEnergy < 5300) {
         return {
-            [w.carrier]: { [MOVE]: 6, [CARRY]: 12 },
-            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
-            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.carrier]: { [MOVE]: 8, [CARRY]: 16 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
+            [w.builder]: { [MOVE]: 6, [WORK]: 6, [CARRY]: 6 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
-            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
-            [w.attack]: { [TOUGH]: 14, [MOVE]: 9, [ATTACK]: 4 },
-            [w.remote_carry]: { [MOVE]: 6, [CARRY]: 12 },
+            [w.repair]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
+            [w.remote_carry]: { [MOVE]: 8, [CARRY]: 16 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
-            [w.remote_repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
+            [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
             [w.remote_attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
-            [w.claim_start]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+            [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }
     // 5300
     if (maxEnergy <= 12300) {
         return {
-            [w.carrier]: { [MOVE]: 6, [CARRY]: 12 },
-            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 1 },
-            [w.builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.carrier]: { [MOVE]: 8, [CARRY]: 16 },
+            [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
+            [w.builder]: { [MOVE]: 6, [WORK]: 6, [CARRY]: 6 },
             [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
-            [w.repair]: { [MOVE]: 4, [WORK]: 3, [CARRY]: 5 },
-            [w.attack]: { [TOUGH]: 14, [MOVE]: 9, [ATTACK]: 4 },
-            [w.remote_carry]: { [MOVE]: 6, [CARRY]: 12 },
+            [w.repair]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
+            [w.remote_carry]: { [MOVE]: 8, [CARRY]: 16 },
             [w.remote_harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 0 },
-            [w.remote_builder]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
-            [w.remote_repair]: { [MOVE]: 2, [WORK]: 1, [CARRY]: 3 },
+            [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
+            [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
             [w.remote_attack]: { [TOUGH]: 10, [MOVE]: 6, [ATTACK]: 2 },
-            [w.claim_start]: { [MOVE]: 3, [WORK]: 2, [CARRY]: 4 },
+            [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }
 }

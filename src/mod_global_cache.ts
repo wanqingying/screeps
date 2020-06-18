@@ -1,4 +1,4 @@
-import { getSourceWithContainer, RemoteAttack, RemoteReserve } from './lib_base';
+import { getSourceWithContainer, RemoteAttack } from './lib_base';
 import { get, set } from 'lodash';
 
 export function load_cache() {
@@ -15,14 +15,6 @@ function load_global_cache() {
     if (!global.w_cache) {
         global.w_cache = new Map<any, any>();
     }
-
-    // reserve
-    let che_reserve: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
-    if (!che_reserve) {
-        che_reserve = new RemoteReserve();
-    }
-    che_reserve.tryUpdateState();
-    w_cache.set(w_code.REMOTE_KEY_RESERVE, che_reserve);
     // remote_attack
     let che_atk: RemoteAttack = w_cache.get(w_code.REMOTE_KEY_ATTACK);
     if (!che_atk) {
@@ -30,8 +22,6 @@ function load_global_cache() {
     }
     che_atk.updateState();
     w_cache.set(w_code.REMOTE_KEY_ATTACK, che_atk);
-
-    w_cache.set(w_code.REMOTE_KEY_RESERVE, che_reserve);
     Object.values(Game.rooms).forEach(room => {
         if (room.controller?.my) {
             prepareCache(room);

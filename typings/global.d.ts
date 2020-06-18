@@ -29,6 +29,7 @@ interface CfgRoom {
     link_a?: string[];
     link_b?: string[];
     link_c?: string[];
+    link_d?: string[];
     link_pair?: string[][];
 }
 
@@ -54,6 +55,7 @@ declare type W_CODE = {
     REMOTE_KEY_MINE: 'REMOTE_KEY_MINE';
     REMOTE_KEY_RESERVE: 'REMOTE_KEY_RESERVE';
     REMOTE_KEY_ATTACK: 'REMOTE_KEY_ATTACK';
+    remote_transport: 'remote_transport';
     REMOTE_KEY_BUILDER: 'REMOTE_KEY_BUILDER';
     DRIVER_KEY_SPAWN_AUTO: 'DRIVER_KEY_SPAWN_AUTO';
     DRIVER_KEY_REMOTE_REPAIR: 'DRIVER_KEY_REMOTE_REPAIR';

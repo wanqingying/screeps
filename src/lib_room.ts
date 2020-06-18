@@ -64,9 +64,11 @@ export function checkRemoteDanger(creep: Creep) {
 
     let atk = findAttackTarget(creep.room);
     if (atk) {
-        creep.memory.ack_tick = 30;
+        creep.memory.ack_tick = 40;
         creep.moveTo(pos);
         creep.say('danger');
+        let atc=w_cache.get('remote_attack_g_v')
+        atc.warning(creep,atk)
         return true;
     } else {
         creep.memory.ack_tick -= 1;

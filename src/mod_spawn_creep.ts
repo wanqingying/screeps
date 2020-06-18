@@ -1,5 +1,7 @@
-import { getBodyCost, ListA, RemoteReserve, RemoteTransport, run_my_room } from './lib_base';
+import { getBodyCost, ListA, run_my_room } from './lib_base';
 import { getCreepBodyByRole } from './lib_creep';
+import { RemoteTransport } from './mod_remote_transport';
+import { RemoteReserveW } from './mod_remote_reserve';
 
 interface CacheRoom {
     // 房间当前角色数量
@@ -28,7 +30,7 @@ interface SpawnTask {
 export class SpawnAuto {
     private last_run_time = 0;
     private last_update_time = 0;
-    private run_tick = 6;
+    private run_tick = 9;
     private max_fail_tick = this.run_tick * 10;
     private spawn_before_tick = 30;
     private timeoutMap = new Map();
@@ -93,7 +95,6 @@ export class SpawnAuto {
         che.c_ready = false;
         const body = this.getCreepBody(room, role);
         if (!body || body.length === 0) {
-            console.log('body empty check config');
             return;
         }
         const cost = getBodyCost(body);
@@ -141,7 +142,25 @@ export class SpawnAuto {
         let role = che.c_spawning_role;
         let mem = {};
         if (!role) {
-            let next = che.c_wait_role.shift();
+            let list = che.c_wait_role || [];
+            let next = list.find(c => [w_role_name.carrier].includes(c.role));
+            if (!next) {
+                next = list.find(c => [w_role_name.harvester].includes(c.role));
+            }
+            if (!next) {
+                next = list.find(c => [w_role_name.starter].includes(c.role));
+            }
+            if (!next) {
+                next = list.find(c =>
+                    [w_role_name.attack, w_role_name.remote_attack].includes(c.role)
+                );
+            }
+            if (!next) {
+                next = list.find(c =>
+                    [w_role_name.attack, w_role_name.remote_attack].includes(c.role)
+                );
+                next = che.c_wait_role.shift();
+            }
             if (next) {
                 role = next.role;
                 room.memory.spawning_role = role;
@@ -167,6 +186,9 @@ export class SpawnAuto {
         const current_harvester = current_exist[w_role_name.harvester];
         const current_carrier = current_exist[w_role_name.carrier];
         const cfg = w_config.rooms[room.name];
+        console.log(room.name);
+        console.log('boost');
+        console.log(JSON.stringify(current_exist));
         if (
             che.c_roles_count[w_role_name.harvester] === 0 &&
             che.c_roles_count[w_role_name.carrier] === 0 &&
@@ -174,25 +196,36 @@ export class SpawnAuto {
         ) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.starter });
         }
+        console.log('1');
+
         if (current_exist.starter < cfg.creep_cfg_num.starter) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.starter });
         }
+        console.log('2');
+
         if (current_carrier < 1) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.carrier });
         }
+        console.log('3');
+
         if (current_harvester < 1) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.harvester });
         }
+        console.log('4');
+
         if (current_carrier < 2) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.carrier });
         }
+        console.log('5');
+
         if (current_harvester < 2) {
             return this.addSpawnTask(room, { room: room.name, role: w_role_name.harvester });
         }
+
     };
     private updateRoleConfig = (room: Room) => {
-        const sh: RemoteReserve = w_cache.get(w_code.REMOTE_KEY_RESERVE);
-        const ch: RemoteTransport = w_cache.get(w_code.REMOTE_KEY_TRANSPORT);
+        const sh: RemoteReserveW = w_cache.get('remote_ser_h');
+        const ch: RemoteTransport = w_cache.get(w_code.remote_transport);
         const current_exist = this.getRoomCache(room).c_roles_count;
         const cfg = w_config.rooms[room.name].creep_cfg_num;
         const list = Object.entries(current_exist)
@@ -244,6 +277,9 @@ export class SpawnAuto {
     };
     // 每次 tick
     public updateState = () => {
+        if (this.last_update_time === Game.time) {
+            return;
+        }
         this.last_update_time = Game.time;
         run_my_room(room => {
             let che = this.getRoomCache(room);

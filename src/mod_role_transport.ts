@@ -1,9 +1,11 @@
 import {
     findNearTarget,
-    is_empty_tate,
-    is_full_tate,
+    is_less_than,
+    is_more_than,
     isContainerNearController,
     isContainerNearSource,
+    isEmpty,
+    isFull,
     run_creep,
     run_my_room,
 } from './lib_base';
@@ -46,29 +48,32 @@ const minAmo = 40;
 // todo 支持自定义调度 callback
 const w_out = {
     // 丢地上的
-    drop: 100,
+    drop: 95,
     // 矿区容器
     harvester_container: 90,
     // 升级用的容器
     controller_container: 20,
     link_a: 0,
-    link_b: 90,
-    [STRUCTURE_STORAGE]: 30,
+    link_b: 96,
+    link_c: 10,
+    link_d: 30,
+    [STRUCTURE_STORAGE]: 40,
     [STRUCTURE_SPAWN]: 4,
     [STRUCTURE_TOWER]: 0,
     [STRUCTURE_EXTENSION]: 9,
-    [STRUCTURE_CONTAINER]: 40,
-    [BOTTOM]: 40,
+    [STRUCTURE_CONTAINER]: 50,
 };
 const w_in = {
     drop: 0,
     link_a: 0,
     link_b: 0,
+    link_c: 85,
+    link_d: 0,
     harvester_container: 0,
     controller_container: 60,
-    [STRUCTURE_STORAGE]: 30,
-    [STRUCTURE_SPAWN]: 90,
-    [STRUCTURE_TOWER]: 80,
+    [STRUCTURE_STORAGE]: 45,
+    [STRUCTURE_SPAWN]: 95,
+    [STRUCTURE_TOWER]: 90,
     [STRUCTURE_EXTENSION]: 99,
     [STRUCTURE_CONTAINER]: 50,
 };
@@ -153,10 +158,10 @@ export class TransportDriver {
             this.updateState();
         }
         let tasks: TransTask[];
-        if (is_full_tate(creep)) {
+        if (is_more_than(creep)) {
             creep.memory.trans_direct = 'in';
         }
-        if (is_empty_tate(creep)) {
+        if (is_less_than(creep)) {
             creep.memory.trans_direct = 'out';
         }
         let direct = creep.memory.trans_direct;
@@ -203,13 +208,13 @@ export class TransportDriver {
     };
     private run_task = (creep: Creep, task: TransTask) => {
         creep.say('*' + task.stcType);
-        if (task.trans_dec === 'in' && is_empty_tate(creep)) {
+        if (task.trans_dec === 'in' && isEmpty(creep)) {
             // 运入建筑 单位没有资源重置
             creep.say('reset_emp');
             return this.closeCreepTask(creep);
         }
 
-        if (task.trans_dec === 'out' && is_full_tate(creep)) {
+        if (task.trans_dec === 'out' && isFull(creep)) {
             // 从建筑运出 如果单位已满则重置任务
             creep.say('reset_ful');
             return this.closeCreepTask(creep);
@@ -221,15 +226,14 @@ export class TransportDriver {
         let code;
         const target = Game.getObjectById(task.id) as any;
         if (!target) {
+            creep.say('err');
             return this.closeCreepTask(creep);
         }
-        const far = moveToTarget(creep, target, 1);
-
+        let far = moveToTarget(creep, target, 1);
         if (far > 3) {
             return;
         }
-        creep.say(far + '');
-
+        creep.say('_' + far);
         if (task.trans_dec === 'in') {
             const type = task.resType;
             if (type === 'any') {
@@ -244,9 +248,10 @@ export class TransportDriver {
         }
         // Tombstone 特殊处理
         if (task.trans_dec === 'out') {
-            if (task.stcType === 'drop') {
+            if (target.amount){
                 code = creep.pickup(target as Resource);
-            } else {
+            }
+            if (target.store){
                 code = creep.withdraw(target, task.resType as any);
             }
         }
@@ -255,6 +260,8 @@ export class TransportDriver {
         }
         if (far <= 1) {
             this.closeCreepTask(creep);
+            let msg=w_utils.get_code_msg(code)
+            creep.say(msg)
             return;
         }
     };
@@ -379,25 +386,54 @@ export class TransportDriver {
                     );
                 }
             });
-        // link_b
+        // link
         const lin_b = w_config.rooms[room.name].link_b || [];
+        const lin_c = w_config.rooms[room.name].link_c || [];
+        const lin_d = w_config.rooms[room.name].link_d || [];
         lin_b
             .map(id => Game.getObjectById(id))
             .forEach((link: StructureLink) => {
-                RESOURCES_ALL.forEach(type => {
-                    const used = link.store.getUsedCapacity(type);
-                    if (used > 0) {
-                        const taskOut = generateTask('out', link, {
-                            amount: used,
-                            resourceType: type,
-                            structureType: 'link_b',
-                        });
-                        che.transOut.updateTask(taskOut);
-                    }
-                });
+                const used = link.store.getUsedCapacity(RESOURCE_ENERGY);
+                if (used > 0) {
+                    const taskOut = generateTask('out', link, {
+                        amount: used,
+                        resourceType: RESOURCE_ENERGY,
+                        structureType: 'link_b',
+                    });
+                    che.transOut.updateTask(taskOut);
+                }
             });
+        lin_c
+            .map(id => Game.getObjectById(id))
+            .forEach((link: StructureLink) => {
+                const free = link.store.getFreeCapacity(RESOURCE_ENERGY);
+                if (free > 0) {
+                    const task = generateTask('in', link, {
+                        amount: free,
+                        resourceType: RESOURCE_ENERGY,
+                        structureType: 'link_c',
+                    });
+                    che.transIn.updateTask(task);
+                }
+            });
+        // lin_d
+        //     .map(id => Game.getObjectById(id))
+        //     .forEach((link: StructureLink) => {
+        //         const used = link.store.getUsedCapacity(RESOURCE_ENERGY);
+        //         if (used > 0) {
+        //             const task = generateTask('out', link, {
+        //                 amount: used,
+        //                 resourceType: RESOURCE_ENERGY,
+        //                 structureType: 'link_d',
+        //             });
+        //             che.transOut.updateTask(task);
+        //         }
+        //     });
     };
     public updateState = () => {
+        if (this.updateTick === Game.time) {
+            return;
+        }
         this.updateTick = Game.time;
         run_my_room(room => {
             this.publicTask(room);
@@ -632,7 +668,7 @@ interface TransTask {
 interface GenTask {
     amount: number;
     resourceType: resType;
-    structureType?: stcType;
+    structureType?: stcType | string;
 }
 
 function generateTask(

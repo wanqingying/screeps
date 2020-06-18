@@ -7,10 +7,12 @@ import { RoomCache } from './room_cache';
 
 function main() {
     console.log(
-        '===============================tick===============================================',
+        '====================9===========tick===============================================',
         Game.time
     );
-    Object.values(Game.rooms).forEach(room => {});
+    Object.values(Game.rooms).forEach(room => {
+        console.log(room.name,room.energyAvailable, '/', room.energyCapacityAvailable);
+    });
     RoomCache.start();
     RoomCache.start();
     mod.load_cache();
@@ -20,7 +22,6 @@ function main() {
     // 防御塔
     mod.load_tower_logic();
     // 采矿
-    mod.load_harvest();
     // 运输
     mod.TransportDriver.start();
     // mod.load_distribution_transport();
@@ -32,12 +33,14 @@ function main() {
     mod.load_defence();
     mod.load_scout();
     mod.load_scout();
-    mod.load_remote_reserve();
-    mod.load_remote_attack();
+    // mod.load_remote_attack();
     mod.RemoteRepair.start();
     mod.RemoteBuilder.start();
     mod.RemoteHarvest.start();
     mod.RemoteTransport.start();
+    mod.RemoteReserveW.start()
+    mod.HarvestAtMyRoom.start()
+    mod.RemoteAttackW.start()
     BaseClaim.start();
     BaseLink.start();
     Object.keys(Memory.creeps).forEach(name => {

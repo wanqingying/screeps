@@ -4,7 +4,13 @@ export class BaseMod {
         this.born_tick = Game.time;
     }
 
-    private updateState = () => {};
+    private updateState = () => {
+        if (this.update_tick===Game.time){
+            return;
+        }
+        this.update_tick=Game.time;
+
+    };
     private update_tick = 0;
     private tryUpdateState = () => {
         if (Game.time - this.update_tick > 27) {

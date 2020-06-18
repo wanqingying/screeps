@@ -1,6 +1,6 @@
 import {
-    is_empty_tate,
-    is_full_tate,
+    is_less_than,
+    is_more_than,
     isEmpty,
     isFull,
     isNotEmpty,

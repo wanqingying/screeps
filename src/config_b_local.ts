@@ -13,6 +13,7 @@ export const cfg_local: { [k: string]: CfgRoom } = {
             [w_role_name.repair]: 0,
             [w_role_name.attack]: 0,
         },
+        link_a: ['41560dd9b7d200a'],
         claims: {
             name: 'W1N8',
             creep: [
@@ -37,23 +38,28 @@ export const cfg_local: { [k: string]: CfgRoom } = {
     W2N7: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 4,
-            [w_role_name.remote_carry]: 0,
-            [w_role_name.remote_builder]: 0,
+            [w_role_name.carrier]: 2,
             [w_role_name.scout]: 0,
             [w_role_name.builder]: 1,
             [w_role_name.harvester]: 0,
-            [w_role_name.remote_harvester]: 0,
-            [w_role_name.remote_reserve]: 0,
-            [w_role_name.upgrader]: 0,
+            [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 1,
+            [w_role_name.remote_repair]: 1,
+            [w_role_name.remote_carry]: 5,
+            [w_role_name.remote_builder]: 1,
+            [w_role_name.remote_harvester]: 4,
+            [w_role_name.remote_reserve]: 2,
         },
         reserve: {
             W3N7: [
-                { id: 'eff307740862fd8', container_id: 'f05df9672ac4fb0' },
-                { id: 'eee50774086309c', container_id: '' },
+                { id: 'eff307740862fd8', container_pos: [12, 22] },
+                { id: 'eee50774086309c', container_pos: [37, 4] },
             ],
-            // W3N8: [{ id: 'ebdd0774017409d', container_id: '' }, { id: '9d330774017e6b9' }],
+
+            W3N8: [
+                { id: 'ebdd0774017409d', container_pos: [41, 37] },
+                { id: '9d330774017e6b9', container_pos: [34, 4] },
+            ],
         },
         scout: ['W4N7'],
         remote_container: ['3ae357adc2e6a21'],

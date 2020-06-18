@@ -1,5 +1,5 @@
 import { getSourceWithContainer } from './lib_room';
-import { is_empty_tate, is_full_tate } from './lib_base';
+import { is_less_than, is_more_than } from './lib_base';
 import { harvestSource } from './lib_creep';
 import { TransportDriver } from './mod_role_transport';
 
@@ -46,10 +46,10 @@ export function load_starter() {
 }
 
 function run_starter(creep: Creep) {
-    if (is_empty_tate(creep)) {
+    if (is_less_than(creep)) {
         creep.memory.process = 'dig';
     }
-    if (is_full_tate(creep)) {
+    if (is_more_than(creep)) {
         creep.memory.process = null;
     }
 

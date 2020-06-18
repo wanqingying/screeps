@@ -1,6 +1,7 @@
 import { isEmpty, isFull, run_creep, run_my_room } from './lib_base';
 import { checkRemoteDanger } from './lib_room';
 import { TransportDriver } from './mod_role_transport';
+import { moveToTarget } from './lib_creep';
 
 const DROP = 'drop';
 
@@ -93,7 +94,8 @@ export class RemoteTransport {
         return this.array.filter(t => t.from === room.name);
     };
     public stop_spawn_carry = (room: Room): boolean => {
-        return this.array.filter(t => t.from === room.name && t.amount > 200).length === 0;
+        return false;
+        // return this.array.filter(t => t.from === room.name && t.amount > 200).length === 0;
     };
     private getTaskById = (id: string): RemoteTransportTask => {
         return this.array.find(t => t.id === id);
@@ -128,7 +130,7 @@ export class RemoteTransport {
                 creep.moveTo(pos);
                 creep.memory.mv_tick = 3;
             } else {
-                let container_ids = w_config.rooms[task.from]?.remote_container || [];
+                let container_ids = w_config.rooms[creep.memory.from]?.remote_container || [];
                 const cns: StructureContainer[] = container_ids
                     .map(id => Game.getObjectById(id))
                     .filter(c => c) as any;
@@ -137,10 +139,8 @@ export class RemoteTransport {
                 });
 
                 if (target) {
-                    const code = creep.transfer(target, task.resourceType);
-                    if (code === ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target);
-                    }
+                    moveToTarget(creep, target, 1);
+                    creep.transfer(target, task?.resourceType || RESOURCE_ENERGY);
                 } else {
                     return TransportDriver.giv_resource(creep);
                 }
@@ -194,7 +194,9 @@ export class RemoteTransport {
                 if (!remote_room) {
                     return;
                 }
-                const drops = remote_room.find(FIND_DROPPED_RESOURCES, { filter: c => c.amount > 100 });
+                const drops = remote_room.find(FIND_DROPPED_RESOURCES, {
+                    filter: c => c.amount > 100,
+                });
                 drops.forEach(d => {
                     let exist = this.array.find(t => t.id === d.id);
                     if (exist) {
@@ -259,7 +261,7 @@ export class RemoteTransport {
         run_creep(w_role_name.remote_carry, this.run_remote_transport);
     };
     private last_run_time = 0;
-    public static cache_key = 'remote_trans_t';
+    public static cache_key = w_code.remote_transport;
     public static start = () => {
         let driver: RemoteTransport = w_cache.get(RemoteTransport.cache_key);
         if (!driver) {
@@ -272,4 +274,10 @@ export class RemoteTransport {
         }
         return driver;
     };
+}
+
+let driver: RemoteTransport = w_cache.get(RemoteTransport.cache_key);
+if (!driver) {
+    driver = new RemoteTransport();
+    w_cache.set(RemoteTransport.cache_key, driver);
 }
