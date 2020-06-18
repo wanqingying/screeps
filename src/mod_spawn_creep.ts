@@ -256,9 +256,11 @@ export class SpawnAuto {
         });
     };
     private tryUpdateState = () => {
+        this.updateState();
+
         if (Game.time - this.last_update_time > 30) {
             this.last_update_time = Game.time;
-            this.updateState();
+            // this.updateState();
         }
     };
     // 主方法 每 tick 调用一次
