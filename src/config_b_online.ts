@@ -7,7 +7,7 @@ export const cfg_online: { [k: string]: CfgRoom } = {
             [w_role_name.starter]: 0,
             [w_role_name.carrier]: 2,
             [w_role_name.scout]: 0,
-            [w_role_name.builder]: 0,
+            [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
             [w_role_name.upgrader]: 2,
             [w_role_name.repair]: 1,
@@ -23,17 +23,17 @@ export const cfg_online: { [k: string]: CfgRoom } = {
             // E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_pos: [10, 18] }],
         },
         // 用于采矿 只有采矿单位使用 发送到其他link
-        link_a: [],
+        link_a: ['5eebf3521f88d46bee1e7a56'],
         // 用于接受其他link 单位清空此link
         link_b: [],
         // 用于发送能量 比如发送到controller 单位搬运能量到此
-        link_c: ['5ee977305ee0cd135ace0bd8'],
+        // link_c: [''],
         // 接收能量 用于升级 单位不处理此link
         link_d: ['5ee98971418f3a4631ec8d8c'],
         // 传输配对
         link_pair: [
-            // storage->controller
-            ['5ee977305ee0cd135ace0bd8', '5ee98971418f3a4631ec8d8c'],
+            // mine->controller
+            ['5eebf3521f88d46bee1e7a56', '5ee98971418f3a4631ec8d8c'],
         ],
         // claims: {
         //     name: 'E13S5',

@@ -20,7 +20,7 @@ const DropSite = 'drop';
 // only for in , not out
 const AnySource = 'any';
 // any 表示任意资源
-type resType = ResourceConstant | typeof AnySource;
+type resType = ResourceConstant;
 type stcType =
     | StructureConstant
     | typeof DropSite
@@ -102,7 +102,34 @@ export class TransportDriver {
     private updateTick = 0;
     private last_run_time = 0;
     private last_reset_time = 0;
-    constructor() {}
+    constructor() {
+        this.source_sites = [];
+        this.mineral_sites = [];
+        run_my_room(room => {
+            room.find(FIND_SOURCES).forEach(s => {
+                let { x, y, roomName } = s.pos;
+                this.source_sites.push({ pos: [x, y, roomName], id: s.id });
+            });
+            room.find(FIND_DEPOSITS).forEach(s => {
+                let { x, y, roomName } = s.pos;
+                this.source_sites.push({ pos: [x, y, roomName], id: s.id });
+            });
+        });
+    }
+    private readonly source_sites: { pos: any[]; id: string }[];
+    private readonly mineral_sites: { pos: any[]; id: string }[];
+    private is_container_near_mine = (room: Room, pos: RoomPosition) => {
+        let pos_a = Array.from(this.source_sites);
+        pos_a = pos_a.concat(this.mineral_sites);
+        let near = findNearTarget(
+            pos,
+            pos_a.map(p => p.pos)
+        );
+        let far = w_utils.count_distance(pos, near);
+        if (far <= 3) {
+            return true;
+        }
+    };
     private cache_creep: Map<string, CacheCreep> = new Map();
     private cache_room: Map<string, CacheRoom> = new Map<string, CacheRoom>();
     private getRoomCache = (room: Room) => {
@@ -208,15 +235,17 @@ export class TransportDriver {
     };
     private run_task = (creep: Creep, task: TransTask) => {
         creep.say('*' + task.stcType);
-        if (task.trans_dec === 'in' && isEmpty(creep)) {
+        if (task.trans_dec === 'in' && isEmpty(creep, task.resType)) {
             // 运入建筑 单位没有资源重置
-            creep.say('reset_emp');
+            creep.say('reset_emp2');
+            console.log('eeeee');
+            console.log(JSON.stringify(task));
             return this.closeCreepTask(creep);
         }
 
-        if (task.trans_dec === 'out' && isFull(creep)) {
+        if (task.trans_dec === 'out' && isFull(creep, task.resType)) {
             // 从建筑运出 如果单位已满则重置任务
-            creep.say('reset_ful');
+            creep.say('reset_ful3');
             return this.closeCreepTask(creep);
         }
 
@@ -315,14 +344,22 @@ export class TransportDriver {
                     });
                     che.transOut.updateTask(taskOut);
                 }
-            });
-            const free = storage.store.getFreeCapacity();
 
-            const taskIn: TransTask = generateTask('in', storage, {
-                amount: free,
-                resourceType: 'any',
+                const free = storage.store.getFreeCapacity();
+                const taskIn: TransTask = generateTask('in', storage, {
+                    amount: free,
+                    resourceType: type,
+                });
+                che.transIn.updateTask(taskIn);
             });
-            che.transIn.updateTask(taskIn);
+            // const free = storage.store.getFreeCapacity();
+            //
+            //
+            // const taskIn: TransTask = generateTask('in', storage, {
+            //     amount: free,
+            //     resourceType: 'any',
+            // });
+            // che.transIn.updateTask(taskIn);
         }
         // spawn extension===================
         Array.from(structures)
@@ -348,7 +385,7 @@ export class TransportDriver {
             })
             .forEach((s: StructureContainer) => {
                 let stc: stcType = s.structureType;
-                if (isContainerNearSource(room, s)) {
+                if (this.is_container_near_mine(room, s.pos)) {
                     stc = 'harvester_container';
                 }
                 if (isContainerNearController(room, s)) {

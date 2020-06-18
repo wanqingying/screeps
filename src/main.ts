@@ -7,7 +7,7 @@ import { RoomCache } from './room_cache';
 
 function main() {
     console.log(
-        '====================9===========tick===============================================',
+        '===================55===========tick===============================================',
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {

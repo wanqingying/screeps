@@ -17,6 +17,24 @@ export class HarvestAtMyRoom {
             let cts: StructureContainer[] = room.find(FIND_STRUCTURES, {
                 filter: s => s.structureType === STRUCTURE_CONTAINER,
             }) as any;
+            room.find(FIND_DEPOSITS).forEach(s=>{
+                let near: StructureContainer = findNearTarget(s, cts);
+                let pos = [s.pos.x, s.pos.y, s.pos.roomName];
+                if (near) {
+                    let far = w_utils.count_distance(s, near);
+                    if (far <= 2) {
+                        pos = [near.pos.x, near.pos.y, near.pos.roomName];
+                    }
+                }
+                this.array.push({
+                    room_name: room.name,
+                    source_id: s.id,
+                    resType: s.depositType,
+                    creep_id: '',
+                    update_tick: 0,
+                    pos: pos,
+                });
+            })
             room.find(FIND_SOURCES).forEach(s => {
                 let near: StructureContainer = findNearTarget(s, cts);
                 let pos = [s.pos.x, s.pos.y, s.pos.roomName];
@@ -81,7 +99,7 @@ export class HarvestAtMyRoom {
                             creep.say('link');
                             let code = creep.transfer(near, RESOURCE_ENERGY);
                             if (code === ERR_NOT_IN_RANGE) {
-                                // creep.moveTo(near as any);
+                                creep.moveTo(near as any);
                                 // return true;
                                 return;
                             }
