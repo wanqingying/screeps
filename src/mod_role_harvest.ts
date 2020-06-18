@@ -95,7 +95,7 @@ export class HarvestAtMyRoom {
                     let near: any = findNearTarget(creep, links);
                     if (near) {
                         let far = w_utils.count_distance(creep, near);
-                        if (far <= 4) {
+                        if (far <= 2) {
                             creep.say('link');
                             let code = creep.transfer(near, RESOURCE_ENERGY);
                             if (code === ERR_NOT_IN_RANGE) {

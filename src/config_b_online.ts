@@ -9,7 +9,7 @@ export const cfg_online: { [k: string]: CfgRoom } = {
             [w_role_name.scout]: 0,
             [w_role_name.builder]: 1,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 2,
+            [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 1,
             [w_role_name.remote_carry]: 1,
             [w_role_name.remote_reserve]: 1,
