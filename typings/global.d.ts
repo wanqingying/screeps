@@ -100,6 +100,7 @@ declare namespace NodeJS {
         w_log(...p: any): void;
         w_log_on: boolean;
         w_a_log(...p: any): void;
+        g_log: Function;
         w_my_name: string;
         w_set_tick_out(tick: number, fn: Function): void;
     }
@@ -113,3 +114,4 @@ declare const w_code: W_CODE;
 declare const w_utils: W_Utils;
 declare const w_debug_creep: string;
 declare const w_my_name: string;
+declare const g_log: (...p: any) => void;

@@ -39,3 +39,6 @@ declare interface RoomMemory {
 declare interface SpawnMemory {
     tasks: any[];
 }
+declare interface SpawnMemory {
+    spawning_role: string;
+}
