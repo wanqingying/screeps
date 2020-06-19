@@ -92,7 +92,7 @@ export class RemoteAttackW {
         console.log(1);
         if (spawn && spawn.target && spawn.target?.ticksToLive > 300) {
             console.log(2);
-             SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
+            SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
         }
         console.log(3);
     };
