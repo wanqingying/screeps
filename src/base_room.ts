@@ -90,12 +90,12 @@ class PosDesc<T> {
     public readonly id: string;
     public update_tick: number = 0;
     public extra: any;
-    public creep_id?:string
+    public creep_id?: string;
     private _target = undefined;
-    public get roomName(){
-        return this.pos[2]
+    public get roomName() {
+        return this.pos[2];
     }
-    private _up_tk=0;
+    private _up_tk = 0;
     public get target(): T {
         if (this._up_tk !== Game.time) {
             this._up_tk = Game.time;
@@ -224,19 +224,18 @@ class CacheRoom {
                 }
                 if (far <= 2) {
                     const { x, y, roomName } = ct.pos;
-                    const pos= new PosDesc<StructureContainer>({
+                    const pos = new PosDesc<StructureContainer>({
                         pos: [x, y, roomName],
                         id: ct.id,
                     });
-                    desc.mine.container=pos;
-                    desc.container =pos
+                    desc.mine.container = pos;
+                    desc.container = pos;
                 }
                 if (far2 <= 2) {
                     const { x, y, roomName } = lk.pos;
-                    let pos=new PosDesc<StructureLink>({ pos: [x, y, roomName], id: lk.id });
-                    desc.link = pos
-                    desc.mine.link=pos;
-
+                    let pos = new PosDesc<StructureLink>({ pos: [x, y, roomName], id: lk.id });
+                    desc.link = pos;
+                    desc.mine.link = pos;
                 }
                 this.extractor.push(desc);
             });

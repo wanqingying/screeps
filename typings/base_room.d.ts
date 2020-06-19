@@ -3,8 +3,8 @@ declare class PosDesc<T> {
     id: string;
     update_tick: number;
     readonly target: T;
-    readonly roomName:string
-    public creep_id?:string
+    readonly roomName: string;
+    public creep_id?: string;
     // extra msg like creep id
     extra?: any;
 }
