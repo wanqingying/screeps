@@ -122,8 +122,8 @@ export class SpawnAuto {
     };
     private trySpawnCreep = (room: Room, role: string, mem?: any) => {
         if (room.memory.spawning_role) {
-            // todo is this ok
-            role = room.memory.spawning_role;
+            g_log(`${room.name} spawn ${role} fail, busy`);
+            return;
         }
         const che = this.getRoomCache(room);
         const spawn = che.c_spawn_ids
@@ -288,8 +288,8 @@ export class SpawnAuto {
             driver = new SpawnAuto();
             w_cache.set(SpawnAuto.cache_key, driver);
         }
-        driver.trySpawnCreep(room, role, mem);
         driver.run(true);
+        driver.trySpawnCreep(room, role, mem);
     };
     public static cache_key = w_code.DRIVER_KEY_SPAWN_AUTO;
     public static start = () => {
@@ -301,3 +301,9 @@ export class SpawnAuto {
         driver.run();
     };
 }
+let driver: SpawnAuto = w_cache.get(SpawnAuto.cache_key);
+if (!driver) {
+    driver = new SpawnAuto();
+    w_cache.set(SpawnAuto.cache_key, driver);
+}
+global.G_SpawnAuto = SpawnAuto;

@@ -104,6 +104,7 @@ declare namespace NodeJS {
         w_my_name: string;
         w_set_tick_out(tick: number, fn: Function): void;
         G_BaseRoom: G_BaseRoom;
+        G_SpawnAuto: G_SpawnAuto;
     }
 }
 

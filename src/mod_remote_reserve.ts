@@ -12,7 +12,7 @@ interface RemoteReserveTask {
 }
 
 export class RemoteReserveW {
-    private array: RemoteReserveTask[] = [];
+    private readonly array: RemoteReserveTask[] = [];
     // reserve to this value
     private max_contain = 3500;
     constructor() {
@@ -33,11 +33,12 @@ export class RemoteReserveW {
         });
     }
     private update_tick2 = 0;
-    public updateState = () => {
+    private updateState = () => {
         if (this.update_tick2 === Game.time) {
             return;
         }
         this.update_tick2 = Game.time;
+        // update creep
         run_creep(w_role_name.remote_reserve, creep => {
             if (creep.memory.remote_task_id) {
                 let task = this.array.find(t => t.id === creep.memory.remote_task_id);
@@ -48,30 +49,33 @@ export class RemoteReserveW {
                 task.update_tick = Game.time;
             }
         });
-        Object.keys(w_config.rooms).forEach(name => {
-            let cfg_room = w_config.rooms[name];
-            let reserves = cfg_room.reserve || {};
-            Object.keys(reserves).forEach((_name, index) => {
-                let room = Game.rooms[_name];
-                let target = this.array.find(s => s.remote === _name);
-                if (room && target) {
-                    target.process = room.controller?.reservation?.ticksToEnd;
-                }
-            });
-        });
-        this.array.forEach(task => {
-            let room = Game.rooms[task.remote];
-            if (room && room.controller?.reservation?.ticksToEnd) {
-                task.process = room.controller?.reservation?.ticksToEnd || 0;
-            } else {
-                task.process = 0;
+        // update progress
+        this.array.forEach(t => {
+            let room = Game.rooms[t.remote];
+            if (room) {
+                t.process = room.controller?.reservation?.ticksToEnd || 0;
             }
+        });
+        // clear no creep task
+        this.array.forEach(task => {
             if (task.update_tick !== Game.time) {
                 task.creep_id = '';
             }
         });
     };
-    public getTask = (creep: Creep): RemoteReserveTask => {
+    private trySpawnWorker = () => {
+        this.updateState();
+        for (let i = 0; i < this.array.length; i++) {
+            const task = this.array[i];
+            if (!task.creep_id && task.process < this.max_contain) {
+                const room = Game.rooms[task.from];
+                G_SpawnAuto.spawnCreep(room, w_role_name.remote_reserve, {
+                    remote_task_id: task.id,
+                });
+            }
+        }
+    };
+    private getTask = (creep: Creep): RemoteReserveTask => {
         if (creep.memory.remote_task_id) {
             let prev = this.getTaskById(creep.memory.remote_task_id);
             if (prev) {
@@ -184,6 +188,7 @@ export class RemoteReserveW {
     private run = () => {
         this.tryUpdateState();
         run_creep(w_role_name.remote_reserve, this.run_remote_reserve);
+        this.trySpawnWorker();
     };
     private last_run_time = 0;
     public static cache_key = 'remote_ser_h';
