@@ -15,9 +15,9 @@ export function load_builder() {
         try {
             run_builder(creep);
         } catch (e) {
-            console.log('err run_builder ', creep.name);
-            console.log(e.message);
-            console.log(e.stack);
+            g_log('err run_builder ', creep.name);
+            g_log(e.message);
+            g_log(e.stack);
         }
     });
 }

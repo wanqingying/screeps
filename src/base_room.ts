@@ -297,16 +297,16 @@ class CacheRoom {
     };
     public findMineLink = (pos: RoomPosition, id: string): StructureLink => {
         let extractor = this.extractor.find(e => {
-            if (!e.link.id) {
+            if (!e?.link) {
                 return false;
             }
-            return e.id === id || e.mine?.id === id;
+            return e?.id === id || e.mine?.id === id;
         });
-        if (extractor) {
+        if (extractor&&extractor.link) {
             return extractor.link.target;
         }
-        let source = this.source.find(s => s.id === id && s.link.id);
-        if (source) {
+        let source = this.source.find(s => s?.id === id && s.link?.id);
+        if (source&&source.link) {
             return source.link.target;
         }
     };

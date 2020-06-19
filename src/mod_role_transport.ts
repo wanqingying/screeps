@@ -238,8 +238,6 @@ export class TransportDriver {
         if (task.trans_dec === 'in' && isEmpty(creep, task.resType)) {
             // 运入建筑 单位没有资源重置
             creep.say('reset_emp2');
-            console.log('eeeee');
-            console.log(JSON.stringify(task));
             return this.closeCreepTask(creep);
         }
 
@@ -493,9 +491,9 @@ export class TransportDriver {
             try {
                 this.run_transport(creep);
             } catch (e) {
-                console.log('err run_transport ', creep.name);
-                console.log(e.message);
-                console.log(e.stack);
+                g_log('err run_transport ', creep.name);
+                g_log(e.message);
+                g_log(e.stack);
             }
         });
     };

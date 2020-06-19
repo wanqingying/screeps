@@ -7,9 +7,9 @@ export function load_upgrader() {
         try {
             run_upgrader(creep);
         } catch (e) {
-            console.log('err run_upgrader ', creep.name);
-            console.log(e.message);
-            console.log(e.stack);
+            g_log('err run_upgrader ', creep.name);
+            g_log(e.message);
+            g_log(e.stack);
         }
     });
 }

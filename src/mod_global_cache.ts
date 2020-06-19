@@ -5,9 +5,9 @@ export function load_cache() {
     try {
         load_global_cache();
     } catch (e) {
-        console.log('err load_global_cache');
-        console.log(e.message);
-        console.log(e.stack);
+        g_log('err load_global_cache');
+        g_log(e.message);
+        g_log(e.stack);
     }
 }
 

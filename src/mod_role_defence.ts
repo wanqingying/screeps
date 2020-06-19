@@ -23,9 +23,9 @@ export function load_defence() {
                 run_defence(creep);
             });
         } catch (e) {
-            console.log('err load_tower_logic ', room.name);
-            console.log(e.message);
-            console.log(e.stack);
+            g_log('err load_tower_logic ', room.name);
+            g_log(e.message);
+            g_log(e.stack);
         }
     });
 }

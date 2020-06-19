@@ -73,13 +73,19 @@ export class RemoteAttackW {
         let task = this.getTask(creep);
         if (task && task.target) {
             let code = creep.attack(task.target);
-            moveToTarget(creep, task.target as any);
+            if (code===ERR_NOT_IN_RANGE){
+                creep.moveTo(task.target)
+            }
         } else {
-            let room = Game.rooms[creep.memory.from];
-            const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
-            let far = moveToTarget(creep, sp as any);
-            if (far < 3) {
-                sp.recycleCreep(creep);
+            creep.memory.process+=1
+            g_log(creep.name,' no atk target');
+            if (creep.memory.process>4){
+                let room = Game.rooms[creep.memory.from];
+                const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
+                let far = moveToTarget(creep, sp as any);
+                if (far < 3) {
+                    sp.recycleCreep(creep);
+                }
             }
         }
     };
@@ -89,12 +95,9 @@ export class RemoteAttackW {
         if (has_atk) {
             return;
         }
-        console.log(1);
         if (spawn && spawn.target && spawn.target?.ticksToLive > 300) {
-            console.log(2);
             SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
         }
-        console.log(3);
     };
 
     private updateState = () => {

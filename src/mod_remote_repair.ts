@@ -203,9 +203,9 @@ export class RemoteRepair {
             try {
                 this.run_remote_repair(creep);
             } catch (e) {
-                console.log('err run_remote_repair');
-                console.log(e.message);
-                console.log(e.stack);
+                g_log('err run_remote_repair');
+                g_log(e.message);
+                g_log(e.stack);
             }
         });
     };
@@ -397,9 +397,9 @@ export class RemoteBuilder {
             try {
                 this.run_remote_builder(creep);
             } catch (e) {
-                console.log('err run_remote_builder');
-                console.log(e.message);
-                console.log(e.stack);
+                g_log('err run_remote_builder');
+                g_log(e.message);
+                g_log(e.stack);
             }
         });
     };
