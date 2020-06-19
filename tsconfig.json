@@ -13,7 +13,8 @@
   },
   "include": [
     "src/*",
-    "typings"
+    "typings",
+    "src/*.ts"
   ],
   "exclude": [
     "node_modules",

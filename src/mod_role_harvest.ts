@@ -99,10 +99,6 @@ export class HarvestAtMyRoom {
             }
         }
 
-        const nea = BaseRoom.findSpawnEnergyTarget(creep);
-        console.log(creep.name);
-        console.log('near energy spawn', nea?.pos);
-
         if (!task) {
             creep.say('no_task');
             return;
@@ -120,6 +116,7 @@ export class HarvestAtMyRoom {
         }
     };
     private tryGiveLinkOrDrop = (creep: Creep) => {
+        let tsc= BaseRoom.findTargetToTransferEnergy(creep)
         if (creep.body.find(b => b.type === CARRY)) {
             if (is_more_than(creep, 0.8)) {
                 creep.say('more');
@@ -171,6 +168,7 @@ export class HarvestAtMyRoom {
         let task = this.getTaskByOrder(creep);
         if (task) {
             task.creep_id = creep.id;
+            let t2: PosDescMine<Mineral>;
             creep.memory.task_id = task.source_id;
         }
         return task;
