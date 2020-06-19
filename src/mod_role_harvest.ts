@@ -1,5 +1,6 @@
 import { moveToTarget } from './lib_creep';
 import { findNearTarget, is_more_than, run_creep, run_my_room } from './lib_base';
+import { BaseRoom } from './base_room';
 
 interface TaskH {
     room_name: string;
@@ -84,39 +85,24 @@ export class HarvestAtMyRoom {
         });
     };
     private run_harvest = (creep: Creep) => {
-        creep.say('o');
+        let task = this.getTask(creep);
         if (creep.body.find(b => b.type === CARRY)) {
             if (is_more_than(creep, 0.8)) {
-                creep.say('more');
-                const link = w_config.rooms[creep.room.name]?.link_a;
-                if (link && link.length > 0) {
-                    creep.say('link');
-                    const links = link.map(id => Game.getObjectById(id)).filter(s => s);
-                    let near: any = findNearTarget(creep, links);
-                    if (near) {
-                        let far = w_utils.count_distance(creep, near);
-                        if (far <= 2) {
-                            creep.say('link');
-                            let code = creep.transfer(near, RESOURCE_ENERGY);
-                            if (code === ERR_NOT_IN_RANGE) {
-                                creep.moveTo(near as any);
-                                // return true;
-                                return;
-                            }
-                            if (code === OK) {
-                                // return false;
-                            }
-                        } else {
-                            creep.drop(RESOURCE_ENERGY);
-                        }
+                const link = BaseRoom.findMineLink(creep, task.source_id);
+                if (link) {
+                    let code = creep.transfer(link, RESOURCE_ENERGY);
+                    if (code === ERR_NOT_IN_RANGE) {
+                        creep.moveTo(link as any);
+                        return;
                     }
-                } else {
-                    creep.drop(RESOURCE_ENERGY);
                 }
             }
         }
 
-        let task = this.getTask(creep);
+        const nea = BaseRoom.findSpawnEnergyTarget(creep);
+        console.log(creep.name);
+        console.log('near energy spawn', nea?.pos);
+
         if (!task) {
             creep.say('no_task');
             return;

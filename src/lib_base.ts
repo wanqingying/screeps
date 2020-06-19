@@ -21,6 +21,19 @@ export function findNearTarget<T>(base, targets: any[]): T {
     });
     return target;
 }
+export function findNearTarget2<T>(base, targets: any[]): [T, number] {
+    const c = base.pos || base;
+    let min_far = 999;
+    let target = null;
+    targets.forEach(t => {
+        const far = w_utils.count_distance(c, t.pos || t);
+        if (far < min_far) {
+            min_far = far;
+            target = t;
+        }
+    });
+    return [target, min_far];
+}
 
 // 锁定当前单位的目标
 export function getActionLockTarget<T>(
@@ -212,31 +225,6 @@ export function getCreepIndex() {
             return i;
         }
     }
-}
-
-export function findRepairTargetC(
-    creep: Creep,
-    types?: any[] | null,
-    excludes?: any[]
-): AnyStructure {
-    let min_hit = 99;
-    let targets = creep.room
-        .findBy(FIND_STRUCTURES, t => {
-            if (types && types.length && !types.includes(t.structureType)) {
-                return false;
-            }
-            if (excludes && excludes.length && excludes.includes(t.structureType)) {
-                return false;
-            }
-            if (t.hits / t.hitsMax < min_hit) {
-                min_hit = t.hits / t.hitsMax;
-            }
-            return t.hits < (t.hitsMax * 4) / 5;
-        })
-        .filter(a => {
-            return a.hits / a.hitsMax <= min_hit + 0.01;
-        });
-    return findNearTarget(creep, targets);
 }
 
 // 获取房间内 source 和旁边 container 配对信息
