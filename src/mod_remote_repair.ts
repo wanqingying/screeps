@@ -87,11 +87,22 @@ export class RemoteRepair {
 
         this.updateState(true);
 
-        let task = this.repairArray.find(t => t.hits < t.hitsMax);
+        let task = this.getTaskByOrder(creep);
         if (task) {
             creep.memory.remote_task_id = task.id;
         }
         return task;
+    };
+
+    private getTaskByOrder = (creep: Creep):TaskRepair => {
+        let targets = this.repairArray
+            .filter(s => s.from === creep.memory.from)
+            .filter(s => s.hits < s.hitsMax);
+        let same_room = targets.filter(s => s.remote === creep.room.name);
+        if (same_room.length > 0) {
+            return findNearTarget(creep, same_room);
+        }
+        return targets.pop();
     };
     public getRepairTaskById = (id: string) => {
         return this.repairArray.find(t => t.id === id);
