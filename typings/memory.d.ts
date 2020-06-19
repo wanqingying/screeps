@@ -14,7 +14,7 @@ declare interface CreepMemory {
     building?: boolean;
     upgrading?: boolean;
     // get_transport 物流系统get
-    process?: string|any;
+    process?: string | any;
     // transport in out
     trans_direct?: string;
     distance?: number;
