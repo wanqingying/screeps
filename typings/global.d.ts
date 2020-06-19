@@ -103,6 +103,7 @@ declare namespace NodeJS {
         g_log: Function;
         w_my_name: string;
         w_set_tick_out(tick: number, fn: Function): void;
+        BaseRoom:BaseRoom
     }
 }
 

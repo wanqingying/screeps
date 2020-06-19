@@ -216,7 +216,7 @@ export class SpawnAuto {
                 continue;
             }
             if (this.timeoutMap.get(creep.id)) {
-                return;
+                continue;
             }
             room = room || creep.room;
             let role = creep.memory.role;
@@ -224,13 +224,21 @@ export class SpawnAuto {
             const cfg = w_config.rooms[room.name].creep_cfg_num;
             // 数量超过配置的不生产
             if (current_exist[role] > (cfg[role] || 0)) {
-                return;
+                continue;
             }
             const body_length = creep.body.length;
             let remain = body_length * 3 + this.spawn_before_tick;
             if (creep.memory.role.includes('remote')) {
-                // 外矿预留时间加长
-                remain += 50;
+                // 外矿预留时间额外加40
+                remain += 40;
+            }
+            if (
+                [w_role_name.remote_reserve, w_role_name.remote_harvester].includes(
+                    creep.memory.role
+                )
+            ) {
+                // reserve harvest 额外加 40
+                remain += 40;
             }
             if (creep.ticksToLive < remain) {
                 this.timeoutMap.set(creep.id, true);
