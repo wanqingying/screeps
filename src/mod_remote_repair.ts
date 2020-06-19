@@ -94,7 +94,7 @@ export class RemoteRepair {
         return task;
     };
 
-    private getTaskByOrder = (creep: Creep):TaskRepair => {
+    private getTaskByOrder = (creep: Creep): TaskRepair => {
         let targets = this.repairArray
             .filter(s => s.from === creep.memory.from)
             .filter(s => s.hits < s.hitsMax);
@@ -378,10 +378,9 @@ export class RemoteBuilder {
             }
             const [x, y, name] = task.pos;
             const pos = new RoomPosition(x, y, name);
-            const far = moveToTarget(creep, pos, 1);
-            let code;
-            if (far < 7) {
-                code = creep.build(target as any);
+            let code = creep.build(target as any);
+            if (code === ERR_NOT_IN_RANGE) {
+                const far = moveToTarget(creep, pos, 1);
             }
         }
     };
