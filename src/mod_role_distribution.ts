@@ -217,9 +217,6 @@
 //                 // }
 //                 prepareCacheRoom(room);
 //             } catch (e) {
-//                 console.log('err load_distribution_transport ', room.name);
-//                 console.log(e.message);
-//                 console.log(e.stack);
 //             }
 //             room.find(FIND_MY_CREEPS).forEach(creep => {
 //                 if (creep.spawning) {
@@ -231,9 +228,6 @@
 //                 try {
 //                     run_transport(creep);
 //                 } catch (e) {
-//                     console.log('err run_transport ', creep.name);
-//                     console.log(e.message);
-//                     console.log(e.stack);
 //                 }
 //             });
 //             tryResetTaskAmount(room);
@@ -570,7 +564,4 @@
 //
 // function log_task(task: TransTask) {
 //     task = task || ({ pos: [] } as any);
-//     console.log(
-//         `structureTYpe=${task.structureType} amount=${task.amount} amount_rec=${task.amount_rec} trans_dec=${task.trans_dec} [${task.pos[0]},${task?.pos[1]}]`
-//     );
 // }

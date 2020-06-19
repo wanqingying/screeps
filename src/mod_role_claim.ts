@@ -20,7 +20,7 @@ export function load_claim() {
     }
     prepareCache();
 
-    console.log('claim progress ', cache.process);
+    g_log('claim progress ', cache.process);
     if (cache.process === 3) {
         return;
     }
@@ -114,7 +114,7 @@ function prepareCache() {
         filter: s => s.structureType === STRUCTURE_CONTAINER,
     });
     if (claim_room.controller.level >= 3) {
-        console.log('claim done');
+        g_log('claim done');
         cache.process = 3;
         return;
     }

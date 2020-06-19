@@ -5,9 +5,9 @@ export function load_scout() {
     try {
         start_scout();
     } catch (e) {
-        console.log('err start_scout ');
-        console.log(e.message);
-        console.log(e.stack);
+        g_log('err start_scout ');
+        g_log(e.message);
+        g_log(e.stack);
     }
 }
 function start_scout() {

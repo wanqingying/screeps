@@ -22,9 +22,9 @@ export function load_repair() {
         try {
             run_repair(creep);
         } catch (e) {
-            console.log('err run_repair ', creep.name);
-            console.log(e.message);
-            console.log(e.stack);
+            g_log('err run_repair ', creep.name);
+            g_log(e.message);
+            g_log(e.stack);
         }
     });
 }

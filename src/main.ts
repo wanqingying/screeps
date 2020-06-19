@@ -6,12 +6,12 @@ import { BaseClaim } from './claim';
 import { RoomCache } from './room_cache';
 
 function main() {
-    console.log(
+    g_log(
         '===================55===========tick===============================================',
         Game.time
     );
     Object.values(Game.rooms).forEach(room => {
-        console.log(room.name, room.energyAvailable, '/', room.energyCapacityAvailable);
+        g_log(room.name, room.energyAvailable, '/', room.energyCapacityAvailable);
     });
     RoomCache.start();
     RoomCache.start();

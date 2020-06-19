@@ -28,7 +28,7 @@ function log(px, msg, force = false) {
     if (force) {
     }
     if (w_config.enable_log) {
-        console.log(px);
+        g_log(px);
     }
 }
 global.w_log_on = false;

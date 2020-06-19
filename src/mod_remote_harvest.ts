@@ -81,7 +81,6 @@ export class RemoteHarvest {
     private getTaskByOrder = (creep: Creep) => {
         let same_room_task = this.getSameRoomTask(creep);
         if (same_room_task) {
-            // console.log('same');
             return same_room_task;
         }
         return this.array.find(t => {

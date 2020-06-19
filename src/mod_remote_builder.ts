@@ -289,9 +289,6 @@
 //             try {
 //                 this.run_remote_builder(creep);
 //             } catch (e) {
-//                 console.log('err run_remote_builder');
-//                 console.log(e.message);
-//                 console.log(e.stack);
 //             }
 //         });
 //     };
