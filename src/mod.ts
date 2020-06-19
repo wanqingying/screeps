@@ -12,7 +12,6 @@ export * from './mod_role_defence';
 export * from './mod_global_cache';
 export * from './mod_role_scout';
 export * from './mod_remote_transport';
-export * from './mod_remote_builder';
 export * from './mod_remote_harvest';
 export * from './mod_remote_reserve';
 export * from './mod_remote_attack';

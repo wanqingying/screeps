@@ -33,12 +33,12 @@ export class BaseRoom {
         const che = driver.getRoomCache(creep.room.name);
         return che.findTargetToTransferEnergy(creep.pos);
     };
-    public static findTargetToTransfer = (creep:Creep) => {
+    public static findTargetToTransfer = (creep: Creep) => {
         const driver = BaseRoom.start();
         const che = driver.getRoomCache(creep.room.name);
         return che.findTargetToTransfer(creep);
     };
-    public static findTargetToPickUpOrWithdraw = (creep:Creep) => {
+    public static findTargetToPickUpOrWithdraw = (creep: Creep) => {
         const driver = BaseRoom.start();
         const che = driver.getRoomCache(creep.room.name);
         return che.findTargetToPickUpOrWithdraw(creep.pos);
@@ -90,17 +90,22 @@ class PosDesc<T> {
     public readonly id: string;
     public update_tick: number = 0;
     public extra: any;
+    public creep_id?:string
     private _target = undefined;
+    public get roomName(){
+        return this.pos[2]
+    }
+    private _up_tk=0;
     public get target(): T {
-        if (this.update_tick !== Game.time) {
-            this.update_tick = Game.time;
+        if (this._up_tk !== Game.time) {
+            this._up_tk = Game.time;
             this._target = Game.getObjectById(this.id);
         }
         return this._target;
     }
     public set target(target: T) {
         this._target = target;
-        this.update_tick = Game.time;
+        this._up_tk = Game.time;
     }
 }
 
@@ -141,8 +146,10 @@ class CacheRoom {
     constructor(room: Room) {
         this.name = room.name;
         const structures = room.find(FIND_STRUCTURES) as any;
-        const containers:StructureContainer[] = structures.filter(s => s.structureType === STRUCTURE_CONTAINER);
-        const links:StructureLink[] = structures.filter(s => s.structureType === STRUCTURE_LINK) ;
+        const containers: StructureContainer[] = structures.filter(
+            s => s.structureType === STRUCTURE_CONTAINER
+        );
+        const links: StructureLink[] = structures.filter(s => s.structureType === STRUCTURE_LINK);
 
         if (room.storage) {
             const { x, y, roomName } = room.storage.pos;
@@ -210,21 +217,26 @@ class CacheRoom {
                 const [ct, far] = findNearTarget2<StructureContainer>(s, containers);
                 const [lk, far2] = findNearTarget2<StructureLink>(s, links);
                 const [mine, far3] = findNearTarget2<PosDescMine<Mineral>>(s, this.mineral);
-                if (far <= 2) {
-                    const { x, y, roomName } = ct.pos;
-                    desc.container = new PosDesc<StructureContainer>({
-                        pos: [x, y, roomName],
-                        id: ct.id,
-                    });
-                }
-                if (far2 <= 2) {
-                    const { x, y, roomName } = lk.pos;
-                    desc.link = new PosDesc<StructureLink>({ pos: [x, y, roomName], id: lk.id });
-                }
                 // always true
                 if (far3 <= 2) {
                     desc.mine = mine;
                     desc.resType = mine.target.mineralType;
+                }
+                if (far <= 2) {
+                    const { x, y, roomName } = ct.pos;
+                    const pos= new PosDesc<StructureContainer>({
+                        pos: [x, y, roomName],
+                        id: ct.id,
+                    });
+                    desc.mine.container=pos;
+                    desc.container =pos
+                }
+                if (far2 <= 2) {
+                    const { x, y, roomName } = lk.pos;
+                    let pos=new PosDesc<StructureLink>({ pos: [x, y, roomName], id: lk.id });
+                    desc.link = pos
+                    desc.mine.link=pos;
+
                 }
                 this.extractor.push(desc);
             });
@@ -280,7 +292,7 @@ class CacheRoom {
             })
             .map(s => s.container);
         if (stn.length > 0) {
-            return  findNearTarget(pos, stn);
+            return findNearTarget(pos, stn);
         }
         let mtn = this.extractor
             .filter(s => {
@@ -312,20 +324,20 @@ class CacheRoom {
             return this.storage as any;
         }
     };
-    public findTargetToTransfer = (creep:Creep):PosDesc<TypeEnergyStructure> => {
-        let max_am=0;
-        let max_resType:ResourceConstant=RESOURCE_ENERGY;
-        RESOURCES_ALL.forEach(resType=>{
-            const am=creep.store[resType];
-            if (am>max_am){
-                max_am=am
-                max_resType=resType;
+    public findTargetToTransfer = (creep: Creep): PosDesc<TypeEnergyStructure> => {
+        let max_am = 0;
+        let max_resType: ResourceConstant = RESOURCE_ENERGY;
+        RESOURCES_ALL.forEach(resType => {
+            const am = creep.store[resType];
+            if (am > max_am) {
+                max_am = am;
+                max_resType = resType;
             }
-        })
-        if (max_resType===RESOURCE_ENERGY){
-            return this.findTargetToTransferEnergy(creep.pos)
-        }else {
-            return this.findTargetToTransferMineral(creep.pos)
+        });
+        if (max_resType === RESOURCE_ENERGY) {
+            return this.findTargetToTransferEnergy(creep.pos);
+        } else {
+            return this.findTargetToTransferMineral(creep.pos);
         }
     };
     public findTargetToTransferMineral = (pos: RoomPosition): PosDesc<StructureStorage> => {
