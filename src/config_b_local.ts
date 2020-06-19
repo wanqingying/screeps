@@ -14,6 +14,7 @@ export const cfg_local: { [k: string]: CfgRoom } = {
             [w_role_name.attack]: 0,
         },
         link_a: ['41560dd9b7d200a'],
+        link_pair: [['41560dd9b7d200a', '75ae0e324f8ba55']],
         claims: {
             name: 'W1N8',
             creep: [

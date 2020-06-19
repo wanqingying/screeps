@@ -1,18 +1,35 @@
 import { SpawnAuto } from './mod_spawn_creep';
 
 global.w_utils = {
-    count_distance(a: RoomPosition, b: RoomPosition) {
-        a = (a as any)?.pos || a;
-        b = (b as any)?.pos || b;
+    count_distance(a, b) {
         if (!a || !b) {
             return 999;
         }
-        if (a.roomName !== b.roomName) {
+        let ax, ay, aRoomName;
+        let bx, by, bRoomName;
+        if (Array.isArray(a)) {
+            [ax, ay, aRoomName] = a;
+        } else {
+            a = a?.pos || a;
+            ax = a.x;
+            ay = a.y;
+            aRoomName = a.roomName;
+        }
+        if (Array.isArray(b)) {
+            [bx, by, bRoomName] = b;
+        } else {
+            b = b?.pos || b;
+            bx = b.x;
+            by = b.y;
+            bRoomName = b.roomName;
+        }
+
+        if (aRoomName !== bRoomName) {
             return 999;
         }
-        let dx = a.x - b.x;
-        let dy = a.y - b.y;
-        return Math.round(Math.pow(dx * dx + dy * dy, 0.5));
+        let dx = ax - bx;
+        let dy = ay - by;
+        return Math.pow(dx * dx + dy * dy, 0.5);
     },
     get_code_msg(code) {
         let ScreepsReturnCodeMsg = [
