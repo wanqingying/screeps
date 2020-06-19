@@ -14,7 +14,6 @@ export class RoomCache {
     private update_tick = 0;
     private update_site_tick = 0;
     private structure_site: Map<string, StructureSite> = new Map<string, StructureSite>();
-    private structure_site: Map<string, StructureSite> = new Map<string, StructureSite>();
     public updateState = () => {
         this.update_tick = Game.time;
         // Object.values(Game.rooms).forEach(room)

@@ -439,23 +439,10 @@ export class RemoteAttack {
     };
 }
 
-export function run_creep(
-    role: role_name_key | 'all',
-    fn: (creep: Creep) => void,
-    filter?: (creep: Creep) => boolean
-) {
+export function run_creep(role: role_name_key, fn: (creep: Creep) => void) {
     Object.values(Game.creeps)
         .filter(c => {
-            if (c.spawning) {
-                return false;
-            }
-            if (role !== 'all' && c.memory.role !== role) {
-                return false;
-            }
-            if (filter && !filter(c)) {
-                return false;
-            }
-            return true;
+            return c.memory.role === role;
         })
         .forEach(fn);
 }
