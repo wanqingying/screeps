@@ -11,7 +11,6 @@ export class BaseRoom {
         }
         return target;
     };
-
     private updateRoom = (name: string) => {
         const room = Game.rooms[name];
         if (!room) {
@@ -21,17 +20,6 @@ export class BaseRoom {
         this.rooms.set(name, che);
         return che;
     };
-    private updateState = () => {
-        if (this.update_tick === Game.time) {
-            return;
-        }
-        this.update_tick = Game.time;
-        // Array.from(this.rooms.keys()).forEach(k => this.rooms.delete(k));
-        // Object.values(Game.rooms).forEach(room => {
-        //     this.rooms.set(room.name, new CacheRoom(room));
-        // });
-    };
-    private update_tick = 0;
     // get link near a mine to drop source
     public static findMineLink = (creep: Creep, mine_id: string): StructureLink | undefined => {
         const driver = BaseRoom.start();
@@ -39,13 +27,21 @@ export class BaseRoom {
         return che.findMineLink(creep.pos, mine_id);
     };
     // get not full extension or spawn
-    // find order extension->spawn->tower->link_c->storage
-    public static findTargetToTransferEnergy = (
-        creep: Creep
-    ): PosDesc<TypeEnergyStructure> => {
+    // find order extension/spawn/tower->link_c->storage
+    public static findTargetToTransferEnergy = (creep: Creep): PosDesc<TypeEnergyStructure> => {
         const driver = BaseRoom.start();
         const che = driver.getRoomCache(creep.room.name);
         return che.findTargetToTransferEnergy(creep.pos);
+    };
+    public static findTargetToTransfer = (creep:Creep) => {
+        const driver = BaseRoom.start();
+        const che = driver.getRoomCache(creep.room.name);
+        return che.findTargetToTransfer(creep);
+    };
+    public static findTargetToPickUpOrWithdraw = (creep:Creep) => {
+        const driver = BaseRoom.start();
+        const che = driver.getRoomCache(creep.room.name);
+        return che.findTargetToPickUpOrWithdraw(creep.pos);
     };
     public static findHarvestTargetsInRoom = (room: Room) => {
         const driver = BaseRoom.start();
@@ -54,10 +50,6 @@ export class BaseRoom {
     };
 
     private tryUpdateState = () => {
-        if (Game.time - this.update_tick > 244) {
-            this.update_tick = Game.time;
-            this.updateState();
-        }
         Array.from(this.rooms.values()).forEach(che => {
             che.tryUpdateState();
         });
@@ -81,7 +73,7 @@ export class BaseRoom {
         return driver;
     };
 }
-global.BaseRoom=BaseRoom;
+global.G_BaseRoom = BaseRoom;
 
 let driver: BaseRoom = w_cache.get(BaseRoom.cache_key);
 if (!driver) {
@@ -94,8 +86,8 @@ class PosDesc<T> {
         this.pos = pos;
         this.id = id;
     }
-    public pos: any[];
-    public id: string;
+    public readonly pos: any[];
+    public readonly id: string;
     public update_tick: number = 0;
     public extra: any;
     private _target = undefined;
@@ -113,7 +105,7 @@ class PosDesc<T> {
 }
 
 type TypeA = Source | Mineral | StructureExtractor | StructureController;
-declare type HarvestType = Source|Mineral
+declare type HarvestType = Source | Mineral;
 
 class PosDescMine<T extends TypeA> extends PosDesc<T> {
     constructor({ pos, id }) {
@@ -123,6 +115,7 @@ class PosDescMine<T extends TypeA> extends PosDesc<T> {
     link?: PosDesc<StructureLink>;
     // only for extractor
     mine?: PosDescMine<Mineral>;
+    resType?: ResourceConstant;
 }
 
 class PosDescDrop<T> extends PosDesc<T> {
@@ -142,14 +135,14 @@ class CacheRoom {
     private tower: PosDesc<StructureTower>[] = [];
     private spawn: PosDesc<StructureSpawn>[] = [];
     private link_c: PosDesc<StructureLink>[] = [];
-    private drop: PosDescDrop<any>[] = [];
+    private drop: PosDescDrop<Resource>[] = [];
     private readonly storage: PosDesc<StructureStorage> | undefined;
     private readonly name: string;
     constructor(room: Room) {
         this.name = room.name;
-        const structures = room.find(FIND_STRUCTURES);
-        const containers = structures.filter(s => s.structureType === STRUCTURE_CONTAINER);
-        const links = structures.filter(s => s.structureType === STRUCTURE_LINK);
+        const structures = room.find(FIND_STRUCTURES) as any;
+        const containers:StructureContainer[] = structures.filter(s => s.structureType === STRUCTURE_CONTAINER);
+        const links:StructureLink[] = structures.filter(s => s.structureType === STRUCTURE_LINK) ;
 
         if (room.storage) {
             const { x, y, roomName } = room.storage.pos;
@@ -162,7 +155,7 @@ class CacheRoom {
             const { x, y, roomName } = s.pos;
             const pos = new PosDescMine<Source>({ pos: [x, y, roomName], id: s.id });
             const [ct, far] = findNearTarget2<StructureContainer>(s, containers);
-            const [lk, far2] = findNearTarget2<StructureContainer>(s, links);
+            const [lk, far2] = findNearTarget2<StructureLink>(s, links);
             if (far <= 2) {
                 const { x, y, roomName } = ct.pos;
                 pos.container = new PosDesc<StructureContainer>({
@@ -215,7 +208,7 @@ class CacheRoom {
                     id: s.id,
                 });
                 const [ct, far] = findNearTarget2<StructureContainer>(s, containers);
-                const [lk, far2] = findNearTarget2<StructureContainer>(s, links);
+                const [lk, far2] = findNearTarget2<StructureLink>(s, links);
                 const [mine, far3] = findNearTarget2<PosDescMine<Mineral>>(s, this.mineral);
                 if (far <= 2) {
                     const { x, y, roomName } = ct.pos;
@@ -228,15 +221,17 @@ class CacheRoom {
                     const { x, y, roomName } = lk.pos;
                     desc.link = new PosDesc<StructureLink>({ pos: [x, y, roomName], id: lk.id });
                 }
+                // always true
                 if (far3 <= 2) {
                     desc.mine = mine;
+                    desc.resType = mine.target.mineralType;
                 }
                 this.extractor.push(desc);
             });
         if (room?.controller) {
             const { x, y, roomName } = room.controller.pos;
             const [near, far] = findNearTarget2<StructureContainer>(room.controller, containers);
-            const [lk, far2] = findNearTarget2<StructureContainer>(room.controller, links);
+            const [lk, far2] = findNearTarget2<StructureLink>(room.controller, links);
             const desc: PosDescMine<StructureController> = new PosDescMine<StructureController>({
                 pos: [x, y, roomName],
                 id: room.controller.id,
@@ -265,35 +260,79 @@ class CacheRoom {
             }
         });
     }
-    public findNearNotFullSpawnOrExtension = (pos: RoomPosition): StructureExtension => {
-        const ext: PosDesc<AnyStructure>[] = [].concat(this.spawn).concat(this.extension);
-        const empty = ext.map(s => s.target).filter(s => isNotFull(s));
-        return findNearTarget(pos, empty);
+    // drop=>mine_container
+    public findTargetToPickUpOrWithdraw = (
+        pos: RoomPosition
+    ): PosDesc<StructureContainer> | PosDescDrop<Resource> => {
+        // get refresh drop
+        const min_pick = 150;
+        this.updateDrop();
+        const drops = this.drop.filter(d => d.amount > min_pick);
+        if (drops.length > 0) {
+            return findNearTarget(pos, drops);
+        }
+        let stn = this.source
+            .filter(s => {
+                if (!s.container) {
+                    return false;
+                }
+                return s.container.target.store.energy > min_pick;
+            })
+            .map(s => s.container);
+        if (stn.length > 0) {
+            return  findNearTarget(pos, stn);
+        }
+        let mtn = this.extractor
+            .filter(s => {
+                if (!s.container) {
+                    return false;
+                }
+                return s.container.target.store.getUsedCapacity(s.resType) > min_pick;
+            })
+            .map(s => s.container);
+        if (mtn.length > 0) {
+            return findNearTarget(pos, stn);
+        }
     };
     // find order extension/spawn/tower->link_c->storage
     public findTargetToTransferEnergy = (pos: RoomPosition): PosDesc<TypeEnergyStructure> => {
-        const oda: PosDesc<AnyStructure>[] = []
+        const oda: PosDesc<TypeEnergyStructure>[] = []
             .concat(this.extension)
             .concat(this.spawn)
             .concat(this.tower);
-        const ext = oda.map(e => e.target).filter(s => s && isNotFull(s));
+        const ext = oda.filter(s => s && isNotFull(s.target));
         if (ext.length > 0) {
             return findNearTarget(pos, ext);
         }
-        const link_c = this.link_c.map(c => c.target).filter(s => isNotFull(s));
+        const link_c = this.link_c.filter(s => isNotFull(s.target));
         if (link_c.length > 0) {
             return findNearTarget(pos, link_c);
         }
         if (this.storage) {
-            return this.storage.target as any;
+            return this.storage as any;
         }
     };
-    public findTargetToTransferMineral = (pos: RoomPosition): StructureStorage => {
-        return this.storage.target;
-        // return null as any
+    public findTargetToTransfer = (creep:Creep):PosDesc<TypeEnergyStructure> => {
+        let max_am=0;
+        let max_resType:ResourceConstant=RESOURCE_ENERGY;
+        RESOURCES_ALL.forEach(resType=>{
+            const am=creep.store[resType];
+            if (am>max_am){
+                max_am=am
+                max_resType=resType;
+            }
+        })
+        if (max_resType===RESOURCE_ENERGY){
+            return this.findTargetToTransferEnergy(creep.pos)
+        }else {
+            return this.findTargetToTransferMineral(creep.pos)
+        }
+    };
+    public findTargetToTransferMineral = (pos: RoomPosition): PosDesc<StructureStorage> => {
+        return this.storage;
     };
     public findHarvestTargets = (): PosDescMine<HarvestType>[] => {
-        return [].concat(this.source).concat(this.extractor.map(e=>e.mine));
+        return [].concat(this.source).concat(this.extractor.map(e => e.mine));
     };
     public findMineLink = (pos: RoomPosition, id: string): StructureLink => {
         let extractor = this.extractor.find(e => {
@@ -302,16 +341,20 @@ class CacheRoom {
             }
             return e?.id === id || e.mine?.id === id;
         });
-        if (extractor&&extractor.link) {
+        if (extractor && extractor.link) {
             return extractor.link.target;
         }
         let source = this.source.find(s => s?.id === id && s.link?.id);
-        if (source&&source.link) {
+        if (source && source.link) {
             return source.link.target;
         }
     };
-
+    private update_drop_tk = 0;
     private updateDrop = () => {
+        if (Game.time === this.update_drop_tk) {
+            return;
+        }
+        this.update_drop_tk = Game.time;
         const room = Game.rooms[this.name];
         if (!room) {
             return;
@@ -324,7 +367,7 @@ class CacheRoom {
                 prev.amount = s.amount;
             } else {
                 const { x, y, roomName } = s.pos;
-                const dp = new PosDescDrop({ pos: [x, y, roomName], id: s.id });
+                const dp = new PosDescDrop<Resource>({ pos: [x, y, roomName], id: s.id });
                 dp.target = s;
                 this.drop.push(dp);
             }
@@ -342,7 +385,7 @@ class CacheRoom {
     };
     private update_state_tick = 0;
     public tryUpdateState = () => {
-        if (Game.time - this.update_state_tick > 4) {
+        if (Game.time - this.update_state_tick > 8) {
             this.updateState();
         }
     };

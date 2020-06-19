@@ -8,12 +8,15 @@ export function findAttackTarget(room: Room): Creep {
         });
     return targets.shift();
 }
-export function findNearTarget<T>(base, targets: any[]): T {
+export function findNearTarget<T>(base, targets: T[]): T {
+    if (targets?.length === 1) {
+        return targets[0];
+    }
     const c = base.pos || base;
     let min_far = 999;
     let target = null;
     targets.forEach(t => {
-        const far = w_utils.count_distance(c, t.pos || t);
+        const far = w_utils.count_distance(c, (t as any).pos || t);
         if (far < min_far) {
             min_far = far;
             target = t;
@@ -21,12 +24,12 @@ export function findNearTarget<T>(base, targets: any[]): T {
     });
     return target;
 }
-export function findNearTarget2<T>(base, targets: any[]): [T, number] {
+export function findNearTarget2<T>(base, targets: T[]): [T, number] {
     const c = base.pos || base;
     let min_far = 999;
     let target = null;
     targets.forEach(t => {
-        const far = w_utils.count_distance(c, t.pos || t);
+        const far = w_utils.count_distance(c, (t as any).pos || t);
         if (far < min_far) {
             min_far = far;
             target = t;

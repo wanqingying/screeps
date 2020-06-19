@@ -73,13 +73,13 @@ export class RemoteAttackW {
         let task = this.getTask(creep);
         if (task && task.target) {
             let code = creep.attack(task.target);
-            if (code===ERR_NOT_IN_RANGE){
-                creep.moveTo(task.target)
+            if (code === ERR_NOT_IN_RANGE) {
+                creep.moveTo(task.target);
             }
         } else {
-            creep.memory.process+=1
-            g_log(creep.name,' no atk target');
-            if (creep.memory.process>4){
+            creep.memory.process += 1;
+            g_log(creep.name, ' no atk target');
+            if (creep.memory.process > 4) {
                 let room = Game.rooms[creep.memory.from];
                 const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
                 let far = moveToTarget(creep, sp as any);
