@@ -259,7 +259,7 @@ export class TransportDriver {
             return this.closeCreepTask(creep);
         }
         let far = moveToTarget(creep, target, 1);
-        if (far > 3) {
+        if (far > 4) {
             return;
         }
         creep.say('_' + far);
@@ -287,7 +287,7 @@ export class TransportDriver {
         if (code === OK) {
             this.closeCreepTask(creep);
         }
-        if (far <= 1) {
+        if (far <= 2) {
             this.closeCreepTask(creep);
             let msg = w_utils.get_code_msg(code);
             creep.say(msg);
