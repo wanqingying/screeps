@@ -26,7 +26,7 @@ type stcType =
     | typeof DropSite
     | typeof HarvesterSite
     | typeof ControllerSite
-    | 'link_b';
+    | 'link_out';
 
 interface CacheRoom {
     tick: number;
@@ -54,8 +54,8 @@ const w_out = {
     // 升级用的容器
     controller_container: 20,
     link_a: 0,
-    link_b: 96,
-    link_c: 10,
+    link_out: 96,
+    link_in: 10,
     link_d: 30,
     [STRUCTURE_STORAGE]: 40,
     [STRUCTURE_SPAWN]: 4,
@@ -66,8 +66,8 @@ const w_out = {
 const w_in = {
     drop: 0,
     link_a: 0,
-    link_b: 0,
-    link_c: 85,
+    link_out: 0,
+    link_in: 85,
     link_d: 0,
     harvester_container: 0,
     controller_container: 60,
@@ -75,7 +75,7 @@ const w_in = {
     [STRUCTURE_SPAWN]: 95,
     [STRUCTURE_TOWER]: 90,
     [STRUCTURE_EXTENSION]: 99,
-    [STRUCTURE_CONTAINER]: 50,
+    [STRUCTURE_CONTAINER]: 40,
 };
 const cache_creep_task = {} as any;
 if (!global.w_cache) {
@@ -256,22 +256,14 @@ export class TransportDriver {
             creep.say('err');
             return this.closeCreepTask(creep);
         }
-        let far = moveToTarget(creep, target, 1);
+        let far = moveToTarget(creep, target, 1.3);
         if (far > 4) {
             return;
         }
         creep.say('_' + far);
         if (task.trans_dec === 'in') {
             const type = task.resType;
-            if (type === 'any') {
-                RESOURCES_ALL.forEach(t => {
-                    if (creep.store[t] > 0) {
-                        code = creep.transfer(target, t);
-                    }
-                });
-            } else {
-                code = creep.transfer(target, type);
-            }
+            code = creep.transfer(target, type);
         }
         // Tombstone 特殊处理
         if (task.trans_dec === 'out') {
@@ -333,6 +325,7 @@ export class TransportDriver {
         const storage = room.storage;
         if (storage && storage.my) {
             // 需要优化
+            const free = storage.store.getFreeCapacity(RESOURCE_ENERGY);
             RESOURCES_ALL.forEach(type => {
                 const used = storage.store.getUsedCapacity(type);
                 if (used > 0) {
@@ -343,7 +336,6 @@ export class TransportDriver {
                     che.transOut.updateTask(taskOut);
                 }
 
-                const free = storage.store.getFreeCapacity();
                 const taskIn: TransTask = generateTask('in', storage, {
                     amount: free,
                     resourceType: type,
@@ -402,12 +394,14 @@ export class TransportDriver {
                 });
                 const free = s.store.getFreeCapacity();
                 if (stc !== 'harvester_container') {
-                    const taskIn: TransTask = generateTask('in', s, {
-                        amount: free,
-                        resourceType: 'any',
-                        structureType: stc,
+                    RESOURCES_ALL.forEach(resT => {
+                        const taskIn: TransTask = generateTask('in', s, {
+                            amount: free,
+                            resourceType: resT,
+                            structureType: stc,
+                        });
+                        che.transIn.updateTask(taskIn);
                     });
-                    che.transIn.updateTask(taskIn);
                 }
             });
         // tower
@@ -422,9 +416,9 @@ export class TransportDriver {
                 }
             });
         // link
-        const lin_b = w_config.rooms[room.name].link_b || [];
-        const lin_c = w_config.rooms[room.name].link_c || [];
-        const lin_d = w_config.rooms[room.name].link_d || [];
+        const lin_b = w_config.rooms[room.name]?.link_out || [];
+        const lin_c = w_config.rooms[room.name]?.link_in || [];
+        const lin_d = w_config.rooms[room.name]?.link_d || [];
         lin_b
             .map(id => Game.getObjectById(id))
             .forEach((link: StructureLink) => {
@@ -433,7 +427,7 @@ export class TransportDriver {
                     const taskOut = generateTask('out', link, {
                         amount: used,
                         resourceType: RESOURCE_ENERGY,
-                        structureType: 'link_b',
+                        structureType: 'link_out',
                     });
                     che.transOut.updateTask(taskOut);
                 }
@@ -446,7 +440,7 @@ export class TransportDriver {
                     const task = generateTask('in', link, {
                         amount: free,
                         resourceType: RESOURCE_ENERGY,
-                        structureType: 'link_c',
+                        structureType: 'link_in',
                     });
                     che.transIn.updateTask(task);
                 }
@@ -489,11 +483,11 @@ export class TransportDriver {
         this.tryUpdateState();
         run_creep(w_role_name.carrier, creep => {
             try {
-                this.run_transport(creep);
+                // this.run_transport(creep);
             } catch (e) {
                 g_log('err run_transport ', creep.name);
-                g_log(e.message);
-                g_log(e.stack);
+                g_log_err(e.message);
+                g_log_err(e.stack);
             }
         });
     };
@@ -627,11 +621,7 @@ class TransList {
         let resType = near_task.resType;
         let max_rec = 0;
         if (this.trans_dec === 'in') {
-            if (resType === 'any') {
-                // ignore
-            } else {
-                max_rec = creep.store.getUsedCapacity(resType);
-            }
+            max_rec = creep.store.getUsedCapacity(resType);
         }
         if (this.trans_dec === 'out') {
             max_rec = creep.store.getFreeCapacity();
@@ -654,15 +644,7 @@ class TransList {
             task.amount_rec += creep.store.getFreeCapacity();
         }
         if (this.trans_dec === 'in') {
-            if (task.resType === 'any') {
-                let rec = 0;
-                RESOURCES_ALL.forEach(t => {
-                    rec += creep.store[t];
-                });
-                task.amount_rec += rec;
-            } else {
-                task.amount_rec += creep.store.getUsedCapacity(task.resType);
-            }
+            task.amount_rec += creep.store.getUsedCapacity(task.resType);
         }
     };
     public getTaskById = (creep: Creep, id?: string): TransTask => {

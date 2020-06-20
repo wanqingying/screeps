@@ -6,8 +6,8 @@ export function load_scout() {
         start_scout();
     } catch (e) {
         g_log('err start_scout ');
-        g_log(e.message);
-        g_log(e.stack);
+        g_log_err(e.message);
+        g_log_err(e.stack);
     }
 }
 function start_scout() {

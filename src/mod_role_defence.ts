@@ -16,16 +16,18 @@ export function load_defence() {
         try {
             prepareCache(room);
             defenceSpawnAttack(room);
-            let cps = room.find(FIND_MY_CREEPS, {
-                filter: c => c.memory.role === w_role_name.attack,
-            });
+            let cps = room
+                .find(FIND_MY_CREEPS, {
+                    filter: c => c.memory.role === w_role_name.attack,
+                })
+                .filter(c => c.memory.process !== 'attack_yes');
             cps.forEach(creep => {
                 run_defence(creep);
             });
         } catch (e) {
             g_log('err load_tower_logic ', room.name);
-            g_log(e.message);
-            g_log(e.stack);
+            g_log_err(e.message);
+            g_log_err(e.stack);
         }
     });
 }

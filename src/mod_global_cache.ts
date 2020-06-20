@@ -6,8 +6,8 @@ export function load_cache() {
         load_global_cache();
     } catch (e) {
         g_log('err load_global_cache');
-        g_log(e.message);
-        g_log(e.stack);
+        g_log_err(e.message);
+        g_log_err(e.stack);
     }
 }
 

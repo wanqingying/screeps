@@ -133,22 +133,31 @@ export class SpawnAuto {
             return this.spawnCreep(spawn, role, mem);
         }
     };
+    private trySpawnCreepForce = (room: Room, role: string, mem?: any) => {
+        const che = this.getRoomCache(room);
+        const spawn = che.c_spawn_ids
+            .map(id => Game.getObjectById<StructureSpawn>(id))
+            .find(s => s && !s.spawning);
+        if (spawn) {
+            return this.spawnCreep(spawn, role, mem);
+        }
+    };
     private checkSpawnCreep = (room: Room) => {
         let role = room.memory.spawning_role;
         if (role) {
-            return this.trySpawnCreep(room, role);
+            return this.trySpawnCreepForce(room, role);
         }
         role = this.tryGetBoostRole(room);
         if (role) {
-            return this.trySpawnCreep(room, role);
+            return this.trySpawnCreepForce(room, role);
         }
         role = this.tryGetConfigRole(room);
         if (role) {
-            return this.trySpawnCreep(room, role);
+            return this.trySpawnCreepForce(room, role);
         }
         role = this.tryGetTimeoutRole(room);
         if (role) {
-            return this.trySpawnCreep(room, role);
+            return this.trySpawnCreepForce(room, role);
         }
     };
     // 检查是否满足发展

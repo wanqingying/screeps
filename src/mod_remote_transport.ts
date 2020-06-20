@@ -146,7 +146,7 @@ export class RemoteTransport {
                 }
             }
         } else {
-            // pick
+            // pick55
             let task = this.getTask(creep);
             if (creep.ticksToLive < 3) {
                 this.forgetTask(creep);
@@ -163,6 +163,7 @@ export class RemoteTransport {
                 target = Game.getObjectById(task.id);
                 if (!target) {
                     creep.say('no_target');
+
                     return;
                 }
             }

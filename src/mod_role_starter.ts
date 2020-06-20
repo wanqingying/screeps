@@ -37,8 +37,8 @@ export function load_starter() {
                     run_starter(creep);
                 } catch (e) {
                     g_log('err load_harvest ', creep.name);
-                    g_log(e.message);
-                    g_log(e.stack);
+                    g_log_err(e.message);
+                    g_log_err(e.stack);
                 }
             }
         });
