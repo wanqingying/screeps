@@ -32,8 +32,16 @@ function log(px, msg, force = false) {
     }
 }
 global.w_log_on = false;
+global.w_log_on = true;
 global.g_log = function (...p) {
-    console.log(...p.reverse());
+    if (global.w_log_on) {
+        console.log(...p);
+    }
+};
+global.g_log_err = function (...p) {
+    if (global.w_log_err_on) {
+        console.log(...p);
+    }
 };
 global.w_log = function (...p) {
     if (global.w_log_on) {

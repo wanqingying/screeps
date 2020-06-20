@@ -67,6 +67,9 @@ export function getActionLockTarget<T>(
             w_cache.set(cache_key, target?.id);
         }
     }
+    if (!target){
+        reset()
+    }
 
     return { target, unLock: reset };
 }
@@ -145,7 +148,7 @@ export function isNotFull(target: any, type?: ResourceConstant): boolean {
     return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) > 0;
 }
 export function isFull(target: any, type?: ResourceConstant): boolean {
-    return target?.store?.getFreeCapacity(type || RESOURCE_ENERGY) === 0;
+    return target?.store?.getFreeCapacity(RESOURCE_ENERGY) === 0;
 }
 
 const FULL_RATE = 0.85;
@@ -462,7 +465,7 @@ export function findNearDropOrContainerTarget(creep: Creep) {
     let max = 0;
     let meets = [];
     creep.room.find(FIND_DROPPED_RESOURCES).forEach(t => {
-        if (t.amount > max) {
+        if (t.amount > max && t.amount > 150) {
             max = t.amount;
             drop = t;
         }
@@ -480,7 +483,7 @@ export function findNearDropOrContainerTarget(creep: Creep) {
     let container: StructureContainer;
     let mes = [];
     creep.room
-        .find(FIND_MY_STRUCTURES, {
+        .find(FIND_STRUCTURES, {
             filter: s => s.structureType === (STRUCTURE_CONTAINER as any),
         })
         .forEach(s => {

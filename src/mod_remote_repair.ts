@@ -46,7 +46,7 @@ export class RemoteRepair {
                     remote_room.find(FIND_STRUCTURES).forEach(s => {
                         let los = s.hitsMax - s.hits;
                         let los_rate = los / s.hitsMax;
-                        if (los > 3000 || los_rate > 0.3) {
+                        if (los > 2000 || los_rate > 0.2) {
                             repair_list.push({ site: s, from: room.name });
                         }
                     });
@@ -137,7 +137,7 @@ export class RemoteRepair {
         }
         const [x, y, name] = task.pos;
         const pos = new RoomPosition(x, y, name);
-        const far = moveToTarget(creep, pos, 1);
+        const far = moveToTarget(creep, pos, 2);
         let code;
         if (far < 5) {
             code = creep.repair(target as any);
@@ -147,10 +147,12 @@ export class RemoteRepair {
         if (checkRemoteDanger(creep)) {
             return;
         }
-        if (isEmpty(creep)) {
+        const used = creep.store.getUsedCapacity(RESOURCE_ENERGY);
+        const cap = creep.store.getCapacity(RESOURCE_ENERGY);
+        if (used < 25) {
             creep.memory.process = 'get';
         }
-        if (is_more_than(creep, 0.7)) {
+        if (used / cap > 0.8) {
             creep.memory.process = 'bud';
         }
         if (creep.memory.process === 'get') {
@@ -192,7 +194,7 @@ export class RemoteRepair {
     };
     private last_update_time = 0;
     private tryUpdateState = () => {
-        if (Game.time - this.last_update_time > 20) {
+        if (Game.time - this.last_update_time > 8) {
             this.last_update_time = Game.time;
             this.updateState();
         }
@@ -204,8 +206,8 @@ export class RemoteRepair {
                 this.run_remote_repair(creep);
             } catch (e) {
                 g_log('err run_remote_repair');
-                g_log(e.message);
-                g_log(e.stack);
+                g_log_err(e.message);
+                g_log_err(e.stack);
             }
         });
     };
@@ -296,7 +298,8 @@ export class RemoteBuilder {
             }
         }
 
-        let task = this.array.find(t => t.progress < t.progressTotal);
+        let tasks = this.array.filter(t => t.progress < t.progressTotal);
+        let task = findNearTarget(creep, tasks);
         if (task) {
             creep.memory.remote_task_id = task.id;
         }
@@ -330,6 +333,7 @@ export class RemoteBuilder {
             creep.memory.process = 'bud';
         }
         if (creep.memory.process === 'get') {
+            creep.say('get');
             if (creep.memory.from === creep.room.name) {
                 return TransportDriver.get_resource(creep);
             }
@@ -337,6 +341,7 @@ export class RemoteBuilder {
                 findNearDropOrContainerTarget(creep)
             );
             if (target) {
+                creep.say('get_b');
                 let far = moveToTarget(creep, target, 1);
                 if (far > 4) {
                     return;
@@ -358,6 +363,7 @@ export class RemoteBuilder {
                     unLock();
                 }
             } else {
+                creep.say('get_home');
                 unLock();
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.from));
             }
@@ -379,6 +385,7 @@ export class RemoteBuilder {
             const [x, y, name] = task.pos;
             const pos = new RoomPosition(x, y, name);
             let code = creep.build(target as any);
+            creep.say('bud');
             if (code === ERR_NOT_IN_RANGE) {
                 const far = moveToTarget(creep, pos, 1);
             }
@@ -386,7 +393,7 @@ export class RemoteBuilder {
     };
     private last_update_time = 0;
     private tryUpdateState = () => {
-        if (Game.time - this.last_update_time > 40) {
+        if (Game.time - this.last_update_time > 8) {
             this.last_update_time = Game.time;
             this.updateState();
         }
@@ -398,8 +405,8 @@ export class RemoteBuilder {
                 this.run_remote_builder(creep);
             } catch (e) {
                 g_log('err run_remote_builder');
-                g_log(e.message);
-                g_log(e.stack);
+                g_log_err(e.message);
+                g_log_err(e.stack);
             }
         });
     };

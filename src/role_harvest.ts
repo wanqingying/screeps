@@ -1,5 +1,7 @@
 import { run_creep, run_my_room } from './lib_base';
-export class HarvestAtMyRoom {
+import { moveToTarget } from './lib_creep';
+
+export class BaseRoleHarvest {
     private array2: PosDescMine<Source | Mineral>[] = [];
     constructor() {
         run_my_room(room => {
@@ -18,6 +20,10 @@ export class HarvestAtMyRoom {
                 return;
             }
             const task = this.array2.find(t => t.id === creep.memory.task_id);
+            if (task && task.update_tick === Game.time && task.creep_id) {
+                task.creep_id = undefined;
+                creep.memory.task_id = undefined;
+            }
             if (task) {
                 task.creep_id = creep.id;
                 task.update_tick = Game.time;
@@ -32,7 +38,7 @@ export class HarvestAtMyRoom {
     private trySpawnWorker = () => {
         this.updateState2();
         this.array2.forEach(t => {
-            if (!t.extra) {
+            if (!t.creep_id) {
                 const room = Game.rooms[t.roomName];
                 G_SpawnAuto.spawnCreep(room, w_role_name.harvester, { task_id: t.id });
             }
@@ -57,9 +63,10 @@ export class HarvestAtMyRoom {
                 creep.drop(task2.resType);
             }
         }
+        moveToTarget(creep, task2.container?.target || task2.target);
         let code = creep.harvest(task2.target);
         if (code === ERR_NOT_IN_RANGE) {
-            creep.moveTo(task2.target);
+            creep.moveTo(task2.container?.target || task2.target);
         }
     };
     private getTask2 = (creep: Creep) => {
@@ -77,16 +84,24 @@ export class HarvestAtMyRoom {
     private update_tick = 0;
     private run = () => {
         this.updateState2();
-        run_creep(w_role_name.harvester, this.run_harvest);
+        run_creep(w_role_name.harvester, creep => {
+            try {
+                this.run_harvest(creep);
+            } catch (e) {
+                g_log('err run_harvest ', creep.name);
+                g_log_err(e.message);
+                g_log_err(e.stack);
+            }
+        });
         this.trySpawnWorker();
     };
     private last_run_time = 0;
     public static cache_key = 'h_a_m_t';
     public static start = () => {
-        let driver: HarvestAtMyRoom = w_cache.get(HarvestAtMyRoom.cache_key);
+        let driver: BaseRoleHarvest = w_cache.get(BaseRoleHarvest.cache_key);
         if (!driver) {
-            driver = new HarvestAtMyRoom();
-            w_cache.set(HarvestAtMyRoom.cache_key, driver);
+            driver = new BaseRoleHarvest();
+            w_cache.set(BaseRoleHarvest.cache_key, driver);
         }
         if (driver.last_run_time !== Game.time) {
             driver.last_run_time = Game.time;
@@ -94,10 +109,4 @@ export class HarvestAtMyRoom {
         }
         return driver;
     };
-}
-
-let driver: HarvestAtMyRoom = w_cache.get(HarvestAtMyRoom.cache_key);
-if (!driver) {
-    driver = new HarvestAtMyRoom();
-    w_cache.set(HarvestAtMyRoom.cache_key, driver);
 }

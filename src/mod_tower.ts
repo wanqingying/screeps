@@ -6,8 +6,8 @@ export function load_tower_logic() {
             checkTower(room);
         } catch (e) {
             g_log('err load_tower_logic ', room.name);
-            g_log(e.message);
-            g_log(e.stack);
+            g_log_err(e.message);
+            g_log_err(e.stack);
         }
     });
 }

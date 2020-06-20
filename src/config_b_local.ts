@@ -5,24 +5,16 @@ export const cfg_local: { [k: string]: CfgRoom } = {
     W1N7: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 2,
+            [w_role_name.carrier]: 1,
             [w_role_name.scout]: 0,
             [w_role_name.builder]: 0,
             [w_role_name.harvester]: 2,
-            [w_role_name.upgrader]: 3,
+            [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 0,
-            [w_role_name.attack]: 0,
+            [w_role_name.mv]: 0,
         },
         link_a: ['41560dd9b7d200a'],
         link_pair: [['41560dd9b7d200a', '75ae0e324f8ba55']],
-        claims: {
-            name: 'W1N8',
-            creep: [
-                // [w_role_name.harvester, 1],
-                // [w_role_name.builder, 1],
-                // [w_role_name.upgrader, 1],
-            ],
-        },
     },
     W1N8: {
         creep_cfg_num: {
@@ -39,38 +31,46 @@ export const cfg_local: { [k: string]: CfgRoom } = {
     W2N7: {
         creep_cfg_num: {
             [w_role_name.starter]: 0,
-            [w_role_name.carrier]: 2,
+            [w_role_name.carrier]: 1,
             [w_role_name.scout]: 0,
-            [w_role_name.builder]: 1,
+            [w_role_name.builder]: 0,
             [w_role_name.harvester]: 0,
             [w_role_name.upgrader]: 1,
             [w_role_name.repair]: 1,
-            [w_role_name.remote_repair]: 1,
-            [w_role_name.remote_carry]: 5,
-            [w_role_name.remote_builder]: 1,
-            [w_role_name.remote_harvester]: 4,
-            [w_role_name.remote_reserve]: 2,
+            [w_role_name.mv]: 1,
+            [w_role_name.remote_repair]: 0,
+            [w_role_name.remote_carry]: 0,
+            [w_role_name.remote_builder]: 0,
+            [w_role_name.remote_harvester]: 0,
+            [w_role_name.remote_reserve]: 0,
         },
         reserve: {
-            W3N7: [
-                { id: 'eff307740862fd8', container_pos: [12, 22] },
-                { id: 'eee50774086309c', container_pos: [37, 4] },
-            ],
-
-            W3N8: [
-                { id: 'ebdd0774017409d', container_pos: [41, 37] },
-                { id: '9d330774017e6b9', container_pos: [34, 4] },
-            ],
+            // W3N7: [
+            //     { id: 'eff307740862fd8', container_pos: [12, 22] },
+            //     { id: 'eee50774086309c', container_pos: [37, 4] },
+            // ],
+            // W3N8: [
+            //     { id: 'ebdd0774017409d', container_pos: [41, 37] },
+            //     { id: '9d330774017e6b9', container_pos: [34, 4] },
+            // ],
         },
         scout: ['W4N7'],
         remote_container: ['3ae357adc2e6a21'],
         // 用于采矿
         link_a: ['1989f91647cdd7c'],
         // 用于接受其他link
-        link_b: ['351efa7ee58125c'],
+        link_out: ['351efa7ee58125c'],
         // 用于发送能量
-        link_c: [],
+        link_in: [],
         // 传输配对
         link_pair: [['1989f91647cdd7c', '351efa7ee58125c']],
+        claims: {
+            name: 'W3N8',
+            creep: [
+                [w_role_name.claim_start, 1],
+                // [w_role_name.builder, 1],
+                // [w_role_name.upgrader, 1],
+            ],
+        },
     },
 };

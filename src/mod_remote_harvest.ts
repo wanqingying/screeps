@@ -18,10 +18,9 @@ export class RemoteHarvest {
         Object.keys(w_config.rooms).forEach(from_room_name => {
             let cfg_room = w_config.rooms[from_room_name];
             let reserves = cfg_room.reserve || {};
-
             Object.keys(reserves).forEach(remote_room_name => {
-                let s = reserves[remote_room_name];
-                s.forEach(u => {
+                let sites = reserves[remote_room_name];
+                sites.forEach(u => {
                     this.array.push({
                         source_id: u.id,
                         container_id: u.container_id,
@@ -141,7 +140,7 @@ export class RemoteHarvest {
             return;
         }
         const task = this.getTask(creep);
-        if (creep.ticksToLive < 3) {
+        if (creep.ticksToLive < 2) {
             // 临死遗言
             this.forgetTask(creep);
             creep.say('die');
@@ -178,6 +177,14 @@ export class RemoteHarvest {
         creep.say('do');
         let far = moveToTarget(creep, pos);
         if (far < 4) {
+            let cont=G_BaseRoom.findMineContainer(creep,task.source_id)
+            if (cont){
+                const free=cont.store.getFreeCapacity(RESOURCE_ENERGY)
+                // creep.say('hi'+eng)
+                if (free===0){
+                    return  creep.say('full')
+                }
+            }
             creep.harvest(target);
         }
     };
@@ -186,10 +193,13 @@ export class RemoteHarvest {
     private tryUpdateState = () => {
         // 单位 1500 tick 一直采一个矿
         // 在接任务的时候热更新 不需要常更新
-        if (Game.time - this.update_tick > 200) {
-            this.update_tick = Game.time;
-            this.updateState();
-        }
+        // if (Game.time - this.update_tick > 200) {
+        //     this.update_tick = Game.time;
+        //     this.updateState();
+        // }
+        // 开销不大
+        this.updateState();
+
     };
     private run = () => {
         this.tryUpdateState();

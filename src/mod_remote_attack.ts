@@ -8,8 +8,10 @@ interface RemoteAttackTask {
     id: string;
     creep_id: string;
     target: Creep;
+    invader_core?: StructureInvaderCore;
     update_tick: number;
     has_atk: boolean;
+    danger: boolean;
 }
 export class RemoteAttackW {
     private array: RemoteAttackTask[];
@@ -27,6 +29,7 @@ export class RemoteAttackW {
                     target: null,
                     update_tick: 0,
                     has_atk: false,
+                    danger: true,
                 });
             });
         });
@@ -35,7 +38,7 @@ export class RemoteAttackW {
         let e_id = creep.memory.remote_task_id;
         if (e_id) {
             let prev = this.getTaskById(e_id);
-            if (prev && prev.target) {
+            if (prev && prev.danger) {
                 return prev;
             }
         }
@@ -44,7 +47,7 @@ export class RemoteAttackW {
             if (t.from !== from) {
                 return false;
             }
-            return t.target;
+            return t.danger;
         });
         if (task) {
             task.creep_id = creep.id;
@@ -64,22 +67,44 @@ export class RemoteAttackW {
     };
     public shouldSpawnAttack = (room: Room) => {
         this.updateState();
-        return this.array.find(t => t.target && t.from === room.name);
+        let atk = Object.values(Game.creeps).filter(
+            c => c.memory.role === w_role_name.remote_attack
+        ).length;
+        return atk < 2;
     };
     private getTaskById = (id: string) => {
         return this.array.find(t => t.id === id);
     };
     private run_remote_attack = (creep: Creep) => {
         let task = this.getTask(creep);
-        if (task && task.target) {
-            let code = creep.attack(task.target);
-            if (code === ERR_NOT_IN_RANGE) {
-                creep.moveTo(task.target);
+        if (!task) {
+            creep.say('no');
+            // task.danger = false;
+            let room = Game.rooms[creep.memory.from];
+            const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
+            let far = moveToTarget(creep, sp as any);
+            if (far < 3) {
+                sp.recycleCreep(creep);
             }
+            return;
+        }
+        const room = Game.rooms[task.remote];
+        if (!room && (task.target || task.invader_core)) {
+            const pos = new RoomPosition(25, 25, task.remote);
+            return creep.moveTo(pos);
+        }
+        if (task && task.target) {
+            moveToTarget(creep, task.target);
+            creep.attack(task.target);
+            creep.rangedAttack(task.target);
+        } else if (task && task.invader_core) {
+            let code = creep.attack(task.invader_core);
+            moveToTarget(creep, task.invader_core);
         } else {
             creep.memory.process += 1;
-            g_log(creep.name, ' no atk target');
+            creep.say('no_atk_target');
             if (creep.memory.process > 4) {
+                task.danger = false;
                 let room = Game.rooms[creep.memory.from];
                 const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
                 let far = moveToTarget(creep, sp as any);
@@ -90,13 +115,15 @@ export class RemoteAttackW {
         }
     };
     private spawn_attack = (room: Room) => {
-        let spawn = this.shouldSpawnAttack(room);
-        let has_atk = this.array.find(t => t.from === room.name && t.has_atk);
-        if (has_atk) {
-            return;
-        }
-        if (spawn && spawn.target && spawn.target?.ticksToLive > 300) {
-            SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: spawn.remote });
+        let ok = this.shouldSpawnAttack(room);
+        let task = this.array.find(t => {
+            if (t.from !== room.name) {
+                return;
+            }
+            return t.danger;
+        });
+        if (ok && task) {
+            SpawnAuto.spawnCreep(room, w_role_name.remote_attack, { remote: task.remote });
         }
     };
 
@@ -105,21 +132,29 @@ export class RemoteAttackW {
             return;
         }
         this.update_tick = Game.time;
-        let atk = Object.values(Game.creeps).filter(
-            c => c.memory.role === w_role_name.remote_attack
-        );
+
         this.array.forEach(task => {
-            task.has_atk = !!atk.find(c => c.memory.from === task.from);
+            // task.has_atk = !!atk.find(c => c.memory.from === task.from);
             if (task.update_tick === Game.time) {
                 return;
             }
             let room = Game.rooms[task.remote];
             if (room) {
                 let target = findAttackTarget(room);
+                let core = G_BaseRoom.findInvaderCore(room);
+                // console.log('core', core.id);
+                if (core) {
+                    task.invader_core = core.target;
+                } else {
+                    task.invader_core = undefined;
+                }
                 if (target) {
                     task.target = target;
                 } else {
                     task.target = undefined;
+                }
+                if (!task.target && !task.invader_core) {
+                    task.danger = false;
                 }
             }
         });
@@ -136,6 +171,7 @@ export class RemoteAttackW {
         let g = this.array.find(t => t.from === creep.memory.from);
         g.target = target;
         g.update_tick = Game.time;
+        g.danger = true;
     };
     private run = () => {
         this.tryUpdateState();

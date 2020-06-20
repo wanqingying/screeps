@@ -36,7 +36,7 @@ export function load_claim() {
             }
             if (creep.memory.role === w_role_name.claim) {
                 if (claim_room) {
-                    creep.claimController(claim_room.controller);
+                   let code= creep.claimController(claim_room.controller);
                     moveToTarget(creep, claim_room.controller as any);
                 } else {
                     moveToTarget(creep, new RoomPosition(25, 25, claim_room_name));
@@ -113,7 +113,7 @@ function prepareCache() {
     let cont = claim_room.find(FIND_STRUCTURES, {
         filter: s => s.structureType === STRUCTURE_CONTAINER,
     });
-    if (claim_room.controller.level >= 3) {
+    if (claim_room.controller.level >= 3 && claim_room.controller.my) {
         g_log('claim done');
         cache.process = 3;
         return;

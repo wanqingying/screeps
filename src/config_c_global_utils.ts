@@ -69,3 +69,12 @@ global.w_utils = {
         return false;
     },
 };
+
+global._sp=function (role,name) {
+    let room = Game.rooms[name];
+    if (room) {
+        SpawnAuto.spawnCreep(room, role);
+        return true;
+    }
+    return false;
+}

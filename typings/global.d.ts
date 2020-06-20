@@ -13,6 +13,13 @@ declare interface ConfigGlobal {
     };
 }
 
+interface Atk {
+    atk_name: string;
+    creeps: [string, number][];
+    pos_a: any[];
+    pos_b: any[];
+}
+
 interface CfgR {
     id: string;
     container_id?: string;
@@ -24,11 +31,12 @@ interface CfgRoom {
     creep_cfg_num: CreepCfgNum;
     claims?: Claims;
     reserve?: { [name: string]: CfgR[] };
+    attack?: Atk;
     scout?: string[];
     remote_container?: string[];
     link_a?: string[];
-    link_b?: string[];
-    link_c?: string[];
+    link_out?: string[];
+    link_in?: string[];
     link_d?: string[];
     link_pair?: string[][];
 }
@@ -99,12 +107,16 @@ declare namespace NodeJS {
         w_debug_creep: string;
         w_log(...p: any): void;
         w_log_on: boolean;
+        w_log_err_on: boolean;
         w_a_log(...p: any): void;
         g_log: Function;
+        g_log_err: Function;
         w_my_name: string;
         w_set_tick_out(tick: number, fn: Function): void;
         G_BaseRoom: G_BaseRoom;
         G_SpawnAuto: G_SpawnAuto;
+        G_BaseRoleRepair: G_BaseRoleRepair;
+        _sp:any
     }
 }
 
@@ -117,3 +129,4 @@ declare const w_utils: W_Utils;
 declare const w_debug_creep: string;
 declare const w_my_name: string;
 declare const g_log: (...p: any) => void;
+declare const g_log_err: (...p: any) => void;

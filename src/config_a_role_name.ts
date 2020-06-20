@@ -15,5 +15,7 @@ export const role_name = {
     claim: 'claim',
     repair: 'repair',
     attack: 'attack',
+    heal: 'heal',
+    mv: 'test',
 };
 global.w_role_name = role_name;
