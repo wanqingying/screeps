@@ -22,6 +22,7 @@ export const cfg_online: { [k: string]: CfgRoom } = {
             E19S5: [{ id: '5bbcae0b9099fc012e6385b1', container_pos: [10, 18] }],
             // E19S4: [{ id: '5bbcae0b9099fc012e6385af', container_pos: [32, 46] }],
         },
+        tk: 'eba03bfe-bc7c-48bc-89b2-50a4665bf574',
         // 用于采矿 只有采矿单位使用 发送到其他link
         link_a: ['5eebf3521f88d46bee1e7a56'],
         // 用于接受其他link 单位清空此link
