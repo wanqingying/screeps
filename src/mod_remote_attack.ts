@@ -29,7 +29,7 @@ export class RemoteAttackW {
                     target: null,
                     update_tick: 0,
                     has_atk: false,
-                    danger: true,
+                    danger: false,
                 });
             });
         });
@@ -103,14 +103,12 @@ export class RemoteAttackW {
         } else {
             creep.memory.process += 1;
             creep.say('no_atk_target');
-            if (creep.memory.process > 4) {
-                task.danger = false;
-                let room = Game.rooms[creep.memory.from];
-                const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
-                let far = moveToTarget(creep, sp as any);
-                if (far < 3) {
-                    sp.recycleCreep(creep);
-                }
+            task.danger = false;
+            let room = Game.rooms[creep.memory.from];
+            const sp: StructureSpawn = room.find(FIND_MY_SPAWNS).pop();
+            let far = moveToTarget(creep, sp as any);
+            if (far < 3) {
+                sp.recycleCreep(creep);
             }
         }
     };

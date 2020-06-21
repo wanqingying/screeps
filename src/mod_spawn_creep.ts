@@ -183,12 +183,12 @@ export class SpawnAuto {
         if (current_harvester < 1) {
             return w_role_name.harvester;
         }
-        if (current_carrier < 2) {
-            return w_role_name.carrier;
-        }
-        if (current_harvester < 2) {
-            return w_role_name.harvester;
-        }
+        // if (current_carrier < 2) {
+        //     return w_role_name.carrier;
+        // }
+        // if (current_harvester < 2) {
+        //     return w_role_name.harvester;
+        // }
     };
     // 检查是否满足配置
     private tryGetConfigRole = (room: Room) => {

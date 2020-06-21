@@ -141,6 +141,9 @@ export class RemoteRepair {
         let code;
         if (far < 5) {
             code = creep.repair(target as any);
+            if (code === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target as any);
+            }
         }
     };
     private run_remote_repair = (creep: Creep) => {
@@ -342,8 +345,8 @@ export class RemoteBuilder {
             );
             if (target) {
                 creep.say('get_b');
-                let far = moveToTarget(creep, target, 1);
-                if (far > 4) {
+                let far = moveToTarget(creep, target, 2);
+                if (far > 3) {
                     return;
                 }
                 let code;
@@ -358,6 +361,9 @@ export class RemoteBuilder {
                     if (target.amount === 0) {
                         unLock();
                     }
+                }
+                if (code === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
                 }
                 if (code === OK) {
                     unLock();

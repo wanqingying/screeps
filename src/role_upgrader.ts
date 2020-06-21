@@ -10,11 +10,11 @@ export class BaseRoleUpgrader {
             return p_task;
         }
         let cto = G_BaseRoom.getController(creep.room);
-        if (cto?.link) {
+        if (cto?.link && cto.link.target.store.energy > 100) {
             this.creep_get_lock.set(creep.id, cto.link as any);
             return cto.link;
         }
-        if (cto?.container) {
+        if (cto?.container && cto.container.target.store.energy > 100) {
             this.creep_get_lock.set(creep.id, cto.container as any);
             return cto.container;
         }
