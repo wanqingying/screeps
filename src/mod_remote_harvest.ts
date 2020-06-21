@@ -12,7 +12,7 @@ interface RemoteMineSite {
     update_tick: number;
 }
 export class RemoteHarvest {
-    private array: RemoteMineSite[];
+    private readonly array: RemoteMineSite[];
     constructor() {
         this.array = [];
         Object.keys(w_config.rooms).forEach(from_room_name => {
@@ -177,12 +177,12 @@ export class RemoteHarvest {
         creep.say('do');
         let far = moveToTarget(creep, pos);
         if (far < 4) {
-            let cont=G_BaseRoom.findMineContainer(creep,task.source_id)
-            if (cont){
-                const free=cont.store.getFreeCapacity(RESOURCE_ENERGY)
+            let cont = G_BaseRoom.findMineContainer(creep, task.source_id);
+            if (cont) {
+                const free = cont.store.getFreeCapacity(RESOURCE_ENERGY);
                 // creep.say('hi'+eng)
-                if (free===0){
-                    return  creep.say('full')
+                if (free === 0) {
+                    return creep.say('full');
                 }
             }
             creep.harvest(target);
@@ -199,11 +199,27 @@ export class RemoteHarvest {
         // }
         // 开销不大
         this.updateState();
-
+    };
+    private trySpawnWorker = () => {
+        this.updateState();
+        const wk = Object.values(Game.creeps).filter(
+            c => c.memory.role === w_role_name.remote_harvester
+        );
+        const wn = wk.length;
+        for (let i = 0; i < this.array.length; i++) {
+            const task = this.array[i];
+            if (task && !task.creep_id && wn < this.array.length) {
+                const room = Game.rooms[task.from];
+                G_SpawnAuto.spawnCreep(room, w_role_name.remote_harvester, {
+                    remote_task_id: task.source_id,
+                });
+            }
+        }
     };
     private run = () => {
         this.tryUpdateState();
         run_creep(w_role_name.remote_harvester, this.run_remote_harvest);
+        this.trySpawnWorker();
     };
     private last_run_time = 0;
     public static cache_key = 'remote_harvest_h';

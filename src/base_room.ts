@@ -185,6 +185,7 @@ class CacheRoom {
     public invader_core: PosDesc<StructureInvaderCore> | undefined;
     private repair: PosDesc<AnyStructure>[] = [];
     private repairWar: PosDesc<AnyStructure>[] = [];
+    private tombstone: PosDesc<Tombstone>[] = [];
     private readonly storage: PosDesc<StructureStorage> | undefined;
     private readonly name: string;
     constructor(room: Room) {
@@ -328,13 +329,17 @@ class CacheRoom {
             }
         });
     }
-    // drop=>mine_container
+    // drop=>mine_container for carrier
     public findTargetToPickUpOrWithdraw = (
         pos: RoomPosition
     ): PosDesc<StructureContainer> | PosDescDrop<Resource> => {
         // get refresh drop
         const min_pick = 150;
-        this.updateDrop();
+
+        this.updateTombstone();
+        if (this.tombstone.length > 0) {
+            return findNearTarget(pos, this.tombstone as any);
+        }
 
         let link_o = this.link_out.filter(l => isNotEmpty(l.target));
         if (link_o.length > 0) {
@@ -355,6 +360,7 @@ class CacheRoom {
             return findNearTarget(pos, mtn);
         }
 
+        this.updateDrop();
         const drops = this.drop.filter(d => d.amount > min_pick);
         if (drops.length > 0) {
             return findNearTarget(pos, drops);
@@ -374,13 +380,12 @@ class CacheRoom {
         }
         return this.storage as any;
     };
-    // drop=>mine_container
+    // drop=>mine_container for not carrier
     public findTargetToGetEnergy = (
         pos: RoomPosition
     ): PosDesc<StructureContainer> | PosDescDrop<Resource> => {
         // get refresh drop
         const min_pick = 150;
-        this.updateDrop();
         let bs: PosDesc<any>[] = [].concat(this.link_out).concat(this.source.map(d => d.container));
         bs.push(this.storage);
         bs = bs.filter(t => isNotEmpty(t && t.target));
@@ -388,6 +393,7 @@ class CacheRoom {
             return findNearTarget(pos, bs);
         }
 
+        this.updateDrop();
         const drops = this.drop.filter(d => d.amount > min_pick);
         if (drops.length > 0) {
             return findNearTarget(pos, drops);
@@ -545,6 +551,37 @@ class CacheRoom {
         }
         // clear not exist
     };
+    private update_tomb_tk = 0;
+    private updateTombstone = () => {
+        if (Game.time - this.update_tomb_tk < 9) {
+            return;
+        }
+        this.update_site_tk = Game.time;
+        const room = Game.rooms[this.name];
+        if (room) {
+            room.find(FIND_TOMBSTONES)
+                .filter(t => {
+                    let free = t.store.getFreeCapacity();
+                    let cap = t.store.getCapacity(RESOURCE_ENERGY) || 0;
+                    let used = cap - free;
+                    return used > 150 && t.ticksToDecay > 40;
+                })
+                .forEach(s => {
+                    const prev = this.tombstone.find(p => p.id === s.id);
+                    if (prev) {
+                        prev.target = s;
+                        prev.update_tick = Game.time;
+                    } else {
+                        const { x, y, roomName } = s.pos;
+                        const dp = new PosDesc<Tombstone>({ pos: [x, y, roomName], id: s.id });
+                        dp.target = s;
+                        dp.update_tick = Game.time;
+                        this.tombstone.push(dp);
+                    }
+                });
+            this.tombstone = this.tombstone.filter(d => d.update_tick === Game.time);
+        }
+    };
     private update_rp_tk = 0;
     private updateRepairs = () => {
         if (this.update_rp_tk === Game.time) {
@@ -615,6 +652,7 @@ class CacheRoom {
         this.update_state_tick = Game.time;
         this.updateDrop();
         this.updateInvaderCore();
+        this.updateTombstone();
     };
     private update_state_tick = 0;
     public tryUpdateState = () => {

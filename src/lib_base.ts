@@ -67,8 +67,8 @@ export function getActionLockTarget<T>(
             w_cache.set(cache_key, target?.id);
         }
     }
-    if (!target){
-        reset()
+    if (!target) {
+        reset();
     }
 
     return { target, unLock: reset };
@@ -505,4 +505,29 @@ export function findNearDropOrContainerTarget(creep: Creep) {
     if (container) {
         return container;
     }
+}
+
+function getMax<T>(array: T[], fn: (item: T) => number):T {
+    let max=Number.MIN_VALUE;
+    let max_item:T;
+    array.forEach(m=>{
+        const cm=fn(m);
+        if (cm>max){
+            max=cm;
+            max_item=m;
+        }
+    })
+    return max_item
+}
+function getMin<T>(array: T[], fn: (item: T) => number):T {
+    let max=Number.MIN_VALUE;
+    let max_item:T;
+    array.forEach(m=>{
+        const cm=fn(m);
+        if (cm>max){
+            max=cm;
+            max_item=m;
+        }
+    })
+    return max_item
 }
