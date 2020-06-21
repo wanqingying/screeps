@@ -25,8 +25,11 @@ declare type role_name_key =
     | 'repair'
     | 'attack'
     | 'heal'
-    | 'mv'
-    | string;
+    | 'upg'|string
+
+declare type RoleName = {
+    [k in role_name_key]: string;
+};
 
 declare interface SourceCache {
     source: Source;
