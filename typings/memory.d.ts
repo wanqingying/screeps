@@ -2,6 +2,28 @@ declare interface Memory {
     creeps_spawn_index: number;
     resource_energy: { [id: string]: { miners: string[] } };
     renew_creeps?: { name: string; ticks: number }[];
+    stats:Stats
+    stats_help:Stats_help
+}
+
+interface Stats{
+    gcl:number
+    gcl_count:number
+    gcl_increase:number
+    gclLevel:number
+    gpl:number
+    gplLevel:number
+    cpu:number
+    bucket:number
+    rooms:{[k:string]:StatsRoom}
+}
+interface Stats_help{
+    prev_gcl:number
+}
+
+interface StatsRoom{
+    storageEnergy:number
+    controller_points:number
 }
 
 declare interface CreepMemory {

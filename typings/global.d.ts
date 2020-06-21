@@ -80,9 +80,6 @@ declare type Roles = {
     [name in role_name_key]: Role;
 };
 declare type CacheGlobal = Map<any, any>;
-declare type RoleName = {
-    [role in role_name_key]: string;
-};
 
 declare interface SourceWithContainer {
     source: Source;

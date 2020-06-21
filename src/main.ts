@@ -7,6 +7,8 @@ import { RoomCache } from './room_cache';
 import { BaseLink } from './base_link';
 import { BaseClaim } from './claim';
 import * as role from './role';
+import { stat_scan } from './z_stat';
+
 
 function main() {
     g_log('========================tick==================================', Game.time);
@@ -39,6 +41,7 @@ function main() {
     role.BaseRoleCarry.start();
     role.BaseRoleHarvest.start();
     role.BaseRoleUpgrader.start();
+    role.BaseRoleUpg.start();
     role.BaseRoleRepair.start();
     Object.keys(Memory.creeps).forEach(name => {
         if (!Game.creeps[name]) {
@@ -47,6 +50,7 @@ function main() {
     });
     // 放在最后执行可支持 setTickOut(0,fn)
     mod.load_tick_out();
+    stat_scan()
 }
 
 module.exports.loop = main;
