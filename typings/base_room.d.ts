@@ -60,8 +60,6 @@ declare class G_SpawnAuto {
     public static start(): G_SpawnAuto;
 }
 
-
 declare class G_BaseRoleRepair {
-    public static run_as_repair:(creep:Creep)=>void
+    public static run_as_repair: (creep: Creep) => void;
 }
-

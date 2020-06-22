@@ -507,27 +507,27 @@ export function findNearDropOrContainerTarget(creep: Creep) {
     }
 }
 
-function getMax<T>(array: T[], fn: (item: T) => number):T {
-    let max=Number.MIN_VALUE;
-    let max_item:T;
-    array.forEach(m=>{
-        const cm=fn(m);
-        if (cm>max){
-            max=cm;
-            max_item=m;
+function getMax<T>(array: T[], fn: (item: T) => number): T {
+    let max = Number.MIN_VALUE;
+    let max_item: T;
+    array.forEach(m => {
+        const cm = fn(m);
+        if (cm > max) {
+            max = cm;
+            max_item = m;
         }
-    })
-    return max_item
+    });
+    return max_item;
 }
-function getMin<T>(array: T[], fn: (item: T) => number):T {
-    let max=Number.MIN_VALUE;
-    let max_item:T;
-    array.forEach(m=>{
-        const cm=fn(m);
-        if (cm>max){
-            max=cm;
-            max_item=m;
+function getMin<T>(array: T[], fn: (item: T) => number): T {
+    let max = Number.MIN_VALUE;
+    let max_item: T;
+    array.forEach(m => {
+        const cm = fn(m);
+        if (cm > max) {
+            max = cm;
+            max_item = m;
         }
-    })
-    return max_item
+    });
+    return max_item;
 }

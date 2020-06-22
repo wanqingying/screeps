@@ -180,7 +180,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3,[RANGED_ATTACK]: 3 },
+            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3, [RANGED_ATTACK]: 3 },
             [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }
@@ -200,7 +200,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3,[RANGED_ATTACK]: 3 },
+            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3, [RANGED_ATTACK]: 3 },
             [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }
@@ -219,7 +219,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.remote_builder]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.remote_repair]: { [MOVE]: 3, [WORK]: 3, [CARRY]: 3 },
             [w.remote_reserve]: { [MOVE]: 2, [CLAIM]: 2 },
-            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3,[RANGED_ATTACK]: 3 },
+            [w.remote_attack]: { [TOUGH]: 14, [MOVE]: 10, [ATTACK]: 3, [RANGED_ATTACK]: 3 },
             [w.claim_start]: { [MOVE]: 4, [WORK]: 4, [CARRY]: 4 },
         };
     }

@@ -55,9 +55,9 @@ export class BaseRoleUpgrader {
         if (creep.memory.process === p_work) {
             const cto = creep.room.controller;
             // moveToTarget(creep, cto, 1.3);
-            const code=creep.upgradeController(cto);
-            if (code===ERR_NOT_IN_RANGE){
-                creep.moveTo(cto)
+            const code = creep.upgradeController(cto);
+            if (code === ERR_NOT_IN_RANGE) {
+                creep.moveTo(cto);
             }
         }
     };
@@ -173,9 +173,9 @@ export class BaseRoleUpg {
         if (creep.memory.process === p_work) {
             const cto = creep.room.controller;
             // moveToTarget(creep, cto, 1.3);
-            const code=creep.upgradeController(cto);
-            if (code===ERR_NOT_IN_RANGE){
-                creep.moveTo(cto)
+            const code = creep.upgradeController(cto);
+            if (code === ERR_NOT_IN_RANGE) {
+                creep.moveTo(cto);
             }
         }
     };

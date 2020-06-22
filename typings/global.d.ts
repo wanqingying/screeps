@@ -113,7 +113,7 @@ declare namespace NodeJS {
         G_BaseRoom: G_BaseRoom;
         G_SpawnAuto: G_SpawnAuto;
         G_BaseRoleRepair: G_BaseRoleRepair;
-        _sp:any
+        _sp: any;
     }
 }
 

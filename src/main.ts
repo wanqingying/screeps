@@ -9,7 +9,6 @@ import { BaseClaim } from './claim';
 import * as role from './role';
 import { stat_scan } from './z_stat';
 
-
 function main() {
     g_log('========================tick==================================', Game.time);
     Object.values(Game.rooms).forEach(room => {
@@ -50,7 +49,7 @@ function main() {
     });
     // 放在最后执行可支持 setTickOut(0,fn)
     mod.load_tick_out();
-    stat_scan()
+    stat_scan();
 }
 
 module.exports.loop = main;

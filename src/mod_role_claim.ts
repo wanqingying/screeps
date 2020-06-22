@@ -36,7 +36,7 @@ export function load_claim() {
             }
             if (creep.memory.role === w_role_name.claim) {
                 if (claim_room) {
-                   let code= creep.claimController(claim_room.controller);
+                    let code = creep.claimController(claim_room.controller);
                     moveToTarget(creep, claim_room.controller as any);
                 } else {
                     moveToTarget(creep, new RoomPosition(25, 25, claim_room_name));

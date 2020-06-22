@@ -1,14 +1,11 @@
-import { moveToTarget } from './lib_creep';
-
 export class Base_attack {
     private creeps_cur: [string, number][] = [];
     private readonly creeps_target = [];
-    private pos_a = [];
-    private pos_b = [];
+    private readonly pos_a = [];
+    private readonly pos_b = [];
     private atk_room_name: string;
     private readonly from: string;
     private ready: boolean = false;
-
     constructor() {
         const atk_from = Object.keys(w_config.rooms).find(key => {
             const s = w_config.rooms[key];
