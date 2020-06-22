@@ -39,9 +39,10 @@ api.auth('1336753721@qq.com','wan@com123',{
 // api.memory.get()
 
 // Dump Memory Path
-api.memory.get('','shard3')
+api.memory.get('stats','shard3')
     .then(memory => {
         console.log('memory', JSON.stringify(memory));
+        debugger;
         fs.writeFileSync('memory.rooms.E18S5.json', JSON.stringify(memory))
     })
     .catch(err => console.error(err));

@@ -11,6 +11,7 @@ export class BaseRoom {
         }
         return target;
     };
+
     private updateRoom = (name: string) => {
         const room = Game.rooms[name];
         if (!room) {

@@ -7,14 +7,12 @@
     "moduleResolution": "classic",
     "preserveConstEnums": true,
     "sourceMap": false,
-//    "outDir": "screeps.com/default"
     "outDir": "127_0_0_1___21025/default",
     "allowJs": true
   },
   "include": [
     "src/*",
-    "typings",
-    "src/*.ts"
+    "typings/*"
   ],
   "exclude": [
     "node_modules",

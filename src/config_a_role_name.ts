@@ -1,5 +1,4 @@
-
-export const role_name:RoleName = {
+export const role_name: RoleName = {
     carrier: 'carrier',
     remote_carry: 'remote_carry',
     harvester: 'harvester',
@@ -17,6 +16,6 @@ export const role_name:RoleName = {
     repair: 'repair',
     attack: 'attack',
     heal: 'heal',
-    upg:'upg'
+    upg: 'upg',
 };
 global.w_role_name = role_name;

@@ -1,18 +1,33 @@
 module.exports = function(grunt) {
 
+
+    grunt.loadNpmTasks('grunt-contrib-clean')
+    grunt.loadNpmTasks('grunt-contrib-copy')
+    grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-screeps');
+
+    const config=require('./user.json')
+
+    const dist='127_0_0_1___21025/default'
 
     grunt.initConfig({
         screeps: {
             options: {
-                email: '1336753721@qq.com',
-                password: 'wan@com123',
-                branch: 'default',
-                ptr: false
+                email: config.email,
+                password: config.password,
+                branch: config.branch,
+                ptr: config.ptr
             },
             dist: {
-                src: ['127_0_0_1___21025/default/*.js']
+                src: [`${dist}/*.js`]
+            },
+        },
+        ts: {
+            default : {
+                tsconfig: './tsconfig.json'
             }
-        }
+        },
     });
+
+    grunt.registerTask('default',  ['screeps']);
 }

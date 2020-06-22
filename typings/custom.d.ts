@@ -25,7 +25,8 @@ declare type role_name_key =
     | 'repair'
     | 'attack'
     | 'heal'
-    | 'upg'|string
+    | 'upg'
+    | string;
 
 declare type RoleName = {
     [k in role_name_key]: string;

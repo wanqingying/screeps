@@ -70,11 +70,11 @@ global.w_utils = {
     },
 };
 
-global._sp=function (role,name) {
+global._sp = function (role, name) {
     let room = Game.rooms[name];
     if (room) {
         SpawnAuto.spawnCreep(room, role);
         return true;
     }
     return false;
-}
+};
