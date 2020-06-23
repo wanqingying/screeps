@@ -55,6 +55,7 @@ export class BaseRoleUpgrader {
         if (creep.memory.process === p_work) {
             const cto = creep.room.controller;
             // moveToTarget(creep, cto, 1.3);
+            creep.say('up')
             const code = creep.upgradeController(cto);
             if (code === ERR_NOT_IN_RANGE) {
                 creep.moveTo(cto);
@@ -70,7 +71,7 @@ export class BaseRoleUpgrader {
         const [x, y, name] = task_get.pos;
         const pos = new RoomPosition(x, y, name);
         const far = moveToTarget(creep, pos, 1.5);
-        creep.say('gt' + far + creep.memory.process);
+        creep.say('gt2' + far + creep.memory.process);
         if (far < 3) {
             let code;
             if (task_get.target?.store) {
@@ -188,7 +189,7 @@ export class BaseRoleUpg {
         const [x, y, name] = task_get.pos;
         const pos = new RoomPosition(x, y, name);
         const far = moveToTarget(creep, pos, 1.5);
-        creep.say('gt' + far + creep.memory.process);
+        creep.say('gt1' + far + creep.memory.process);
         if (far < 3) {
             let code;
             if (task_get.target?.store) {

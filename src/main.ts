@@ -9,7 +9,9 @@ import { BaseClaim } from './claim';
 import * as role from './role';
 import { stat_scan } from './z_stat';
 
+
 function main() {
+    console.log('o2');
     g_log('========================tick==================================', Game.time);
     Object.values(Game.rooms).forEach(room => {
         g_log(room.name, room.energyAvailable, '/', room.energyCapacityAvailable);

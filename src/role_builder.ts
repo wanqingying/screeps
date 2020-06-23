@@ -73,7 +73,7 @@ export class BaseRoleBuilder {
         const [x, y, name] = task_get.pos;
         const pos = new RoomPosition(x, y, name);
         const far = moveToTarget(creep, pos, 1.5);
-        creep.say('gt' + far + creep.memory.process);
+        creep.say('gt4' + far + creep.memory.process);
         if (far < 3) {
             let code;
             if (task_get.target?.store) {

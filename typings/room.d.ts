@@ -24,3 +24,7 @@ declare interface Room {
     log(...p: any): void;
     start(): void;
 }
+
+declare interface RoomPosition {
+    inRangeToPos(pos:RoomPosition,range?:number):boolean
+}

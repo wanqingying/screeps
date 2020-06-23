@@ -11,8 +11,8 @@
     "allowJs": true
   },
   "include": [
-    "src/*",
-    "typings/*"
+    "src",
+    "typings"
   ],
   "exclude": [
     "node_modules",
