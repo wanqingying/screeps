@@ -8,22 +8,25 @@
     "prettier": "prettier ./src ./typings --write"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.155",
-    "@types/node": "^12.12.20",
-    "@types/screeps": "^3.1.2",
     "axios": "^0.19.2",
+    "koa": "^2.13.0",
+    "lodash": "^4.17.15",
+    "mongoose": "^5.9.19"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "typescript": "3.9.5",
     "grunt": "^1.1.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-screeps": "^1.4.0",
     "grunt-ts": "^6.0.0-beta.22",
     "grunt-typescript": "^0.8.0",
-    "lodash": "^4.17.15",
-    "mongodb": "^3.5.9",
-    "mongoose": "^5.9.19",
-    "prettier": "^2.0.5",
-    "screeps-api": "^1.12.1",
-    "typescript": "3.9.5"
+    "@types/koa": "^2.11.3",
+    "@types/lodash": "^4.14.155",
+    "@types/mongoose": "^5.7.27",
+    "@types/node": "^12.12.20",
+    "@types/screeps": "^3.1.2"
   },
   "author": "",
   "license": "ISC"

@@ -15,7 +15,7 @@ export function stat_scan() {
 
     // 统计 GCL / GPL 的升级百分比和等级
     const rate_gcl = Game.gcl.progress / Game.gcl.progressTotal;
-    Memory.stats.tick=Game.time
+    Memory.stats.tick = Game.time;
     Memory.stats.gcl_rate = Math.round(rate_gcl * 100) / 100;
     Memory.stats.gcl = Game.gcl.progress;
     Memory.stats.gcl_increase = Game.gcl.progress - Memory.stats_help.prev_gcl;

@@ -99,7 +99,7 @@ export class BaseRoleCarry {
         const [x, y, name] = task.pos;
         const pos = new RoomPosition(x, y, name);
         const far = moveToTarget(creep, pos, 1.5);
-        creep.say('dp' + far + creep.memory.process);
+        creep.say('dp3' + far + creep.memory.process);
         if (far <= 5) {
             let code;
             RESOURCES_ALL.forEach(resType => {

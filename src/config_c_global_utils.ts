@@ -28,9 +28,10 @@ global.w_utils = {
             return 999;
         }
         let dx = ax - bx;
+        dx=dx>0?dx:0-dx;
         let dy = ay - by;
-        const far = Math.pow(dx * dx + dy * dy, 0.5);
-        return Math.round(far * 100) / 100;
+        dy=dy>0?dy:0-dy;
+        return Math.min(dx,dy)
     },
     get_code_msg(code) {
         let ScreepsReturnCodeMsg = [
