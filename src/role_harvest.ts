@@ -60,7 +60,8 @@ export class BaseRoleHarvest {
                     return;
                 }
             } else {
-                creep.drop(task2.resType);
+                RESOURCES_ALL.forEach(r => creep.drop(r));
+                // creep.drop(task2.resType);
             }
         }
         moveToTarget(creep, task2.container?.target || task2.target);
