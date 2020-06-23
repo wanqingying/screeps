@@ -70,21 +70,24 @@ export class BaseRoleCarry {
         }
         const [x, y, name] = task_get.pos;
         const pos = new RoomPosition(x, y, name);
-        const far = moveToTarget(creep, pos, 1.5);
-        creep.say('gt' + far);
+        const far = moveToTarget(creep, pos, 1);
+        creep.say('gtA' + far);
         if (far < 3) {
             let code;
             if (task_get.target?.store) {
-                RESOURCES_ALL.forEach(resT => {
-                    const am = task_get.target.store[resT];
-                    if (am > 0) {
-                        code = creep.withdraw(task_get.target, resT);
-                    }
-                });
+                // RESOURCES_ALL.forEach(resT => {
+                //     const am = task_get.target.store[resT];
+                //     if (am > 0) {
+                //         code = creep.withdraw(task_get.target, resT);
+                //     }
+                // });
+                code = creep.withdraw(task_get.target, RESOURCE_ENERGY);
             } else {
                 let k: Resource = task_get.target;
                 code = creep.pickup(k);
             }
+            console.log(creep.name);
+            console.log(w_utils.get_code_msg(code));
             if (far < 2) {
                 this.forgetTask(creep);
             }
@@ -98,8 +101,8 @@ export class BaseRoleCarry {
 
         const [x, y, name] = task.pos;
         const pos = new RoomPosition(x, y, name);
-        const far = moveToTarget(creep, pos, 1.5);
-        creep.say('dp3' + far + creep.memory.process);
+        const far = moveToTarget(creep, pos, 1);
+        creep.say('dp36' + far + creep.memory.process);
         if (far <= 5) {
             let code;
             RESOURCES_ALL.forEach(resType => {
@@ -111,6 +114,8 @@ export class BaseRoleCarry {
             if (code === OK) {
                 creep.say('ok');
             }
+            console.log(creep.name);
+            console.log(w_utils.get_code_msg(code));
         }
         if (far < 2) {
             this.forgetDropTask(creep);

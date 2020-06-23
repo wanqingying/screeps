@@ -358,7 +358,7 @@ class CacheRoom {
             .map(s => s.container);
 
         if (mtn.length > 0) {
-            return findNearTarget(pos, mtn);
+            // return findNearTarget(pos, mtn);
         }
 
         this.updateDrop();
@@ -443,7 +443,8 @@ class CacheRoom {
         return this.storage;
     };
     public findHarvestTargets = (): PosDescMine<HarvestType>[] => {
-        return [].concat(this.source).concat(this.extractor.map(e => e.mine));
+        // return [].concat(this.source).concat(this.extractor.map(e => e.mine));
+        return [].concat(this.source).concat([]);
     };
     public findMineLink = (pos: RoomPosition, id: string): StructureLink => {
         let extractor = this.extractor.find(e => {
