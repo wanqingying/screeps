@@ -27,7 +27,8 @@ function run() {
             // let obj=JSON.parse(res)
             axios
                 .get('https://screeps.com/api/user/memory?path=stats&shard=shard3', {
-                    headers: { 'X-Token': res.data.token },
+                    // headers: { 'X-Token': res.data.token },
+                    headers: { 'X-Token': 'eba03bfe-bc7c-48bc-89b2-50a4665bf574' },
                 })
                 .then(async res => {
                     let res_data = res.data.data;
@@ -41,6 +42,6 @@ function run() {
 }
 
 function main() {
-    setInterval(run, 1000*30);
+    setInterval(run, 1000 * 30);
 }
 main();

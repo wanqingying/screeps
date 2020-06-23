@@ -28,10 +28,12 @@ global.w_utils = {
             return 999;
         }
         let dx = ax - bx;
-        dx=dx>0?dx:0-dx;
+        dx = dx >= 0 ? dx : 0 - dx;
         let dy = ay - by;
-        dy=dy>0?dy:0-dy;
-        return Math.min(dx,dy)
+        dy = dy >= 0 ? dy : 0 - dy;
+        let min = Math.max(dx, dy);
+        console.log('far', min);
+        return min;
     },
     get_code_msg(code) {
         let ScreepsReturnCodeMsg = [
