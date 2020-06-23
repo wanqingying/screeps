@@ -14,23 +14,25 @@ export function stat_scan() {
     }
 
     // 统计 GCL / GPL 的升级百分比和等级
-    Memory.stats.gcl = (Game.gcl.progress / Game.gcl.progressTotal) * 100;
-    Memory.stats.gcl_count = Game.gcl.progress;
+    const rate_gcl = Game.gcl.progress / Game.gcl.progressTotal;
+    Memory.stats.tick=Game.time
+    Memory.stats.gcl_rate = Math.round(rate_gcl * 100) / 100;
+    Memory.stats.gcl = Game.gcl.progress;
     Memory.stats.gcl_increase = Game.gcl.progress - Memory.stats_help.prev_gcl;
     Memory.stats.gclLevel = Game.gcl.level;
-    Memory.stats.gpl = (Game.gpl.progress / Game.gpl.progressTotal) * 100;
-    Memory.stats.gplLevel = Game.gpl.level;
+    const rate_gpl = Game.gpl.progress / Game.gpl.progressTotal;
+    Memory.stats.gpl_rate = Math.round(rate_gpl * 100) / 100;
+    Memory.stats.gpl = Game.gpl.progress;
 
     Memory.stats_help.prev_gcl = Game.gcl.progress;
     // CPU 的当前使用量
-    Memory.stats.cpu = Game.cpu.getUsed();
+    Memory.stats.cpu = Math.round(Game.cpu.getUsed() * 100) / 100;
     // bucket 当前剩余量
-    Memory.stats.bucket = Game.cpu.bucket;
+    Memory.stats.bucket = Math.round(Game.cpu.bucket * 100) / 100;
 
     if (!Memory.stats.rooms) {
         Memory.stats.rooms = {} as any;
     }
-    delete Memory.stats['storageEnergy'];
 
     Object.values(Game.rooms).forEach(room => {
         if (!room.controller?.my) {
@@ -42,6 +44,6 @@ export function stat_scan() {
         if (room.storage) {
             stat.storageEnergy = room.storage.store.energy;
         }
-        Memory.stats[room.name] = stat;
+        Memory.stats.rooms[room.name] = stat;
     });
 }

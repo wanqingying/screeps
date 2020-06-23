@@ -8,11 +8,12 @@ declare interface Memory {
 
 interface Stats {
     gcl: number;
-    gcl_count: number;
+    tick: number;
+    gcl_rate: number;
     gcl_increase: number;
     gclLevel: number;
     gpl: number;
-    gplLevel: number;
+    gpl_rate: number;
     cpu: number;
     bucket: number;
     rooms: { [k: string]: StatsRoom };
