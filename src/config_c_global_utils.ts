@@ -31,9 +31,7 @@ global.w_utils = {
         dx = dx >= 0 ? dx : 0 - dx;
         let dy = ay - by;
         dy = dy >= 0 ? dy : 0 - dy;
-        let min = Math.max(dx, dy);
-        console.log('far', min);
-        return min;
+        return  Math.max(dx, dy);
     },
     get_code_msg(code) {
         let ScreepsReturnCodeMsg = [

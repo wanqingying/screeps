@@ -26,5 +26,5 @@ declare interface Room {
 }
 
 declare interface RoomPosition {
-    inRangeToPos(pos:RoomPosition,range?:number):boolean
+    inRangeToPos(pos: RoomPosition, range?: number): boolean;
 }
