@@ -7,4 +7,8 @@ declare interface Creep {
     log_one(...p: any): void;
     say_one(...p: any): void;
     run(): void;
+    gotoPos(
+        pos: RoomPosition,
+        range?: number
+    ): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
 }
