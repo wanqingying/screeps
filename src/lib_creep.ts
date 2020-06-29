@@ -190,7 +190,7 @@ export function getCreepBodyCfg(maxEnergy: number) {
             [w.carrier]: { [MOVE]: 8, [CARRY]: 16 },
             [w.harvester]: { [MOVE]: 2, [WORK]: 6, [CARRY]: 2 },
             [w.builder]: { [MOVE]: 6, [WORK]: 6, [CARRY]: 6 },
-            [w.upgrader]: { [MOVE]: 2, [WORK]: 10, [CARRY]: 2 },
+            [w.upgrader]: { [MOVE]: 3, [WORK]: 11, [CARRY]: 4 },
             [w.repair]: { [MOVE]: 5, [WORK]: 5, [CARRY]: 5 },
             [w.attack]: { [TOUGH]: 19, [MOVE]: 10, [ATTACK]: 1 },
             [w.heal]: { [TOUGH]: 4, [MOVE]: 4, [HEAL]: 4 },
