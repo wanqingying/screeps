@@ -338,10 +338,10 @@ export class RemoteBuilder {
         if (creep.memory.process === 'get') {
             creep.say('get');
             if (creep.memory.from === creep.room.name) {
-                return TransportDriver.get_resource(creep);
+                // return TransportDriver.get_resource(creep);
             }
             const { target, unLock } = getActionLockTarget(creep, 'run_remote_builder', () =>
-                findNearDropOrContainerTarget(creep)
+                G_BaseRoom.findTargetToGetEnergy(creep)
             );
             if (target) {
                 creep.say('get_b');

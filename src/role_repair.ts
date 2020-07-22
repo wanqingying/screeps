@@ -94,7 +94,7 @@ export class BaseRoleRepair {
     private run_creep_repair = (creep: Creep) => {
         let task = this.getWorkTask(creep);
         if (!task) {
-            return creep.say('dp_no');
+            return creep.say('rp_no');
         }
 
         const [x, y, name] = task.pos;
