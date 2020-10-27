@@ -1,10 +1,6 @@
 import {
-    is_less_than,
-    is_more_than,
     isEmpty,
     isFull,
-    isNotEmpty,
-    isNotFull,
     run_creep,
 } from './lib_base';
 import { moveToTarget } from './lib_creep';
