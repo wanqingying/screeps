@@ -7,7 +7,6 @@ const path = require('path');
  */
 module.exports = function (grunt) {
     grunt.registerTask('flat', 'flat file form path to file', function () {
-        const that = this;
         const done = this.async();
         flat().then(()=>{
             done(true)
@@ -57,8 +56,7 @@ function replaceStr(str = '', dirName) {
         const absDir = targetDir.replace(root, '');
         if (absDir.trim()) {
             const newName = absDir.replace(/\\/g, '_') + '_' + path.basename(targetFileName);
-            const newS = match.replace(p1, './' + newName);
-            return newS;
+            return match.replace(p1, './' + newName);
         } else {
             return match;
         }
