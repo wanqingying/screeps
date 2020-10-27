@@ -32,5 +32,5 @@ module.exports = function (grunt) {
         },
     });
 
-    grunt.registerTask('default', ['tsc', 'flat']);
+    grunt.registerTask('default', ['tsc','flat']);
 };
