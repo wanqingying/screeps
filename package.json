@@ -8,7 +8,7 @@
     "prettier": "prettier ./src ./typings --write"
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "koa": "^2.13.0",
     "lodash": "^4.17.15",
     "mongoose": "^5.9.19"
