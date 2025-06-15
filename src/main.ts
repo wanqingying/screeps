@@ -3,7 +3,7 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import { work } from "./role";
 import { spawnCreep, spawn_room, getRolesCount } from "./spawn";
 import { Role } from "types";
-import { init } from "room";
+import { init, runTowerAtk } from "room";
 import { tick_callbacks } from "utils";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
@@ -16,6 +16,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   for (const fn of tick_callbacks) {
     fn(room);
   }
+  runTowerAtk(room);
   const roles = room.memory.roles || {};
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {

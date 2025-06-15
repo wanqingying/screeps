@@ -29,3 +29,36 @@ Object.defineProperties(Room.prototype, {
     }
   }
 });
+
+Object.defineProperties(Structure.prototype, {
+  memory: {
+    get: function () {
+      //   if (!global.cache) {
+      //     global.cache = { rooms: {}, time: Game.time };
+      //   }
+      if (!Memory.structure) {
+        Memory.structure = {
+          [this.id]: {}
+        };
+      }
+
+      return new Proxy(Memory.structure[this.id], {
+        get: (target, prop) => {
+          let mem: any = Memory.structure[this.id];
+          return mem[prop];
+        },
+        set: (target, prop, value) => {
+          let mem: any = Memory.structure[this.id];
+          mem[prop] = value;
+          return true;
+        }
+      });
+    },
+    set: function (value) {
+      if (!Memory.structure) {
+        Memory.structure = {};
+      }
+      Memory.structure[this.id] = value;
+    }
+  }
+});

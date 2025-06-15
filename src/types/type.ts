@@ -24,6 +24,14 @@ declare global {
   interface Memory {
     uuid: number;
     log: any;
+    structure: Record<string, StructureMem>;
+  }
+  interface StructureMem {
+    target?: string; // id of the target creep
+    state?: string; // state of the structure, like "idle", "working", "waiting"
+  }
+  interface Structure {
+    memory: StructureMem;
   }
 
   interface Room {

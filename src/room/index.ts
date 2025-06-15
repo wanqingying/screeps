@@ -1,5 +1,6 @@
 import { Role, dc } from "types";
 import { EventBus, setIntervalTick } from "utils";
+export * from './tower'
 
 console.log("Room index loaded");
 global.event = new EventBus();

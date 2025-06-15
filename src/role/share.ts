@@ -105,16 +105,23 @@ function getNearByPos(creep: Creep): any {
     })
     .filter(t => t && t.target)
     .sort((a: any, b: any) => a.weigth - b.weigth);
-//   if (creep.memory.role === Role.repairer) {
-//     console.log("getNearByPos", JSON.stringify(poss));
-//   }
+  //   if (creep.memory.role === Role.repairer) {
+  //     console.log("getNearByPos", JSON.stringify(poss));
+  //   }
   const t = poss[0]?.target;
   creep.memory.target = t?.id || "";
   return t;
 }
 
-type DropTargetType = StructureSpawn | StructureExtension | StructureStorage | StructureContainer;
+type DropTargetType = StructureSpawn | StructureExtension | StructureStorage | StructureContainer | StructureTower;
 export function getDropTarget(creep: Creep): DropTargetType | null {
+  let target = Game.getObjectById<DropTargetType>(creep.memory.target as Id<DropTargetType>);
+  if (target) {
+    return target;
+  } else {
+    creep.memory.target = "";
+  }
+
   const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
     filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
   });
@@ -126,6 +133,12 @@ export function getDropTarget(creep: Creep): DropTargetType | null {
   }) as StructureExtension | null;
   if (ext) {
     return ext;
+  }
+  const tower = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+    filter: s => s.structureType === STRUCTURE_TOWER && s.store.getFreeCapacity(RESOURCE_ENERGY) > 100
+  }) as StructureTower | null;
+  if (tower) {
+    return tower;
   }
 
   const storage = creep.room.storage;
@@ -151,6 +164,7 @@ export enum TransOver {
 export function transfer(creep: Creep) {
   const target = getDropTarget(creep);
   if (target) {
+    creep.memory.target = target.id;
     if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
       creep.moveTo(target, {
         reusePath: 5,

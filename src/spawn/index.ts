@@ -71,9 +71,11 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       capacity = Math.min(capacity, 900);
       if (room.memory.controller?.container) {
         // [w,w,c,m]
-        count_m = 1;
-        count_c = 1;
-        count_w = Math.floor((capacity - BODYPART_COST[MOVE] - BODYPART_COST[CARRY]) / BODYPART_COST[WORK]);
+        count_m = Math.ceil(capacity / 700);
+        count_c = Math.ceil(capacity / 700);
+        count_w = Math.floor(
+          (capacity - BODYPART_COST[MOVE] * count_m - BODYPART_COST[CARRY] * count_c) / BODYPART_COST[WORK]
+        );
         return Array(count_w).fill(WORK).concat(Array(count_c).fill(CARRY)).concat(Array(count_m).fill(MOVE));
       }
       //[w,c,m]
