@@ -12,40 +12,25 @@ export const loop = ErrorMapper.wrapLoop(() => {
   // get all creeps in the game
   const creeps = Object.values(Game.creeps);
   const room = Object.values(Game.rooms)[0];
-  init(room);
+  if (global.cache.rooms[room.name]?.init !== true) {
+    init(room);
+  }
   for (const fn of tick_callbacks) {
     fn(room);
   }
   runTowerAtk(room);
-  const roles = room.memory.roles || {};
-  // Automatically delete memory of missing creeps
-  for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
-      return;
-    }
 
-    const creep_mem = Memory.creeps[name];
-    if (creep_mem.role in roles) {
-      // roles[creep_mem.role].push(creep_mem);
-    } else {
-      console.log(`Creep ${name} has unknown role ${creep_mem.role}`);
-      delete Memory.creeps[name];
-      // destroy the creep
-    }
-  }
-  const roles_count = getRolesCount(room);
-
-  // const rm = Array.from(Object.entries(roles).map(([role, creeps]) => [role, creeps.length].join(":"))).join(", ");
-  const rm = Object.entries(roles_count)
-    .map(([role, count]) => `${role}: ${count}`)
-    .join(", ");
   if (Game.time % 10 === 0) {
+    const roles_count = getRolesCount(room);
+    const rm = Object.entries(roles_count)
+      .map(([role, count]) => `${role}: ${count}`)
+      .join(", ");
     console.log(`time:${Game.time}, ${rm}`);
   }
 
-  spawn_room(room);
-  // room
+  if (Game.time % 3 === 0) {
+    spawn_room(room);
+  }
 
   for (const creep of creeps) {
     work(creep);

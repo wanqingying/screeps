@@ -1,16 +1,7 @@
 import { Role } from "./enum";
 import { EventBus } from "utils";
+import { dc } from "./dc";
 
-export namespace dc {
-  export enum pos_type {
-    ruin = 1,
-    dropped = 2,
-    container_controller = 3,
-    container = 4,
-    container_source = 5,
-    storage = 6
-  }
-}
 declare global {
   /*
 	Example types, expand on these or remove them and add your own.
@@ -26,25 +17,21 @@ declare global {
     log: any;
     structure: Record<string, StructureMem>;
   }
+
   interface StructureMem {
-    target?: string; // id of the target creep
-    state?: string; // state of the structure, like "idle", "working", "waiting"
+    target?: string;
+    state?: string;
+    warn?: number;
   }
   interface Structure {
     memory: StructureMem;
-  }
-
-  interface Room {
-    cache: {
-      sources: Record<string, srouce_tsk>;
-    };
   }
 
   interface CreepMemory {
     role: Role;
     name: string;
     room: string;
-    working: boolean;
+    wkn: dc.wkn_temp_role;
     state: string;
     target?: string;
     near?: number; // distance to target , upgrader
@@ -65,32 +52,6 @@ declare global {
       link?: Id<StructureLink>;
     };
     roles: Record<string, string[]>;
-  }
-
-  interface rooms {
-    [roomName: string]: {
-      //   ruins_worker?: Record<string, string>;
-      sources: Record<string, srouce_tsk>;
-      event: EventBus;
-    };
-  }
-
-  interface srouce_tsk {
-    pos: RoomPosition;
-    amount: number;
-    pt: dc.pos_type;
-    type: ResourceConstant;
-    get_resource: (creep: Creep) => ScreepsReturnCode;
-  }
-  // Syntax for adding proprties to `global` (ex "global.log")
-  namespace NodeJS {
-    interface Global {
-      log: any;
-      event: EventBus;
-      cache: {
-        rooms: rooms;
-        time: number;
-      };
-    }
+    config: dc.Config;
   }
 }

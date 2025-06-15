@@ -9,7 +9,8 @@ Object.defineProperties(Room.prototype, {
       if (!global.cache.rooms[this.name]) {
         global.cache.rooms[this.name] = {
           sources: {},
-          event: new EventBus()
+          event: new EventBus(),
+          init: true
         };
       }
       return new Proxy(global.cache.rooms[this.name], {

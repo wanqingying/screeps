@@ -1,4 +1,7 @@
+import { setIntervalTick } from "utils";
 import { restoreNearbyEnergy } from "./share";
+import { Role, dc } from "types";
+import { handle_builder } from "./builder";
 
 enum state_repair {
   idle = "idle",
@@ -32,7 +35,7 @@ export function work_repair(creep: Creep) {
       });
     }
 
-    if (target) {
+    if (target && creep.memory.wkn !== dc.wkn_temp_role.temp_builder) {
       creep.memory.target = target.id;
       if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
@@ -41,8 +44,7 @@ export function work_repair(creep: Creep) {
         creep.memory.target = "";
       }
     } else {
-      // say "no target"
-      creep.say("no target");
+      handle_builder(creep);
     }
     if (creep.store[RESOURCE_ENERGY] === 0) {
       creep.memory.state = state_repair.restore;
@@ -50,3 +52,22 @@ export function work_repair(creep: Creep) {
     }
   }
 }
+
+// setIntervalTick(17, () => {
+//   for (const name in Game.creeps) {
+//     const creep = Game.creeps[name];
+//     const room = creep.room;
+//     if (creep.memory.wkn === dc.wkn_temp_role.temp_builder) {
+//       const to_repairs = room.find(FIND_MY_STRUCTURES, {
+//         filter: (s: Structure) =>
+//           s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART && s.hitsMax - s.hits > 200
+//       });
+//       const to_fix_roads = room.find(FIND_STRUCTURES, {
+//         filter: (s: Structure) => s.structureType === STRUCTURE_ROAD && s.hitsMax - s.hits > 400
+//       });
+//       if (to_repairs.length || to_fix_roads.length) {
+//         creep.memory.wkn = dc.wkn_temp_role.temp_repairer;
+//       }
+//     }
+//   }
+// });

@@ -1,6 +1,6 @@
 import { Role, dc } from "types";
-import { EventBus, setIntervalTick } from "utils";
-export * from './tower'
+import { EventBus, setIntervalTick, dc_config } from "utils";
+export * from "./tower";
 
 console.log("Room index loaded");
 global.event = new EventBus();
@@ -8,6 +8,9 @@ global.event = new EventBus();
 global.event.on("build_over", (data: any) => {
   console.log("event build_over", JSON.stringify(data));
 });
+if (!global.cache) {
+  global.cache = { rooms: {}, time: Game.time };
+}
 
 export function init(room: Room) {
   if (room.controller) {
@@ -34,7 +37,8 @@ export function init(room: Room) {
   if (!global.cache.rooms[room.name]) {
     global.cache.rooms[room.name] = {
       sources: {},
-      event: new EventBus()
+      event: new EventBus(),
+      init: true
     };
   }
 
@@ -71,11 +75,29 @@ export function init(room: Room) {
         role: Role.starter,
         name: creep.name,
         room: room.name,
-        working: false,
+        wkn: dc.wkn_temp_role.temp_none,
         state: "idle"
       };
     }
     room.memory.roles[creep.memory.role].push(creep.name);
+  }
+  // Automatically delete memory of missing creeps
+  const roles = room.memory.roles || {};
+
+  for (const name in Memory.creeps) {
+    if (!(name in Game.creeps)) {
+      delete Memory.creeps[name];
+      return;
+    }
+
+    const creep_mem = Memory.creeps[name];
+    if (creep_mem.role in roles) {
+      // roles[creep_mem.role].push(creep_mem);
+    } else {
+      console.log(`Creep ${name} has unknown role ${creep_mem.role}`);
+      delete Memory.creeps[name];
+      // destroy the creep
+    }
   }
 
   //   ini sources
@@ -112,6 +134,15 @@ export function init(room: Room) {
         : dc.pos_type.container
     };
   }
+
+  // init config
+  if (!room.memory.config) {
+    const config = dc_config.rooms[room.name];
+    if (!config) {
+      throw new Error(`No config found for room ${room.name}`);
+    }
+    room.memory.config = config;
+  }
 }
 
 setIntervalTick(13, () => {
@@ -140,5 +171,11 @@ setIntervalTick(13, () => {
         }
       }
     }
+  }
+});
+
+setIntervalTick(3, () => {
+  for (const room of Object.values(Game.rooms)) {
+    init(room);
   }
 });

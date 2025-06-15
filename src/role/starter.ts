@@ -16,7 +16,7 @@ export function work_starter(creep: Creep) {
         creep.moveTo(source);
       }
     } else {
-      console.log(`No source found for creep ${creep.name}`);
+    //   console.log(`No source found for creep ${creep.name}`);
     }
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
       creep.memory.state = state_starter.dropping;

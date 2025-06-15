@@ -58,18 +58,31 @@ function findToAttack(tower: StructureTower) {
     tower.memory.target = "";
   }
 
-  const hos_heal = room.find(FIND_HOSTILE_CREEPS, {
-    filter: c => c.getActiveBodyparts(HEAL) > 0
-  });
-  if (hos_heal.length) {
-    return hos_heal.sort((a, b) => b.hits - a.hits)[0];
+  //   const hos_heal = room.find(FIND_HOSTILE_CREEPS, {
+  //     filter: c => c.getActiveBodyparts(HEAL) > 0
+  //   });
+  //   if (hos_heal.length) {
+  //     return hos_heal.sort((a, b) => b.hits - a.hits)[0];
+  //   }
+
+  //   const hos_atk = room.find(FIND_HOSTILE_CREEPS, {
+  //     filter: c => c.getActiveBodyparts(ATTACK) > 0 || c.getActiveBodyparts(RANGED_ATTACK) > 0
+  //   });
+  //   if (hos_atk.length) {
+  //     return hos_atk.sort((a, b) => b.hits - a.hits)[0];
+  //   }
+
+  const hos_safe = room.find(FIND_HOSTILE_CREEPS);
+  if (!hos_safe.length) {
+    return null;
   }
 
-  const hos_atk = room.find(FIND_HOSTILE_CREEPS, {
-    filter: c => c.getActiveBodyparts(ATTACK) > 0 || c.getActiveBodyparts(RANGED_ATTACK) > 0
-  });
-  if (hos_atk.length) {
-    return hos_atk.sort((a, b) => b.hits - a.hits)[0];
+  const randomCreep = room.find(FIND_MY_CREEPS);
+  if (randomCreep.length) {
+    randomCreep[0].say(`Warning!`, true);
+  }
+  if (hos_safe.length) {
+    return hos_safe.sort((a, b) => b.hits - a.hits)[0];
   }
 
   return null;

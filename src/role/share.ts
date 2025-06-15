@@ -78,12 +78,12 @@ function getNearByPos(creep: Creep): any {
       amount: (container as StructureContainer)?.store?.[RESOURCE_ENERGY] || 0,
       pos: container?.pos
     },
-    {
-      target: spawn,
-      mx: 3,
-      amount: spawn?.store?.[RESOURCE_ENERGY] || 0,
-      pos: spawn?.pos
-    },
+    // {
+    //   target: spawn,
+    //   mx: 3,
+    //   amount: spawn?.store?.[RESOURCE_ENERGY] || 0,
+    //   pos: spawn?.pos
+    // },
     {
       target: storage,
       mx: 1,
@@ -139,6 +139,11 @@ export function getDropTarget(creep: Creep): DropTargetType | null {
   }) as StructureTower | null;
   if (tower) {
     return tower;
+  }
+
+  const cont = Game.getObjectById(creep.room.memory.controller?.container as Id<StructureContainer>);
+  if (cont && cont.store.getFreeCapacity(RESOURCE_ENERGY) >= creep.store[RESOURCE_ENERGY]) {
+    return cont;
   }
 
   const storage = creep.room.storage;

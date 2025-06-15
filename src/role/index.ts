@@ -19,17 +19,6 @@ const runs: Record<Role, Function> = {
   [Role.repairer]: work_repair
 };
 
-export const roles_limit: Record<Role, number> = {
-  [Role.starter]: 1,
-  [Role.worker]: 0,
-  [Role.carrier]: 4,
-  [Role.upgrader]: 5,
-  [Role.builder]: 5,
-  [Role.harvester]: 2,
-  [Role.ruin_cary]: 0,
-  [Role.repairer]: 1
-};
-
 export const roles_body: Record<Role, BodyPartConstant[]> = {
   [Role.starter]: [WORK, CARRY, MOVE],
   [Role.worker]: [WORK, CARRY, MOVE],

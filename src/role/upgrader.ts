@@ -34,14 +34,24 @@ export function work_upgrader(creep: Creep) {
   if (state === state_updater.restore) {
     const spawn = room.find(FIND_MY_SPAWNS)[0];
     if (room.memory.controller?.container) {
-      const target = Game.getObjectById(room.memory.controller?.container);
+      let target: any = Game.getObjectById(room.memory.controller?.container);
+      if (target?.store?.[RESOURCE_ENERGY]! < 40) {
+        target =
+          room.storage ||
+          creep.pos.findClosestByPath(FIND_RUINS, {
+            filter: r => r.store[RESOURCE_ENERGY] > 0
+          });
+      }
+
       if (target && target.store[RESOURCE_ENERGY] > 0) {
         if (creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
           creep.moveTo(target);
         }
       } else {
         creep.memory.target = "";
-        creep.moveTo(spawn, {});
+        const config = room.memory.config;
+        const [x, y] = config.pos_idle?.pos || [12, 25];
+        creep.moveTo(x, y, { visualizePathStyle: { stroke: "#ffffff" } });
       }
     }
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {

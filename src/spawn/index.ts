@@ -1,5 +1,5 @@
-import { Role } from "types";
-import { roles_limit, roles_body, roles_priority } from "role";
+import { dc, Role } from "types";
+import { roles_body, roles_priority } from "role";
 import { dc_config } from "utils";
 
 // MOVE	50	每 tick 减少 2 点疲惫值
@@ -140,7 +140,7 @@ export function spawnCreep(role: Role, spawn?: StructureSpawn) {
       role: role,
       name: name,
       room: spawn.room.name,
-      working: false,
+      wkn: dc.wkn_temp_role.temp_none,
       state: "idle"
     }
   });
@@ -162,7 +162,7 @@ export function getRolesCount(room: Room) {
 }
 
 export function spawn_room(room: Room) {
-  const dc = dc_config.rooms[room.name];
+  const dc = room.memory.config;
   const exist_roles = room.memory.roles;
   const should_spawn_starter = exist_roles[Role.harvester].length === 0 && exist_roles[Role.carrier].length === 0;
   const wall_and_rampart = room.find(FIND_STRUCTURES, {
@@ -171,6 +171,7 @@ export function spawn_room(room: Room) {
   const should_spawn_builder =
     room.find(FIND_MY_CONSTRUCTION_SITES).length > 0 || (dc.build_wall && wall_and_rampart.length > 0);
   const should_spawn_upgrader = room.memory.controller?.container || room.memory.controller?.link;
+  const roles_limit = dc.roles_limit;
 
   let sp: { role: Role; w: number }[] = [];
   roles_priority.forEach((r, i) => {
