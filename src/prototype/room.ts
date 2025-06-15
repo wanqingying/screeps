@@ -1,3 +1,4 @@
+import { EventBus } from "utils";
 
 Object.defineProperties(Room.prototype, {
   cache: {
@@ -7,7 +8,8 @@ Object.defineProperties(Room.prototype, {
       }
       if (!global.cache.rooms[this.name]) {
         global.cache.rooms[this.name] = {
-          sources: {}
+          sources: {},
+          event: new EventBus()
         };
       }
       return new Proxy(global.cache.rooms[this.name], {

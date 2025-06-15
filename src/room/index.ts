@@ -1,6 +1,12 @@
 import { Role, dc } from "types";
+import { EventBus, setIntervalTick } from "utils";
 
 console.log("Room index loaded");
+global.event = new EventBus();
+
+global.event.on("build_over", (data: any) => {
+  console.log("event build_over", JSON.stringify(data));
+});
 
 export function init(room: Room) {
   if (room.controller) {
@@ -26,7 +32,8 @@ export function init(room: Room) {
   }
   if (!global.cache.rooms[room.name]) {
     global.cache.rooms[room.name] = {
-      sources: {}
+      sources: {},
+      event: new EventBus()
     };
   }
 
@@ -105,3 +112,32 @@ export function init(room: Room) {
     };
   }
 }
+
+setIntervalTick(13, () => {
+  for (const room of Object.values(Game.rooms)) {
+    if (!room.memory.sources) continue;
+    for (const [id, s] of Object.entries(room.memory.sources)) {
+      if (s.harvester) {
+        const creep = Game.getObjectById(s.harvester as Id<Creep>);
+        if (!creep) {
+          delete s.harvester;
+        }
+      }
+      if (s.container) {
+        const container = Game.getObjectById(s.container as Id<StructureContainer>);
+        if (!container) {
+          delete s.container;
+        }
+      }
+      const source = Game.getObjectById(id as Id<Source>);
+      if (source && !s.container) {
+        const containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
+          filter: s => s.structureType === STRUCTURE_CONTAINER
+        });
+        if (containers.length) {
+          room.memory.sources[id].container = containers[0].id as Id<StructureContainer>;
+        }
+      }
+    }
+  }
+});

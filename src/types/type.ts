@@ -1,4 +1,5 @@
 import { Role } from "./enum";
+import { EventBus } from "utils";
 
 export namespace dc {
   export enum pos_type {
@@ -47,6 +48,7 @@ declare global {
       string,
       {
         container?: Id<StructureContainer>; // source related containers id
+        harvester?: Id<Creep>;
       }
     >;
     controller?: {
@@ -61,6 +63,7 @@ declare global {
     [roomName: string]: {
       //   ruins_worker?: Record<string, string>;
       sources: Record<string, srouce_tsk>;
+      event: EventBus;
     };
   }
 
@@ -75,6 +78,7 @@ declare global {
   namespace NodeJS {
     interface Global {
       log: any;
+      event: EventBus;
       cache: {
         rooms: rooms;
         time: number;

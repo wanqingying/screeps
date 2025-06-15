@@ -1,5 +1,6 @@
 import { Role } from "types";
 import { roles_limit, roles_body, roles_priority } from "role";
+import { dc_config } from "utils";
 
 // MOVE	50	每 tick 减少 2 点疲惫值
 // WORK	100
@@ -42,7 +43,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
   const hasCarrier = room.memory.roles[Role.carrier].length > 0;
   const hasHarvester = room.memory.roles[Role.harvester].length > 0;
   const isOv = hasCarrier && hasHarvester;
-  const capacity = isOv ? room.energyCapacityAvailable : Math.max(room.energyAvailable, 300);
+  let capacity = isOv ? room.energyCapacityAvailable : Math.max(room.energyAvailable, 300);
   let move_cap = 0;
   let work_cap = 0;
   let cary_cap = 0;
@@ -58,6 +59,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       break;
     case Role.carrier:
     case Role.ruin_cary:
+      capacity = Math.min(capacity, 850);
       //   move_cap = capacity * 0.33;
       //   cary_cap = capacity - move_cap;
       cary_cap = (capacity - 50) * 0.66;
@@ -66,6 +68,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       count_c = Math.floor(cary_cap / BODYPART_COST[CARRY]);
       return Array(count_c).fill(CARRY).concat(Array(count_m).fill(MOVE));
     case Role.upgrader:
+      capacity = Math.min(capacity, 900);
       if (room.memory.controller?.container) {
         // [w,w,c,m]
         count_m = 1;
@@ -82,6 +85,8 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       count_m = Math.floor(move_cap / BODYPART_COST[MOVE]);
       return Array(count_w).fill(WORK).concat(Array(count_c).fill(CARRY)).concat(Array(count_m).fill(MOVE));
     case Role.builder:
+    case Role.repairer:
+      capacity = Math.min(capacity, 800);
       //[w,c,m]
       move_cap = capacity * 0.25;
       cary_cap = capacity * 0.25;
@@ -92,11 +97,14 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       return Array(count_w).fill(WORK).concat(Array(count_c).fill(CARRY)).concat(Array(count_m).fill(MOVE));
     case Role.harvester:
       //[w,w,m]
+      capacity = Math.min(capacity, 800);
       move_cap = capacity * 0.2;
       work_cap = capacity - move_cap;
       count_w = Math.floor(work_cap / BODYPART_COST[WORK]);
       count_m = Math.floor(move_cap / BODYPART_COST[MOVE]);
       return Array(count_w).fill(WORK).concat(Array(count_m).fill(MOVE));
+    // case Role.repairer:
+    //   return [WORK, CARRY, MOVE, MOVE];
     default:
       console.log(`Unknown role: ${role}`);
       break;
@@ -121,9 +129,9 @@ export function spawnCreep(role: Role, spawn?: StructureSpawn) {
   }
   if (bodyCost > energyAvailable) {
     if (Game.time % 5 === 0) {
-       console.log(`no energy spawn ${name}, required: ${bodyCost}, available: ${energyAvailable}`);
+      console.log(`no energy spawn ${name}, required: ${bodyCost}, available: ${energyAvailable}`);
     }
-	return;
+    return;
   }
   spawn.spawnCreep(body, name, {
     memory: {
@@ -152,9 +160,14 @@ export function getRolesCount(room: Room) {
 }
 
 export function spawn_room(room: Room) {
+  const dc = dc_config.rooms[room.name];
   const exist_roles = room.memory.roles;
   const should_spawn_starter = exist_roles[Role.harvester].length === 0 && exist_roles[Role.carrier].length === 0;
-  const should_spawn_builder = room.find(FIND_MY_CONSTRUCTION_SITES).length > 0;
+  const wall_and_rampart = room.find(FIND_STRUCTURES, {
+    filter: s => s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART
+  });
+  const should_spawn_builder =
+    room.find(FIND_MY_CONSTRUCTION_SITES).length > 0 || (dc.build_wall && wall_and_rampart.length > 0);
   const should_spawn_upgrader = room.memory.controller?.container || room.memory.controller?.link;
 
   let sp: { role: Role; w: number }[] = [];

@@ -1,3 +1,5 @@
+import { Role } from "types";
+
 export function restoreNearbyEnergy(creep: Creep) {
   const target = getNearByPos(creep);
   if (target) {
@@ -12,7 +14,7 @@ export function restoreNearbyEnergy(creep: Creep) {
       if (creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
       }
-      if ((target as StructureContainer).store[RESOURCE_ENERGY] === 0) {
+      if ((target as StructureContainer).store?.[RESOURCE_ENERGY] === 0) {
         creep.memory.target = "";
       }
     }
@@ -24,9 +26,11 @@ export function restoreNearbyEnergy(creep: Creep) {
   return isFull;
 }
 
-function getNearByPos(creep: Creep) {
+type ResType = StructureContainer | Ruin | Resource;
+
+function getNearByPos(creep: Creep): any {
   if (creep.memory.target) {
-    const target = Game.getObjectById(creep.memory.target);
+    const target = Game.getObjectById<any>(creep.memory.target);
     if (target) {
       return target;
     } else {
@@ -101,7 +105,9 @@ function getNearByPos(creep: Creep) {
     })
     .filter(t => t && t.target)
     .sort((a: any, b: any) => a.weigth - b.weigth);
-  const ps = poss.map((t: any) => `${t.target?.id}(${t.weigth})`).join(",");
+//   if (creep.memory.role === Role.repairer) {
+//     console.log("getNearByPos", JSON.stringify(poss));
+//   }
   const t = poss[0]?.target;
   creep.memory.target = t?.id || "";
   return t;

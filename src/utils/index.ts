@@ -1,4 +1,6 @@
-export function every_tick() {}
+export * from "./config";
+
+export function process_tick() {}
 
 export class EventBus {
   private listeners: Record<string, Function[]> = {};
@@ -21,4 +23,13 @@ export class EventBus {
       this.listeners[event] = this.listeners[event].filter(l => l !== listener);
     }
   }
+}
+
+export const tick_callbacks: Function[] = [];
+export function setIntervalTick(tick: number, callback: () => void) {
+  tick_callbacks.push(function () {
+    if (Game.time % tick === 0) {
+      callback();
+    }
+  });
 }

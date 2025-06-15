@@ -4,6 +4,7 @@ import { work_upgrader } from "./upgrader";
 import { work_builder } from "./builder";
 import { work_harvester } from "./harvester";
 import { work_carrier } from "./carrier";
+import { work_repair } from "./repair";
 
 const runs: Record<Role, Function> = {
   [Role.starter]: work_starter,
@@ -14,7 +15,8 @@ const runs: Record<Role, Function> = {
   [Role.ruin_cary]: work_carrier,
   [Role.upgrader]: work_upgrader,
   [Role.builder]: work_builder,
-  [Role.harvester]: work_harvester
+  [Role.harvester]: work_harvester,
+  [Role.repairer]: work_repair
 };
 
 export const roles_limit: Record<Role, number> = {
@@ -22,9 +24,10 @@ export const roles_limit: Record<Role, number> = {
   [Role.worker]: 0,
   [Role.carrier]: 4,
   [Role.upgrader]: 5,
-  [Role.builder]: 6,
-  [Role.harvester]: 1,
-  [Role.ruin_cary]: 0
+  [Role.builder]: 5,
+  [Role.harvester]: 2,
+  [Role.ruin_cary]: 0,
+  [Role.repairer]: 1
 };
 
 export const roles_body: Record<Role, BodyPartConstant[]> = {
@@ -34,7 +37,8 @@ export const roles_body: Record<Role, BodyPartConstant[]> = {
   [Role.ruin_cary]: [CARRY, CARRY, CARRY, MOVE, MOVE],
   [Role.upgrader]: [WORK, CARRY, MOVE],
   [Role.builder]: [WORK, CARRY, MOVE],
-  [Role.harvester]: [WORK, WORK, MOVE]
+  [Role.harvester]: [WORK, WORK, MOVE],
+  [Role.repairer]: [WORK, CARRY, MOVE]
 };
 export const roles_priority = [
   Role.starter,
@@ -42,7 +46,8 @@ export const roles_priority = [
   Role.harvester,
   Role.carrier,
   Role.upgrader,
-  Role.builder
+  Role.builder,
+  Role.repairer
 ].reverse();
 
 export function work(creep: Creep) {

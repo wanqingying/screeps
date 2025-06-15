@@ -5,7 +5,8 @@ export enum Role {
   ruin_cary = "ruin_carry",
   upgrader = "upgrader",
   builder = "builder",
-  harvester = "harvester"
+  harvester = "harvester",
+  repairer = "repairer",
 }
 
 export enum state_starter {

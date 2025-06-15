@@ -76,6 +76,7 @@ type ResTargetType = StructureStorage | StructureContainer | Resource | Ruin;
 
 function getRestoreTarget(creep: Creep): ResTargetType | null {
   const room = creep.room;
+  const cap = creep.store.getFreeCapacity(RESOURCE_ENERGY);
   const tid = creep.memory.target as Id<ResTargetType>;
   const target = Game.getObjectById(tid);
   if (target) {
@@ -83,6 +84,18 @@ function getRestoreTarget(creep: Creep): ResTargetType | null {
   } else {
     creep.memory.target = "";
   }
+
+  const containers = Object.values(room.memory.sources)
+    .map(s => s.container)
+    .map(id => Game.getObjectById(id as Id<StructureContainer>))
+    .filter(c => c && c.store[RESOURCE_ENERGY] > 1000) as StructureContainer[];
+  containers.sort((a, b) => b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY]);
+  if (containers.length > 0) {
+    creep.memory.target = containers[0].id;
+    return containers[0];
+  }
+  creep.say("No container found");
+
   const ruin_x = creep.pos.findClosestByPath(FIND_RUINS, {
     filter: r => r.store[RESOURCE_ENERGY] > 0
   });
@@ -99,17 +112,17 @@ function getRestoreTarget(creep: Creep): ResTargetType | null {
     creep.memory.target = dropped.id;
     return dropped;
   }
-  const containers = Object.values(room.memory.sources)
-    .map(s => s.container)
-    .map(id => Game.getObjectById(id as Id<StructureContainer>))
-    .filter(c => c && c.store[RESOURCE_ENERGY] > 100) as StructureContainer[];
-  containers.sort((a, b) => b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY]);
-  if (containers.length > 0) {
-    creep.memory.target = containers[0].id;
-    return containers[0];
-  } else {
-    console.log(`No container found for creep ${creep.name}`);
-  }
+  //   const containers = Object.values(room.memory.sources)
+  //     .map(s => s.container)
+  //     .map(id => Game.getObjectById(id as Id<StructureContainer>))
+  //     .filter(c => c && c.store[RESOURCE_ENERGY] > 1000) as StructureContainer[];
+  //   containers.sort((a, b) => b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY]);
+  //   if (containers.length > 0) {
+  //     creep.memory.target = containers[0].id;
+  //     return containers[0];
+  //   } else {
+  //     console.log(`No container found for creep ${creep.name}`);
+  //   }
 
   return null;
 }
