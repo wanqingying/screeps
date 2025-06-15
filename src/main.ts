@@ -1,3 +1,4 @@
+import "./prototype/room";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { work } from "./role";
 import { spawnCreep, spawn_room, getRolesCount } from "./spawn";
@@ -34,7 +35,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
   const rm = Object.entries(roles_count)
     .map(([role, count]) => `${role}: ${count}`)
     .join(", ");
-  console.log(`time:${Game.time}, ${rm}`);
+  if (Game.time % 10 === 0) {
+    console.log(`time:${Game.time}, ${rm}`);
+  }
 
   spawn_room(room);
   // room

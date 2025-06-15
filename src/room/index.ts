@@ -1,4 +1,4 @@
-import { Role } from "types";
+import { Role, dc } from "types";
 
 console.log("Room index loaded");
 
@@ -70,11 +70,38 @@ export function init(room: Room) {
     room.memory.roles[creep.memory.role].push(creep.name);
   }
 
-  // ini sources
-//   const ruins = room.find(FIND_RUINS, {
-//     filter: r => r.store[RESOURCE_ENERGY] > 0
-//   });
-//   for (const ruin of ruins) {
+  //   ini sources
+  const ruins = room.find(FIND_RUINS, {
+    filter: r => r.store[RESOURCE_ENERGY] > 0
+  });
+  for (const ruin of ruins) {
+    room.cache.sources[ruin.id] = {
+      pos: ruin.pos,
+      amount: ruin.store[RESOURCE_ENERGY],
+      type: RESOURCE_ENERGY,
+      get_resource: (creep: Creep) => creep.withdraw(ruin, RESOURCE_ENERGY),
+      pt: dc.pos_type.ruin
+    };
+  }
+  const containers = room.find(FIND_MY_STRUCTURES, {
+    filter: (s: Structure) =>
+      s.structureType === STRUCTURE_CONTAINER && (s as StructureContainer).store[RESOURCE_ENERGY] > 0
+  }) as any as StructureContainer[];
 
-//   }
+  for (const container of containers) {
+    const s_ids = Object.values(room.memory.sources).map(s => s.container);
+    const is_controller = room.memory.controller?.container === container.id;
+    const is_source = s_ids.includes(container.id);
+    room.cache.sources[container.id] = {
+      pos: container.pos,
+      amount: container.store[RESOURCE_ENERGY],
+      type: RESOURCE_ENERGY,
+      get_resource: (creep: Creep) => creep.withdraw(container, RESOURCE_ENERGY),
+      pt: is_controller
+        ? dc.pos_type.container_controller
+        : is_source
+        ? dc.pos_type.container_source
+        : dc.pos_type.container
+    };
+  }
 }

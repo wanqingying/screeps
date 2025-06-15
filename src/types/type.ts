@@ -1,5 +1,15 @@
 import { Role } from "./enum";
 
+export namespace dc {
+  export enum pos_type {
+    ruin = 1,
+    dropped = 2,
+    container_controller = 3,
+    container = 4,
+    container_source = 5,
+    storage = 6
+  }
+}
 declare global {
   /*
 	Example types, expand on these or remove them and add your own.
@@ -13,6 +23,12 @@ declare global {
   interface Memory {
     uuid: number;
     log: any;
+  }
+
+  interface Room {
+    cache: {
+      sources: Record<string, srouce_tsk>;
+    };
   }
 
   interface CreepMemory {
@@ -47,11 +63,13 @@ declare global {
       sources: Record<string, srouce_tsk>;
     };
   }
+
   interface srouce_tsk {
     pos: RoomPosition;
     amount: number;
+    pt: dc.pos_type;
     type: ResourceConstant;
-    get_resource: (creep: Creep) => number;
+    get_resource: (creep: Creep) => ScreepsReturnCode;
   }
   // Syntax for adding proprties to `global` (ex "global.log")
   namespace NodeJS {

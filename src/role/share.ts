@@ -102,7 +102,6 @@ function getNearByPos(creep: Creep) {
     .filter(t => t && t.target)
     .sort((a: any, b: any) => a.weigth - b.weigth);
   const ps = poss.map((t: any) => `${t.target?.id}(${t.weigth})`).join(",");
-  console.log(`getNearByPos: ${ps}`);
   const t = poss[0]?.target;
   creep.memory.target = t?.id || "";
   return t;

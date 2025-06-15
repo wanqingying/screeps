@@ -116,10 +116,14 @@ export function spawnCreep(role: Role, spawn?: StructureSpawn) {
   const energyAvailable = spawn.room.energyAvailable;
   if (spawn.spawning) {
     spawn.room.visual.text(`🛠️ ${spawn.spawning.name}`, spawn.pos.x + 1, spawn.pos.y, { align: "left", opacity: 0.8 });
-    return console.log("Spawn is busy, cannot spawn new creep");
+
+    return;
   }
   if (bodyCost > energyAvailable) {
-    return console.log(`Not enough energy to spawn ${name}, required: ${bodyCost}, available: ${energyAvailable}`);
+    if (Game.time % 5 === 0) {
+       console.log(`no energy spawn ${name}, required: ${bodyCost}, available: ${energyAvailable}`);
+    }
+	return;
   }
   spawn.spawnCreep(body, name, {
     memory: {

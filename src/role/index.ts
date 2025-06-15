@@ -21,8 +21,8 @@ export const roles_limit: Record<Role, number> = {
   [Role.starter]: 1,
   [Role.worker]: 0,
   [Role.carrier]: 4,
-  [Role.upgrader]: 4,
-  [Role.builder]: 8,
+  [Role.upgrader]: 5,
+  [Role.builder]: 6,
   [Role.harvester]: 1,
   [Role.ruin_cary]: 0
 };
