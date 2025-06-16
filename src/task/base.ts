@@ -16,6 +16,20 @@ import { dc } from "types";
 type TargetType = Structure | Resource | Ruin | Tombstone;
 
 export class BaseTask<Target extends _HasId> {
+  public static cache_creep: Record<string, any> = {};
+  public static cache_task: Record<string, BaseTask<any>> = {};
+  public static priority_list: string[] = [];
+
+  public static discover(room:Room){
+    // discover tasks in the room
+
+  }
+  public static update(){
+    // update priority list
+
+  }
+
+
   private static _id_count = 1;
   public static get next_id() {
     return BaseTask._id_count++;
@@ -48,6 +62,8 @@ export class BaseTask<Target extends _HasId> {
     return this._target;
   }
 
+  public creeps: Set<Creep> = new Set();
+
   constructor(task: dc.base_task<Target>) {
     this._id = Math.random().toString(36).substring(2, 5) + BaseTask.next_id;
     this._pos = task.pos;
@@ -67,7 +83,29 @@ export class BaseTask<Target extends _HasId> {
     }
   }
 
-  public receive(creep: Creep) {
-    // const g = this.target as any as Tombstone;
+  public reserve(creep: Creep) {
+    this.creeps.add(creep);
+    creep.memory.task = this.id;
+  }
+
+  public pickup(creep: Creep) {
+    try {
+      const g = this.target;
+      if (this.target instanceof Resource) {
+        return creep.pickup(this.target);
+      }
+      if (g instanceof Structure || g instanceof Tombstone || g instanceof Ruin) {
+        return creep.withdraw(g, this._r_type);
+      } else {
+        console.error(`BaseTask.pickup unsupported target type ${g?.constructor.name}`);
+        return ERR_INVALID_TARGET;
+      }
+    } finally {
+      this.finish(creep);
+    }
+  }
+  private finish(creep: Creep) {
+    this.creeps.delete(creep);
+    creep.memory.task = "";
   }
 }
