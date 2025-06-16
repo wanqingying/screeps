@@ -24,7 +24,7 @@ export const rank_out_map = {
   resource: 8, // droped resource
   ruin: 8, // ruin
   tombstone: 8,
-  storage: 5,
+  storage: 4,
   container: 5,
   link: 3,
   container_controller: 2,
@@ -37,7 +37,7 @@ export const rank_in_map = {
   tower: 8,
   container_controller: 7,
   link: 6,
-  storage: 4,
+  storage: 3,
   container: 3,
   container_source: 1 // harvest source
 };
@@ -189,6 +189,12 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         }
         if (task.type === dc.trans_type.out) {
           room.cache.task_out_targets.delete(task.t_id);
+        }
+      } else {
+        for (const creep of new Set(task.creeps)) {
+          if (!Game.creeps[creep.name]) {
+            task.creeps.delete(creep);
+          }
         }
       }
     }
