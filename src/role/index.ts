@@ -23,7 +23,7 @@ const runs: Record<Role, Function> = {
 };
 
 export function work(creep: Creep) {
-  const rn_tk = 100 + Math.random() * 100;
+  const rn_tk = 70 + Math.random() * 70;
   if (creep.ticksToLive && creep.ticksToLive < rn_tk && !creep.room.cache.renew) {
     return renew(creep);
   }

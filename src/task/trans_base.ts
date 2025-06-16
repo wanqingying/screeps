@@ -54,7 +54,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     room.cache.max_rank_in = 4;
     room.cache.max_rank_out = 4;
     let list = Array.from(room.cache.tasks.values())
-      .filter(t => t.type === type && t.getAmountLeft() > 0)
+      .filter(t => t.getAmountLeft() > 0)
       .map(t => {
         if (type === dc.trans_type.in) {
           room.cache.max_rank_in = Math.max(room.cache.max_rank_in, t.rank);
@@ -64,6 +64,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         }
         return t;
       })
+      .filter(t => t.type === type)
       .filter(t => {
         if (type === dc.trans_type.out) {
           return t.rank + room.cache.max_rank_in >= 10;
@@ -89,18 +90,19 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
       })
       .sort((a, b) => b.score - a.score)
       .map(t => t.task);
-    let debug: string[] = [`get_one_count:${v_list.length}, ${v_list.slice(0, 3).map(t => t.desc)},`];
+    let debug: string[] = [`get_one_${type}:${v_list.length}, ${v_list.slice(0, 3).map(t => t.desc)},`];
 
     for (const task of v_list) {
       const amount_need_left = task.getAmountLeft();
       const min_amount = task.getMinAmount(creep);
-      const pass = amount_need_left <= min_amount;
-      debug.push(`task_${type}_${task.desc} amount ${amount_need_left} min ${min_amount} pass:${pass}`);
-      if (pass) continue;
+      const skip = amount_need_left <= min_amount;
+      debug.push(`task_${type}_${task.desc} amount:${amount_need_left} min:${min_amount} skip:${skip}`);
+      if (skip) continue;
       creep.memory.debug = debug.join(" | ");
       return task;
     }
     console.log(`no task found ${type}`);
+    creep.memory.debug = debug.join(" | ");
     return null;
   }
 
