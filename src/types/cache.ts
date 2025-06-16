@@ -3,17 +3,16 @@ import { dc } from "./dc";
 
 declare global {
   interface Room {
-    cache: {
-      sources: Record<string, dc.srouce_task>;
-    };
+    cache: cache_room;
   }
 
   interface cache_room {
-    [roomName: string]: {
-      //   ruins_worker?: Record<string, string>;
-      sources: Record<string, dc.srouce_task>;
-      event: EventBus;
-      init: boolean;
-    };
+    //   ruins_worker?: Record<string, string>;
+    event: EventBus;
+    init: boolean;
+  }
+
+  interface g_cache_room {
+    [roomName: string]: cache_room;
   }
 }

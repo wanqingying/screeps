@@ -1,5 +1,5 @@
 import { dc, Role } from "types";
-import { roles_body, roles_priority } from "role";
+import { roles_priority } from "role";
 import { dc_config } from "utils";
 
 // MOVE	50	每 tick 减少 2 点疲惫值

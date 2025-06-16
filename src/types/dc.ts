@@ -37,13 +37,13 @@ export namespace dc {
     id?: string;
     pos: RoomPosition;
     t_id: Id<Target>;
-    resource_type?: ResourceConstant;
+    rank: number;
+    min_amount: number; // -1 eq creep capacity.  min amount to transfer
+    type: "trans_in" | "trans_out";
+    d_time: number; // deadline time , like Tombstone decay time
   }
-  export interface srouce_task {
-    pos: RoomPosition;
-    amount: number;
-    pt: dc.pos_type;
-    type: ResourceConstant;
-    get_resource: (creep: Creep) => ScreepsReturnCode;
+  export interface trans_in_task<Target extends _HasId> extends base_task<Target> {
+    resource_need: Partial<Record<ResourceConstant, number>>;
   }
+  export interface trans_out_task<Target extends _HasId> extends base_task<Target> {}
 }

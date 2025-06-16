@@ -8,9 +8,15 @@ Object.defineProperties(Room.prototype, {
       }
       if (!global.cache.rooms[this.name]) {
         global.cache.rooms[this.name] = {
-          sources: {},
           event: new EventBus(),
-          init: true
+          init: true,
+          tasks: new Map<string, any>(),
+          task_in_targets: new Map<string, any>(),
+          task_out_targets: new Map<string, any>(),
+          trans_out_priority: [],
+          trans_in_priority: [],
+          max_rank_in: 6,
+          max_rank_out: 6
         };
       }
       return new Proxy(global.cache.rooms[this.name], {

@@ -14,7 +14,8 @@ export const dc_config: dc.GameConfig = {
         [Role.builder]: 4,
         [Role.harvester]: 2,
         [Role.ruin_cary]: 0,
-        [Role.repairer]: 1
+        [Role.repairer]: 1,
+        [Role.carry]: 0
       }
     },
     W8N7: {
@@ -29,7 +30,8 @@ export const dc_config: dc.GameConfig = {
         [Role.builder]: 2,
         [Role.harvester]: 2,
         [Role.ruin_cary]: 0,
-        [Role.repairer]: 0
+        [Role.repairer]: 0,
+        [Role.carry]: 0
       }
     }
   }

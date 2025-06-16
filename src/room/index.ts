@@ -12,7 +12,7 @@ if (!global.cache) {
   global.cache = { rooms: {}, time: Game.time };
 }
 
-export function init(room: Room) {
+export function init_mem(room: Room) {
   if (room.controller) {
     // initController(room.controller);
     const ct = room.controller;
@@ -33,13 +33,6 @@ export function init(room: Room) {
   }
   if (!global.cache) {
     global.cache = { rooms: {}, time: Game.time };
-  }
-  if (!global.cache.rooms[room.name]) {
-    global.cache.rooms[room.name] = {
-      sources: {},
-      event: new EventBus(),
-      init: true
-    };
   }
 
   if (!room.memory.sources) {
@@ -101,39 +94,6 @@ export function init(room: Room) {
   }
 
   //   ini sources
-  const ruins = room.find(FIND_RUINS, {
-    filter: r => r.store[RESOURCE_ENERGY] > 0
-  });
-  for (const ruin of ruins) {
-    room.cache.sources[ruin.id] = {
-      pos: ruin.pos,
-      amount: ruin.store[RESOURCE_ENERGY],
-      type: RESOURCE_ENERGY,
-      get_resource: (creep: Creep) => creep.withdraw(ruin, RESOURCE_ENERGY),
-      pt: dc.pos_type.ruin
-    };
-  }
-  const containers = room.find(FIND_MY_STRUCTURES, {
-    filter: (s: Structure) =>
-      s.structureType === STRUCTURE_CONTAINER && (s as StructureContainer).store[RESOURCE_ENERGY] > 0
-  }) as any as StructureContainer[];
-
-  for (const container of containers) {
-    const s_ids = Object.values(room.memory.sources).map(s => s.container);
-    const is_controller = room.memory.controller?.container === container.id;
-    const is_source = s_ids.includes(container.id);
-    room.cache.sources[container.id] = {
-      pos: container.pos,
-      amount: container.store[RESOURCE_ENERGY],
-      type: RESOURCE_ENERGY,
-      get_resource: (creep: Creep) => creep.withdraw(container, RESOURCE_ENERGY),
-      pt: is_controller
-        ? dc.pos_type.container_controller
-        : is_source
-        ? dc.pos_type.container_source
-        : dc.pos_type.container
-    };
-  }
 
   // init config
   if (!room.memory.config) {
@@ -176,6 +136,6 @@ setIntervalTick(13, () => {
 
 setIntervalTick(3, () => {
   for (const room of Object.values(Game.rooms)) {
-    init(room);
+    init_mem(room);
   }
 });

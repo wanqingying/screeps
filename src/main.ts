@@ -3,8 +3,12 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import { work } from "./role";
 import { spawnCreep, spawn_room, getRolesCount } from "./spawn";
 import { Role } from "types";
-import { init, runTowerAtk } from "room";
+import { init_mem, runTowerAtk } from "room";
 import { tick_callbacks } from "utils";
+import { init_trans_tasks } from "task";
+
+init_trans_tasks();
+
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
@@ -13,7 +17,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   const creeps = Object.values(Game.creeps);
   const room = Object.values(Game.rooms)[0];
   if (global.cache.rooms[room.name]?.init !== true) {
-    init(room);
+    init_mem(room);
   }
   for (const fn of tick_callbacks) {
     fn(room);

@@ -2,6 +2,7 @@ export enum Role {
   starter = "starter",
   worker = "worker",
   carrier = "carrier",
+  carry = "carry", // carrier v2
   ruin_cary = "ruin_carry",
   upgrader = "upgrader",
   builder = "builder",
@@ -9,11 +10,11 @@ export enum Role {
   repairer = "repairer"
 }
 
-enum stat_carry {
+export enum stat_carry {
   idle = "idle",
-  restore = "restore", // try to restore , no target
-  restoreing = "restoring", // restoring, move to target
-  drop = "drop", // try to drop resource
+  restore = "restore", // try to restore , no target, creep is empty
+  restoreing = "restoring", // restoring, move to target and restore
+  drop = "drop", // try to drop resource , no target, creep is not empty
   dropping = "dropping" // move to target and drop
 }
 

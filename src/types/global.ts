@@ -6,7 +6,7 @@ declare global {
   namespace NodeJS {
     interface Global {
       cache: {
-        rooms: cache_room;
+        rooms: g_cache_room;
         time: number;
       };
       event: EventBus;
