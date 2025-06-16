@@ -15,7 +15,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           type: dc.trans_type.in,
           d_time: Game.time + 0,
           min_amount: 0,
-          resource_need: { [RESOURCE_ENERGY]: -1 }
+          resource_need: { [RESOURCE_ENERGY]: -1 },
+          desc: "spawn"
         },
         room
       );
@@ -33,7 +34,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           type: dc.trans_type.in,
           d_time: Game.time + 0,
           min_amount: 0,
-          resource_need: { [RESOURCE_ENERGY]: -1 }
+          resource_need: { [RESOURCE_ENERGY]: -1 },
+          desc: "extension"
         },
         room
       );
@@ -49,7 +51,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           type: dc.trans_type.in,
           d_time: Game.time + 50,
           min_amount: 200,
-          resource_need: { [RESOURCE_ENERGY]: -1 }
+          resource_need: { [RESOURCE_ENERGY]: -1 },
+          desc: "container_controller"
         },
         room
       );
@@ -67,7 +70,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           type: dc.trans_type.in,
           d_time: Game.time + 24,
           min_amount: 0,
-          resource_need: { [RESOURCE_ENERGY]: -1 }
+          resource_need: { [RESOURCE_ENERGY]: -1 },
+          desc: "tower"
         },
         room
       );
@@ -75,6 +79,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
 
     // storage
     if (room.storage) {
+      const all_obj = RESOURCES_ALL.reduce((acc, r) => ({ ...acc, [r]: -1 }), {});
       TransInTask.create(
         {
           pos: room.storage.pos,
@@ -83,7 +88,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           d_time: Game.time + TickF,
           type: dc.trans_type.in,
           min_amount: 0,
-          resource_need: { [RESOURCE_ENERGY]: -1 }
+          resource_need: all_obj,
+          desc: "storage_in"
         },
         room
       );

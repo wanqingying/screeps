@@ -27,7 +27,7 @@ export enum state_updater {
 
 export function work_upgrader(creep: Creep) {
   const room = creep.room;
-  if (creep.memory.state === state_updater.idle) {
+  if (creep.memory.state === state_updater.idle || !creep.memory.state) {
     creep.memory.state = state_updater.restore; // default state
   }
   // creep.say(creep.memory.state);

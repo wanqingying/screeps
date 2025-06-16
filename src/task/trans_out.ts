@@ -20,7 +20,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           rank: rank_out_map.container_source,
           type: dc.trans_type.out,
           d_time: Game.time + TickF,
-          min_amount: 200
+          min_amount: 200,
+          desc: "container_source"
         },
         room
       );
@@ -39,7 +40,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           rank: rank_out_map.ruin,
           type: dc.trans_type.out,
           d_time: Game.time + ruin.ticksToDecay,
-          min_amount: 50
+          min_amount: 50,
+          desc: "ruin"
         },
         room
       );
@@ -57,7 +59,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           rank: rank_out_map.tombstone,
           type: dc.trans_type.out,
           d_time: Game.time + tb.ticksToDecay,
-          min_amount: 50
+          min_amount: 50,
+          desc: "tombstone"
         },
         room
       );
@@ -75,7 +78,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           rank: rank_out_map.resource,
           type: dc.trans_type.out,
           d_time: Game.time + Math.min(res.amount, 1000),
-          min_amount: 50
+          min_amount: 50,
+          desc: "dropped_resource"
         },
         room
       );
@@ -89,7 +93,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           rank: rank_out_map.storage,
           d_time: Game.time + TickF,
           type: dc.trans_type.out,
-          min_amount: 400
+          min_amount: 400,
+          desc: "storage_out"
         },
         room
       );

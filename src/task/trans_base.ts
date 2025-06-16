@@ -68,8 +68,14 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         if (type === dc.trans_type.out) {
           return t.rank + room.cache.max_rank_in >= 10;
         }
+        if (type === dc.trans_type.in) {
+          const need_types = Object.keys(t.resource_need || {});
+          return Object.keys(creep.store).some(rt => need_types.includes(rt));
+        }
         return true;
       });
+    console.log(`max_rank_in: ${room.cache.max_rank_in}, max_rank_out: ${room.cache.max_rank_out}`);
+
     const cap = creep.store.getFreeCapacity();
     const v_list = list
       .map(t => {
@@ -78,17 +84,23 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         const s_range = creep.pos.getRangeTo(t.pos);
         return {
           task: t,
-          score: (s_time + s_amo + 40 - s_range) * t.rank * t.rank
+          score: (s_time * 4 + s_amo / 3 + 40 - Math.min(s_range, 40)) * t.rank * t.rank
         };
       })
       .sort((a, b) => b.score - a.score)
       .map(t => t.task);
+    let debug: string[] = [`get_one_count:${v_list.length}, ${v_list.slice(0, 3).map(t => t.desc)},`];
+
     for (const task of v_list) {
       const amount_need_left = task.getAmountLeft();
       const min_amount = task.getMinAmount(creep);
-      if (amount_need_left <= min_amount) continue;
+      const pass = amount_need_left <= min_amount;
+      debug.push(`task_${type}_${task.desc} amount ${amount_need_left} min ${min_amount} pass:${pass}`);
+      if (pass) continue;
+      creep.memory.debug = debug.join(" | ");
       return task;
     }
+    console.log(`no task found ${type}`);
     return null;
   }
 
@@ -210,6 +222,13 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
   public last_time: number = Game.time; // last reserve time
   public get rank() {
     return this._task.rank;
+  }
+
+  public get resource_need() {
+    return (this._task as dc.trans_in_task<any>).resource_need;
+  }
+  public get desc() {
+    return this._task.desc;
   }
 
   public get d_time() {

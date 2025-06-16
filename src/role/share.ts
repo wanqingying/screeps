@@ -78,7 +78,7 @@ function getNearByPos(creep: Creep): any {
     },
     {
       target: storage,
-      mx: 1,
+      mx: 3,
       amount: storage?.store?.[RESOURCE_ENERGY] || 0,
       pos: storage?.pos
     },
@@ -88,30 +88,22 @@ function getNearByPos(creep: Creep): any {
       amount: (container as StructureContainer)?.store?.[RESOURCE_ENERGY] || 0,
       pos: container?.pos
     }
-    // {
-    //   target: spawn,
-    //   mx: 3,
-    //   amount: spawn?.store?.[RESOURCE_ENERGY] || 0,
-    //   pos: spawn?.pos
-    // },
   ]
     .map(t => {
       if (!t?.pos) return;
       const range = creep.pos.getRangeTo(t.pos);
       const max_amount = creep.store.getFreeCapacity(RESOURCE_ENERGY);
-      const w_amount = Math.max(1, max_amount * 2 - t.amount);
+      const w_amount = Math.min(t.amount, max_amount) / 3;
 
       return {
         target: t.target,
         pos: t.pos,
-        weigth: t.mx * (range + 1) * (w_amount + 1)
+        weigth: (t.mx * (w_amount + 1)) / (range + 1)
       };
     })
     .filter(t => t && t.target)
-    .sort((a: any, b: any) => a.weigth - b.weigth);
-  //   if (creep.memory.role === Role.repairer) {
-  //     console.log("getNearByPos", JSON.stringify(poss));
-  //   }
+    .sort((a: any, b: any) => b.weigth - a.weigth);
+
   const t = poss[0]?.target;
   creep.memory.target = t?.id || "";
   return t;

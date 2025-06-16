@@ -38,6 +38,7 @@ declare global {
     near?: number; // distance to target , upgrader
     _move?: any;
     harvest_ct?: number;
+    debug?: string;
   }
   interface RoomMemory {
     sources: Record<

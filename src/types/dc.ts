@@ -46,6 +46,7 @@ export namespace dc {
     min_amount: number; // -1 eq creep capacity.  min amount to transfer
     type: trans_type;
     d_time: number; // deadline time , like Tombstone decay time
+    desc: string;
   }
   export interface trans_in_task<Target extends _HasId> extends base_task<Target> {
     resource_need: Partial<Record<ResourceConstant, number>>;

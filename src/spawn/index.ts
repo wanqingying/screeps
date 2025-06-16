@@ -113,7 +113,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       return Array(count_w).fill(WORK).concat(Array(count_c).fill(CARRY)).concat(Array(count_m).fill(MOVE));
     case Role.harvester:
       //[w,w,m]
-      capacity = Math.min(capacity, 800);
+      capacity = Math.min(capacity, 900);
       move_cap = capacity * 0.2;
       work_cap = capacity - move_cap;
       count_w = Math.floor(work_cap / BODYPART_COST[WORK]);

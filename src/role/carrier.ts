@@ -35,7 +35,7 @@ export function work_carrier(creep: Creep) {
           creep.memory.target = "";
         }
       }
-      if (target instanceof StructureContainer || target instanceof Ruin) {
+      if (target instanceof StructureContainer || target instanceof Ruin || target instanceof StructureStorage) {
         if (creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
           creep.moveTo(target, {
             visualizePathStyle: {
@@ -94,7 +94,6 @@ function getRestoreTarget(creep: Creep): ResTargetType | null {
     creep.memory.target = containers[0].id;
     return containers[0];
   }
-  creep.say("No container found");
 
   const ruin_x = creep.pos.findClosestByPath(FIND_RUINS, {
     filter: r => r.store[RESOURCE_ENERGY] > 0
@@ -111,6 +110,10 @@ function getRestoreTarget(creep: Creep): ResTargetType | null {
   if (dropped) {
     creep.memory.target = dropped.id;
     return dropped;
+  }
+  if (room.storage && room.storage.store[RESOURCE_ENERGY] > 200) {
+    creep.memory.target = room.storage.id;
+    return room.storage;
   }
   //   const containers = Object.values(room.memory.sources)
   //     .map(s => s.container)

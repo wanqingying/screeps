@@ -19,7 +19,7 @@ export function init_trans_tasks() {
     }
   });
 
-  setIntervalTick(9, () => {
+  setIntervalTick(3, () => {
     for (const room of Object.values(Game.rooms)) {
       TransInTask.discover(room);
       TransOutTask.discover(room);

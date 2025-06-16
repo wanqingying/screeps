@@ -22,10 +22,9 @@ const runs: Record<Role, Function> = {
   [Role.carry]: TransBaseTask.run_creep
 };
 
-
-
 export function work(creep: Creep) {
-  if (creep.ticksToLive && creep.ticksToLive < 100 && !creep.room.cache.renew) {
+  const rn_tk = 100 + Math.random() * 100;
+  if (creep.ticksToLive && creep.ticksToLive < rn_tk && !creep.room.cache.renew) {
     return renew(creep);
   }
   if (creep.memory.state === "renew") {
