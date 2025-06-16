@@ -144,8 +144,9 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
 
   public getAmountLeft() {
     let amount_on_the_way = 0;
-    for (const creep of this.creeps) {
-      if (!creep.ticksToLive || creep?.ticksToLive <= 5) {
+    for (const creep of new Set(this.creeps)) {
+      if (creep.memory.task !== this.id) {
+        this.creeps.delete(creep);
         continue;
       }
       amount_on_the_way += creep.store.getFreeCapacity();
