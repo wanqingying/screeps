@@ -33,3 +33,10 @@ export function setIntervalTick(tick: number, callback: () => void) {
     }
   });
 }
+
+export function getMemTarget<T>(creep: Creep) {
+  if (creep.memory.target) {
+    return Game.getObjectById(creep.memory.target as Id<any>) as T;
+  }
+  return null;
+}

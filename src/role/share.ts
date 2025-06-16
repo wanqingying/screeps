@@ -51,8 +51,12 @@ function getNearByPos(creep: Creep): any {
     filter: r => r.resourceType === RESOURCE_ENERGY && r.amount > 20
   });
   const container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-    filter: (s: Structure) =>
-      s.structureType === STRUCTURE_CONTAINER && (s as StructureContainer).store[RESOURCE_ENERGY] > 20
+    filter: (s: Structure) => {
+      if (s.id === creep.room.memory.controller?.container) {
+        return false;
+      }
+      return s.structureType === STRUCTURE_CONTAINER && (s as StructureContainer).store[RESOURCE_ENERGY] > 20;
+    }
   });
   const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
     filter: (s: StructureSpawn) => s.store[RESOURCE_ENERGY] > 20
@@ -73,23 +77,23 @@ function getNearByPos(creep: Creep): any {
       pos: ruin_x?.pos
     },
     {
+      target: storage,
+      mx: 1,
+      amount: storage?.store?.[RESOURCE_ENERGY] || 0,
+      pos: storage?.pos
+    },
+    {
       target: container,
       mx: 1,
       amount: (container as StructureContainer)?.store?.[RESOURCE_ENERGY] || 0,
       pos: container?.pos
-    },
+    }
     // {
     //   target: spawn,
     //   mx: 3,
     //   amount: spawn?.store?.[RESOURCE_ENERGY] || 0,
     //   pos: spawn?.pos
     // },
-    {
-      target: storage,
-      mx: 1,
-      amount: storage?.store?.[RESOURCE_ENERGY] || 0,
-      pos: storage?.pos
-    }
   ]
     .map(t => {
       if (!t?.pos) return;

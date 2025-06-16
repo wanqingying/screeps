@@ -1,6 +1,19 @@
 import { dc, Role } from "types";
-import { roles_priority } from "role";
 import { dc_config } from "utils";
+import { renew } from "./renew";
+
+export { renew };
+
+export const roles_priority = [
+  Role.starter,
+  Role.ruin_cary,
+  Role.harvester,
+  Role.carrier,
+  Role.carry,
+  Role.upgrader,
+  Role.builder,
+  Role.repairer
+].reverse();
 
 // MOVE	50	每 tick 减少 2 点疲惫值
 // WORK	100
@@ -59,6 +72,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       break;
     case Role.carrier:
     case Role.ruin_cary:
+    case Role.carry:
       capacity = Math.min(capacity, 850);
       //   move_cap = capacity * 0.33;
       //   cary_cap = capacity - move_cap;

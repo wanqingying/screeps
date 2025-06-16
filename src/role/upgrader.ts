@@ -27,11 +27,11 @@ export enum state_updater {
 
 export function work_upgrader(creep: Creep) {
   const room = creep.room;
-  let state = creep.memory.state || state_updater.idle;
-  if (state === state_updater.idle) {
-    state = state_updater.restore;
+  if (creep.memory.state === state_updater.idle) {
+    creep.memory.state = state_updater.restore; // default state
   }
-  if (state === state_updater.restore) {
+  // creep.say(creep.memory.state);
+  if (creep.memory.state === state_updater.restore) {
     const spawn = room.find(FIND_MY_SPAWNS)[0];
     if (room.memory.controller?.container) {
       let target: any = Game.getObjectById(room.memory.controller?.container);
@@ -58,7 +58,7 @@ export function work_upgrader(creep: Creep) {
       creep.memory.state = state_updater.upgrading;
     }
   }
-  if (state === state_updater.upgrading) {
+  if (creep.memory.state === state_updater.upgrading) {
     const controller = room.controller;
     if (controller) {
       if (creep.upgradeController(controller) === ERR_NOT_IN_RANGE) {

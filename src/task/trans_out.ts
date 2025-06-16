@@ -18,9 +18,9 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           pos: container.pos,
           t_id: container.id,
           rank: rank_out_map.container_source,
-          type: "trans_out",
+          type: dc.trans_type.out,
           d_time: Game.time + TickF,
-          min_amount: -1
+          min_amount: 200
         },
         room
       );
@@ -37,7 +37,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           pos: ruin.pos,
           t_id: ruin.id,
           rank: rank_out_map.ruin,
-          type: "trans_out",
+          type: dc.trans_type.out,
           d_time: Game.time + ruin.ticksToDecay,
           min_amount: 50
         },
@@ -55,7 +55,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           pos: tb.pos,
           t_id: tb.id,
           rank: rank_out_map.tombstone,
-          type: "trans_out",
+          type: dc.trans_type.out,
           d_time: Game.time + tb.ticksToDecay,
           min_amount: 50
         },
@@ -73,7 +73,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           pos: res.pos,
           t_id: res.id,
           rank: rank_out_map.resource,
-          type: "trans_out",
+          type: dc.trans_type.out,
           d_time: Game.time + Math.min(res.amount, 1000),
           min_amount: 50
         },
@@ -88,14 +88,12 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           t_id: room.storage.id,
           rank: rank_out_map.storage,
           d_time: Game.time + TickF,
-          type: "trans_out",
+          type: dc.trans_type.out,
           min_amount: 400
         },
         room
       );
     }
-
-    TransOutTask.priority(room);
   }
 
   public static create(t: dc.base_task<any>, room: Room): TransOutTask<any> {
@@ -112,25 +110,6 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
     room.cache.tasks.set(task.id, task);
     room.cache.task_out_targets.set(task.t_id, task.id);
     return task;
-  }
-
-  public static priority(room: Room) {
-    // update priority list
-    const tasks = Array.from(room.cache.tasks.values()).filter(t => t.type === "trans_out");
-    tasks.sort((a, b) => b.rank - a.rank);
-
-    const newList: string[] = [];
-    for (const task of tasks) {
-      room.cache.max_rank_out = Math.max(room.cache.max_rank_out, task.rank);
-      if (task.d_time - Game.time <= TickC) {
-        newList.unshift(task.id);
-      } else if (Game.time - task.last_time > max_idle_time) {
-        newList.unshift(task.id);
-      } else {
-        newList.push(task.id);
-      }
-    }
-    room.cache.trans_out_priority = newList;
   }
 
   public getMinAmount(c: Creep) {
@@ -153,7 +132,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
     } else if (res?.amount) {
       return res.amount;
     } else {
-      console.error(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
+      console.log(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
       return 0;
     }
   }
@@ -180,7 +159,13 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
   public do_work(creep: Creep) {
     const task = this;
     if (!creep.pos.isNearTo(task.pos)) {
-      creep.moveTo(task.pos);
+      creep.moveTo(task.pos, {
+        visualizePathStyle: {
+          stroke: "#ffff00",
+          opacity: 0.5,
+          lineStyle: "dashed"
+        }
+      });
       return ERR_NOT_IN_RANGE;
     }
     try {
@@ -204,6 +189,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
   public finish(creep: Creep) {
     const task = this;
     task.creeps.delete(creep);
+    task.last_time = Game.time;
     creep.memory.task = "";
     if (creep.store.getFreeCapacity() === 0) {
       // full

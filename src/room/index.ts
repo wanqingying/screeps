@@ -59,13 +59,21 @@ export function init_mem(room: Room) {
   for (const role of Object.values(Role)) {
     room.memory.roles[role] = [];
   }
+  function get_role_by_name(name: string) {
+    for (const role of Object.values(Role)) {
+      if (name.includes(role)) {
+        return role;
+      }
+    }
+    return Role.starter; // default role
+  }
 
   // ini creeps
   const creeps = room.find(FIND_MY_CREEPS);
   for (const creep of creeps) {
     if (!creep.memory.role) {
       creep.memory = {
-        role: Role.starter,
+        role: get_role_by_name(creep.name),
         name: creep.name,
         room: room.name,
         wkn: dc.wkn_temp_role.temp_none,

@@ -19,6 +19,7 @@ export namespace dc {
     building = "building",
     restore = "restore"
   }
+
   // room config
   export interface Config {
     pos_idle?: {
@@ -33,13 +34,17 @@ export namespace dc {
     rooms: Record<string, Config>;
   }
 
+  export enum trans_type {
+    in = "in",
+    out = "out"
+  }
   export interface base_task<Target extends _HasId> {
     id?: string;
     pos: RoomPosition;
     t_id: Id<Target>;
     rank: number;
     min_amount: number; // -1 eq creep capacity.  min amount to transfer
-    type: "trans_in" | "trans_out";
+    type: trans_type;
     d_time: number; // deadline time , like Tombstone decay time
   }
   export interface trans_in_task<Target extends _HasId> extends base_task<Target> {

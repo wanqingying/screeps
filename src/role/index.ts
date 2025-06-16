@@ -6,6 +6,7 @@ import { work_harvester } from "./harvester";
 import { work_carrier } from "./carrier";
 import { work_repair } from "./repair";
 import { TransBaseTask } from "task";
+import { renew } from "spawn";
 
 const runs: Record<Role, Function> = {
   [Role.starter]: work_starter,
@@ -21,18 +22,15 @@ const runs: Record<Role, Function> = {
   [Role.carry]: TransBaseTask.run_creep
 };
 
-export const roles_priority = [
-  Role.starter,
-  Role.ruin_cary,
-  Role.harvester,
-  Role.carrier,
-  Role.carry,
-  Role.upgrader,
-  Role.builder,
-  Role.repairer
-].reverse();
+
 
 export function work(creep: Creep) {
+  if (creep.ticksToLive && creep.ticksToLive < 100 && !creep.room.cache.renew) {
+    return renew(creep);
+  }
+  if (creep.memory.state === "renew") {
+    return renew(creep);
+  }
   const run = runs[creep.memory.role];
   if (run) {
     run(creep);

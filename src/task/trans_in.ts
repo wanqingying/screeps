@@ -3,16 +3,6 @@ import { TransBaseTask, rank_in_map, rank_out_map, TickC, TickF, max_idle_time }
 
 export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Target> {
   public static discover(room: Room) {
-    // const rank_in_map = {
-    //   spawn: 8,
-    //   extension: 8,
-    //   container_controller: 7,
-    //   tower: 7,
-    //   link: 6,
-    //   storage: 4,
-    //   container: 3,
-    //   container_source: 1 // harvest source
-    // };
     // discover tasks in the room
     // spawns
     const spawns = room.find(FIND_MY_SPAWNS);
@@ -22,7 +12,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           pos: spawn.pos,
           t_id: spawn.id,
           rank: rank_in_map.spawn,
-          type: "trans_in",
+          type: dc.trans_type.in,
           d_time: Game.time + 0,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 }
@@ -40,7 +30,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           pos: ext.pos,
           t_id: ext.id,
           rank: rank_in_map.extension,
-          type: "trans_in",
+          type: dc.trans_type.in,
           d_time: Game.time + 0,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 }
@@ -56,7 +46,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           pos: ctn.pos,
           t_id: ctn.id,
           rank: rank_in_map.container_controller,
-          type: "trans_in",
+          type: dc.trans_type.in,
           d_time: Game.time + 50,
           min_amount: 200,
           resource_need: { [RESOURCE_ENERGY]: -1 }
@@ -74,7 +64,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           pos: tower.pos,
           t_id: tower.id,
           rank: rank_in_map.tower,
-          type: "trans_in",
+          type: dc.trans_type.in,
           d_time: Game.time + 24,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 }
@@ -91,15 +81,13 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           t_id: room.storage.id,
           rank: rank_in_map.storage,
           d_time: Game.time + TickF,
-          type: "trans_in",
+          type: dc.trans_type.in,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 }
         },
         room
       );
     }
-
-    TransInTask.priority(room);
   }
 
   public static create(t: dc.trans_in_task<any>, room: Room): TransInTask<any> {
@@ -117,25 +105,6 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
     return task;
   }
 
-  public static priority(room: Room) {
-    // update priority list
-    const tasks = Array.from(room.cache.tasks.values()).filter(t => t.type === "trans_in") as TransInTask[];
-    tasks.sort((a, b) => b.rank - a.rank);
-
-    const newList: string[] = [];
-    for (const task of tasks) {
-      room.cache.max_rank_in = Math.max(room.cache.max_rank_in, task.rank);
-      if (task.d_time - Game.time <= TickC) {
-        newList.unshift(task.id);
-      } else if (Game.time - task.last_time > max_idle_time) {
-        newList.unshift(task.id);
-      } else {
-        newList.push(task.id);
-      }
-    }
-    room.cache.trans_in_priority = newList;
-  }
-
   protected _task: dc.trans_in_task<Target>;
   constructor(t: any) {
     super(t);
@@ -144,8 +113,16 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
 
   public do_work(creep: Creep) {
     const task = this;
+    // const amo = task.amount_need;
+    // console.log("TransInTask.do_work", creep.name, task.id, amo);
     if (!creep.pos.isNearTo(task.pos)) {
-      creep.moveTo(task.pos);
+      creep.moveTo(task.pos, {
+        visualizePathStyle: {
+          stroke: "#ffffff",
+          opacity: 0.5,
+          lineStyle: "dashed"
+        }
+      });
       return ERR_NOT_IN_RANGE;
     }
     try {
@@ -167,14 +144,18 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
   // get the amount of resource needed for this task
   public get amount_need(): number {
     const stru = this.target as any as StructureContainer;
+    const types = Object.keys(this._task.resource_need);
     if (stru?.store) {
-      return stru.store.getFreeCapacity();
+      return types.reduce((s, t) => {
+        return s + (stru.store.getFreeCapacity(t as ResourceConstant) || 0);
+      }, 0);
     } else {
-      console.error(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
+      console.log(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
       return 0;
     }
   }
 
+  // get left amound needed
   public getAmountLeft() {
     let amount_on_the_way = 0;
     for (const creep of this.creeps) {
@@ -199,6 +180,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
     // finish pickup
     task.creeps.delete(creep);
     creep.memory.task = "";
+    task.last_time = Game.time;
     if (creep.store.getUsedCapacity() === 0) {
       // empty
       creep.memory.state = stat_carry.restore;
