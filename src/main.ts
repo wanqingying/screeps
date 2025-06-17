@@ -1,3 +1,4 @@
+import "./mod/path.js"
 import "./prototype/room";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { work } from "./role";

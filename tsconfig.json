@@ -9,11 +9,10 @@
     "sourceMap": true,
     "strict": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
