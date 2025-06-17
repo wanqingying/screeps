@@ -1,5 +1,6 @@
 import "./mod/path.js"
 import "./prototype/room";
+import "./prototype/tower"
 import { ErrorMapper } from "utils/ErrorMapper";
 import { work } from "./role";
 import { spawnCreep, spawn_room, getRolesCount } from "./spawn";

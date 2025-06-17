@@ -15,16 +15,16 @@ declare global {
   interface Memory {
     uuid: number;
     log: any;
-    structure: Record<string, StructureMem>;
+    tower: Record<string, TowerMemory>;
   }
 
-  interface StructureMem {
+  interface TowerMemory {
     target?: string;
     state?: string;
     warn?: number;
   }
-  interface Structure {
-    memory: StructureMem;
+  interface StructureTower {
+    memory: TowerMemory;
   }
 
   interface CreepMemory {
@@ -53,7 +53,17 @@ declare global {
       container?: Id<StructureContainer>;
       link?: Id<StructureLink>;
     };
+    spawns?: Record<
+      string,
+      {
+        stat: dc.stat_spawn;
+      }
+    >;
     roles: Record<string, string[]>;
     config: dc.Config;
+  }
+
+  interface SpawnMemory {
+    stat: dc.stat_spawn;
   }
 }

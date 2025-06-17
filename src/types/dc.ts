@@ -1,23 +1,59 @@
 import { Role } from "./enum";
 
 export namespace dc {
+  export enum stat_role {
+    idle = "idle",
+
+    restore = "restore",
+
+    harvest = "harvest",
+
+    build = "build",
+
+    repair = "repair",
+
+    upgrade = "upgrade",
+
+    drop = "drop",
+  }
+  export enum stat_spawn {
+    idle = "idle",
+
+    building = "building",
+
+    spawning = "spawning",
+
+    renew = "renew",
+  }
+
+  export enum code_ret {
+    ok = 1,
+
+    err_no_target = -1,
+
+    err_unknown = -77,
+  }
+
+  export interface FindFilter<T> {
+    filter?: (t: T) => boolean;
+  }
   export enum pos_type {
     ruin = 1,
     dropped = 2,
     container_controller = 3,
     container = 4,
     container_source = 5,
-    storage = 6
+    storage = 6,
   }
   export enum wkn_temp_role {
     temp_none = "temp_none",
     temp_builder = "temp_builder",
-    temp_repairer = "temp_repairer"
+    temp_repairer = "temp_repairer",
   }
   export enum state_builder {
     idle = "idle",
     building = "building",
-    restore = "restore"
+    restore = "restore",
   }
 
   // room config
@@ -36,7 +72,7 @@ export namespace dc {
 
   export enum trans_type {
     in = "in",
-    out = "out"
+    out = "out",
   }
   export interface base_task<Target extends _HasId> {
     id?: string;

@@ -1,3 +1,5 @@
+import { dc } from "types";
+
 export * from "./config";
 
 export function process_tick() {}
@@ -39,4 +41,26 @@ export function getMemTarget<T>(creep: Creep) {
     return Game.getObjectById(creep.memory.target as Id<any>) as T;
   }
   return null;
+}
+type PosObj = {
+  pos: RoomPosition;
+};
+
+export class Helper {
+  public static getClosestByPos<T extends PosObj>(pos: RoomPosition, targets: T[], opt?: dc.FindFilter<T>): T | null {
+    if (!targets || targets.length === 0) {
+      return null;
+    }
+    let target: T | null = null;
+    let min = Infinity;
+    for (const t of targets) {
+      if (opt?.filter && !opt.filter(t)) continue;
+      const distance = pos.getRangeTo(t.pos);
+      if (distance < min) {
+        min = distance;
+        target = t;
+      }
+    }
+    return target;
+  }
 }

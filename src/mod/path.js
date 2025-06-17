@@ -1,15 +1,20 @@
 /*
 creep对穿+跨房间寻路+寻路缓存
 跑的比香港记者还快从你做起
-应用此模块会导致creep.moveTo可选参数中这些项失效：reusePath、serializeMemory、noPathFinding、ignore、avoid、serialize
+应用此模块会导致creep.moveTo可选参数中这些项失效：
+reusePath、serializeMemory、noPathFinding、ignore、avoid、serialize
 保留creep.moveTo中其他全部可选参数如visualizePathStyle、range、ignoreDestructibleStructures、ignoreCreeps、ignoreRoad等
-新增creep.moveTo中可选参数ignoreSwamps，会无视swamp与road的移动力损耗差异，一律与plain相同处理，用于方便pc和眼，默认false
+新增creep.moveTo中可选参数
+ignoreSwamps，会无视swamp与road的移动力损耗差异，一律与plain相同处理，用于方便pc和眼，默认false
 例：creep.moveTo(controller, {ignoreSwamps: true});
-新增creep.moveTo中可选参数bypassHostileCreeps，被creep挡路时若此项为true则绕过别人的creep，默认为true，设为false用于近战攻击
+新增creep.moveTo中可选参数
+bypassHostileCreeps，被creep挡路时若此项为true则绕过别人的creep，默认为true，设为false用于近战攻击
 例：creep.moveTo(controller, {bypassHostileCreeps: false});
-新增creep.moveTo中可选参数bypassRange，被creep挡路准备绕路时的绕路半径，默认为5
+新增creep.moveTo中可选参数
+bypassRange，被creep挡路准备绕路时的绕路半径，默认为5
 例：creep.moveTo(controller, {bypassRange: 10});
-新增creep.moveTo中可选参数noPathDelay，寻得的路是不完全路径时的再次寻路延迟，默认为10
+新增creep.moveTo中可选参数
+noPathDelay，寻得的路是不完全路径时的再次寻路延迟，默认为10
 例：creep.moveTo(controller, {noPathDelay: 5});
 新增返回值ERR_INVALID_ARGS，表示range或者bypassRange类型错误
 

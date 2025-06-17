@@ -1,18 +1,18 @@
 import { dc, Role, stat_carry, state_updater } from "types";
 // import { TransInTask } from "./trans_in";
 // import { TransOutTask } from "./trans_out";
-declare global {
-  interface cache_room {
-    tasks: Map<string, TransBaseTask<any>>;
-    task_out_targets: Map<string, string>; // Record<targetId, taskId>
-    task_in_targets: Map<string, string>;
-    // trans_out_priority: string[];
-    // trans_in_priority: string[];
-    max_rank_in: number;
-    max_rank_out: number;
-    renew?: string;
-  }
-}
+// declare global {
+//   interface cache_room {
+//     tasks: Map<string, TransBaseTask<any>>;
+//     task_out_targets: Map<string, string>; // Record<targetId, taskId>
+//     task_in_targets: Map<string, string>;
+//     // trans_out_priority: string[];
+//     // trans_in_priority: string[];
+//     max_rank_in: number;
+//     max_rank_out: number;
+//     renew?: string;
+//   }
+// }
 
 export const TickC = 20; //  creep cost about 50 ticks to transfer
 export const TickF = 500000; // tick forever
