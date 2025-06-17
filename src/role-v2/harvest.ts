@@ -1,10 +1,10 @@
 import { Helper } from "utils";
-import { BaseWork } from "./base";
+import { BaseRole } from "./base";
 import { dc } from "types";
 // import { role_stat } from "./const";
 
 // state: idle -> harvest
-export class HarvestSource extends BaseWork {
+export class RoleHarvestSource extends BaseRole {
   public idle_next = dc.stat_role.harvest;
   constructor(creep: Creep) {
     super("harvest", creep);

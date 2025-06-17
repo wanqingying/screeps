@@ -28,7 +28,7 @@ export const rank_out_map = {
   container: 5,
   link: 3,
   container_controller: 2,
-  tower: 1
+  tower: 1,
 };
 // 需求优先级
 export const rank_in_map = {
@@ -39,7 +39,7 @@ export const rank_in_map = {
   link: 6,
   storage: 3,
   container: 3,
-  container_source: 1 // harvest source
+  container_source: 1, // harvest source
 };
 
 // each room have one BaseTask
@@ -53,6 +53,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     const room = creep.room;
     room.cache.max_rank_in = 4;
     room.cache.max_rank_out = 4;
+    let debug: string[] = [];
     let list = Array.from(room.cache.tasks.values())
       .filter(t => t.getAmountLeft() > 0)
       .map(t => {
@@ -75,7 +76,8 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         }
         return true;
       });
-    console.log(`max_rank_in: ${room.cache.max_rank_in}, max_rank_out: ${room.cache.max_rank_out}`);
+    // console.log(`max_rank_in: ${room.cache.max_rank_in}, max_rank_out: ${room.cache.max_rank_out}`);
+    debug.push(`get_one_${type} list:${list.length}, max_rank_in:${room.cache.max_rank_in}, max_rank_out:${room.cache.max_rank_out}`);
 
     const cap = creep.store.getFreeCapacity();
     const v_list = list
@@ -85,12 +87,13 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         const s_range = creep.pos.getRangeTo(t.pos);
         return {
           task: t,
-          score: (s_time * 4 + s_amo / 3 + 40 - Math.min(s_range, 40)) * t.rank * t.rank
+          score: (s_time * 4 + s_amo / 3 + 40 - Math.min(s_range, 40)) * t.rank * t.rank,
         };
       })
       .sort((a, b) => b.score - a.score)
       .map(t => t.task);
-    let debug: string[] = [`get_one_${type}:${v_list.length}, ${v_list.slice(0, 3).map(t => t.desc)},`];
+
+    debug.push(`get_one_${type}:${v_list.length}, ${v_list.slice(0, 3).map(t => t.desc)},`);
 
     for (const task of v_list) {
       const amount_need_left = task.getAmountLeft();
@@ -101,7 +104,8 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
       creep.memory.debug = debug.join(" | ");
       return task;
     }
-    console.log(`no task found ${type}`);
+    // console.log(`no task found ${type}`);
+    debug.push(`no task found ${type}`);
     creep.memory.debug = debug.join(" | ");
     return null;
   }

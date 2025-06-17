@@ -21,15 +21,15 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           type: dc.trans_type.out,
           d_time: Game.time + TickF,
           min_amount: 200,
-          desc: "container_source"
+          desc: "container_source",
         },
-        room
+        room,
       );
     }
 
     // ruins
     const ruins = room.find(FIND_RUINS, {
-      filter: r => r.store.getUsedCapacity() > 0
+      filter: r => r.store.getUsedCapacity() > 0,
     });
     for (const ruin of ruins) {
       // const time= ruin.ticksToDecay;
@@ -41,15 +41,15 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           type: dc.trans_type.out,
           d_time: Game.time + ruin.ticksToDecay,
           min_amount: 50,
-          desc: "ruin"
+          desc: "ruin",
         },
-        room
+        room,
       );
     }
 
     // tombstones
     const tombstones = room.find(FIND_TOMBSTONES, {
-      filter: t => t.store.getUsedCapacity() > 0
+      filter: t => t.store.getUsedCapacity() > 0,
     });
     for (const tb of tombstones) {
       const task = TransOutTask.create(
@@ -60,15 +60,15 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           type: dc.trans_type.out,
           d_time: Game.time + tb.ticksToDecay,
           min_amount: 50,
-          desc: "tombstone"
+          desc: "tombstone",
         },
-        room
+        room,
       );
     }
 
     // dropped resources
     const resources = room.find(FIND_DROPPED_RESOURCES, {
-      filter: r => r.amount > 20
+      filter: r => r.amount > 20,
     });
     for (const res of resources) {
       const task = TransOutTask.create(
@@ -79,9 +79,9 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           type: dc.trans_type.out,
           d_time: Game.time + Math.min(res.amount, 1000),
           min_amount: 50,
-          desc: "dropped_resource"
+          desc: "dropped_resource",
         },
-        room
+        room,
       );
     }
     // storage
@@ -94,9 +94,9 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           d_time: Game.time + TickF,
           type: dc.trans_type.out,
           min_amount: 400,
-          desc: "storage_out"
+          desc: "storage_out",
         },
-        room
+        room,
       );
     }
   }
@@ -137,7 +137,11 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
     } else if (res?.amount) {
       return res.amount;
     } else {
-      console.log(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
+      console.log(
+        `OutTask.amount unsupported target-${this.id} ${this.desc} ${JSON.stringify(this.target)} at ${JSON.stringify(
+          this.pos,
+        )}`,
+      );
       return 0;
     }
   }
@@ -169,8 +173,8 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
         visualizePathStyle: {
           stroke: "#ffff00",
           opacity: 0.5,
-          lineStyle: "dashed"
-        }
+          lineStyle: "dashed",
+        },
       });
       return ERR_NOT_IN_RANGE;
     }

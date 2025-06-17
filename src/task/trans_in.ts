@@ -16,14 +16,14 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           d_time: Game.time + 0,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 },
-          desc: "spawn"
+          desc: "spawn",
         },
-        room
+        room,
       );
     }
     // extensions
     const extensions = room.find(FIND_MY_STRUCTURES, {
-      filter: s => s.structureType === STRUCTURE_EXTENSION
+      filter: s => s.structureType === STRUCTURE_EXTENSION,
     }) as StructureExtension[];
     for (const ext of extensions) {
       TransInTask.create(
@@ -35,9 +35,9 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           d_time: Game.time + 0,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 },
-          desc: "extension"
+          desc: "extension",
         },
-        room
+        room,
       );
     }
     // container_controller
@@ -52,14 +52,14 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           d_time: Game.time + 50,
           min_amount: 200,
           resource_need: { [RESOURCE_ENERGY]: -1 },
-          desc: "container_controller"
+          desc: "container_controller",
         },
-        room
+        room,
       );
     }
     // towers
     const towers = room.find(FIND_MY_STRUCTURES, {
-      filter: s => s.structureType === STRUCTURE_TOWER
+      filter: s => s.structureType === STRUCTURE_TOWER,
     });
     for (const tower of towers) {
       TransInTask.create(
@@ -71,9 +71,9 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           d_time: Game.time + 24,
           min_amount: 0,
           resource_need: { [RESOURCE_ENERGY]: -1 },
-          desc: "tower"
+          desc: "tower",
         },
-        room
+        room,
       );
     }
 
@@ -89,9 +89,9 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           type: dc.trans_type.in,
           min_amount: 0,
           resource_need: all_obj,
-          desc: "storage_in"
+          desc: "storage_in",
         },
-        room
+        room,
       );
     }
   }
@@ -126,8 +126,8 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
         visualizePathStyle: {
           stroke: "#ffffff",
           opacity: 0.5,
-          lineStyle: "dashed"
-        }
+          lineStyle: "dashed",
+        },
       });
       return ERR_NOT_IN_RANGE;
     }
@@ -156,7 +156,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
         return s + (stru.store.getFreeCapacity(t as ResourceConstant) || 0);
       }, 0);
     } else {
-      console.log(`BaseTask.amount unsupported target type ${this.target?.constructor?.name}`);
+      console.log(`BaseTask.amount_need unsupported target-${this.id} ${this.desc} ${JSON.stringify(this.target)}`);
       return 0;
     }
   }
