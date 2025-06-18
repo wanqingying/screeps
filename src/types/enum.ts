@@ -10,6 +10,7 @@ export enum Role {
   repairer = "repairer"
 }
 
+//@deprecated use Role instead
 export enum stat_carry {
   idle = "idle",
   restore = "restore", // try to restore , no target, creep is empty

@@ -1,4 +1,4 @@
-import { dc, Role } from "types";
+import { dc } from "types";
 
 interface LocalCache {
   workers: Record<string, BaseRole>;
@@ -10,8 +10,8 @@ const local_cache: LocalCache = {
 
 // each creep has a base work class
 export abstract class BaseRole {
-  public readonly role_name: string;
   protected creep: Creep;
+  public readonly role: dc.role;
 
   private _state: dc.stat_role = dc.stat_role.idle;
   protected setState(state: dc.stat_role) {
@@ -32,8 +32,8 @@ export abstract class BaseRole {
     return this.creep.name;
   }
 
-  constructor(role_name: string, creep: Creep) {
-    this.role_name = role_name;
+  constructor(creep: Creep, role: dc.role) {
+    this.role = role;
     this.creep = creep;
     local_cache.workers[creep.id] = this;
   }
@@ -65,11 +65,6 @@ export abstract class BaseRole {
         worker.cleanup();
       }
     }
-  }
-
-  public static create(role:Role){
-    switch(role)
-
   }
 
   public moveTo(pos: RoomPosition) {

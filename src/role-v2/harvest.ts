@@ -1,13 +1,12 @@
 import { Helper } from "utils";
 import { BaseRole } from "./base";
 import { dc } from "types";
-// import { role_stat } from "./const";
 
 // state: idle -> harvest
 export class RoleHarvestSource extends BaseRole {
   public idle_next = dc.stat_role.harvest;
   constructor(creep: Creep) {
-    super("harvest", creep);
+    super(creep, dc.role.harvester);
   }
 
   public update_tick(creep: Creep): void {

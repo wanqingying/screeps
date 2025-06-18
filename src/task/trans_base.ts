@@ -1,18 +1,4 @@
 import { dc, Role, stat_carry, state_updater } from "types";
-// import { TransInTask } from "./trans_in";
-// import { TransOutTask } from "./trans_out";
-// declare global {
-//   interface cache_room {
-//     tasks: Map<string, TransBaseTask<any>>;
-//     task_out_targets: Map<string, string>; // Record<targetId, taskId>
-//     task_in_targets: Map<string, string>;
-//     // trans_out_priority: string[];
-//     // trans_in_priority: string[];
-//     max_rank_in: number;
-//     max_rank_out: number;
-//     renew?: string;
-//   }
-// }
 
 export const TickC = 20; //  creep cost about 50 ticks to transfer
 export const TickF = 500000; // tick forever
@@ -46,8 +32,9 @@ export const rank_in_map = {
 export abstract class TransBaseTask<Target extends _HasId = any> {
   public abstract getAmountLeft(): number;
   public abstract reserve(creep: Creep): void;
-  public abstract do_work(creep: Creep): any;
+  public abstract do_work(creep: Creep): dc.code_ret;
   public abstract finish(creep: Creep): void;
+  public abstract amount: number;
 
   public static get_one(creep: Creep, type: dc.trans_type) {
     const room = creep.room;
@@ -55,29 +42,33 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     room.cache.max_rank_out = 4;
     let debug: string[] = [];
     let list = Array.from(room.cache.tasks.values())
-      .filter(t => t.getAmountLeft() > 0)
-      .map(t => {
-        if (type === dc.trans_type.in) {
+      .filter(t => t.target && t.getAmountLeft() > 0)
+
+      .filter(t => {
+        // update max rank
+        if (t.type === dc.trans_type.in) {
           room.cache.max_rank_in = Math.max(room.cache.max_rank_in, t.rank);
         }
-        if (type === dc.trans_type.out) {
+        if (t.type === dc.trans_type.out) {
           room.cache.max_rank_out = Math.max(room.cache.max_rank_out, t.rank);
         }
-        return t;
-      })
-      .filter(t => t.type === type)
-      .filter(t => {
+        // filter by type
+        if (t.type !== type) return false;
+        // trans-out must have rank_in + rank_out >= 10
         if (type === dc.trans_type.out) {
           return t.rank + room.cache.max_rank_in >= 10;
         }
+        // trans-in must have resource need
         if (type === dc.trans_type.in) {
-          const need_types = Object.keys(t.resource_need || {});
-          return Object.keys(creep.store).some(rt => need_types.includes(rt));
+          return Object.keys(creep.store).some(res_type => {
+            return t.resource_need[res_type] > 0;
+          });
         }
-        return true;
+        return false;
       });
-    // console.log(`max_rank_in: ${room.cache.max_rank_in}, max_rank_out: ${room.cache.max_rank_out}`);
-    debug.push(`get_one_${type} list:${list.length}, max_rank_in:${room.cache.max_rank_in}, max_rank_out:${room.cache.max_rank_out}`);
+    debug.push(
+      `get_one_${type} list:${list.length}, max_rank_in:${room.cache.max_rank_in}, max_rank_out:${room.cache.max_rank_out}`,
+    );
 
     const cap = creep.store.getFreeCapacity();
     const v_list = list
@@ -104,7 +95,6 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
       creep.memory.debug = debug.join(" | ");
       return task;
     }
-    // console.log(`no task found ${type}`);
     debug.push(`no task found ${type}`);
     creep.memory.debug = debug.join(" | ");
     return null;
@@ -117,7 +107,6 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
 
   public static run_creep(creep: Creep) {
     const room = creep.room;
-    const max_rank_in = room.cache.max_rank_in;
     if (Game.time % 3 === 0) {
       creep.say(creep.memory.state || "noop");
     }
@@ -134,48 +123,63 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     }
 
     if (stat_carry.restore === creep.memory.state) {
-      const task_out = TransBaseTask.get_one(creep, dc.trans_type.out);
-      if (task_out) {
-        creep.memory.state = stat_carry.restoreing;
-        task_out.reserve(creep);
-      }
-
-      // if (!task_out && creep.store.getUsedCapacity() > 0) {
-      //   creep.memory.state = stat_carry.drop;
-      // }
       if (creep.store.getFreeCapacity() === 0) {
         creep.memory.state = stat_carry.drop;
+      } else {
+        const task_out = TransBaseTask.get_one(creep, dc.trans_type.out);
+        if (task_out) {
+          creep.memory.state = stat_carry.restoreing;
+          // task_out.reserve(creep);
+          task_out.creeps.add(creep);
+          task_out.last_time = Game.time;
+          creep.memory.task = task_out.id;
+        }
       }
     }
     if (stat_carry.restoreing === creep.memory.state) {
       const task_id = creep.memory.task;
       const task = room.cache.tasks.get(task_id!) as TransBaseTask;
       if (!task) {
-        console.log(`TransOutTask.run_creep creep ${creep.name} task ${task_id} not found`);
         TransBaseTask.reset(creep);
       } else {
         task.do_work(creep);
+        const free = creep.store.getFreeCapacity();
+        const amo = task.amount;
+        if (free === 0 || amo <= 0) {
+          // if creep is full or task is empty, finish
+          task.creeps.delete(creep);
+          task.last_time = Game.time;
+          creep.memory.task = "";
+          if (free / cap > 0.7) {
+            creep.memory.state = stat_carry.restore;
+          } else {
+            creep.memory.state = stat_carry.drop;
+          }
+        } else {
+          // continue restore this task
+        }
       }
     }
     if (stat_carry.drop === creep.memory.state) {
-      const task_in = TransBaseTask.get_one(creep, dc.trans_type.in);
-      if (task_in) {
-        creep.memory.state = stat_carry.dropping;
-        task_in.reserve(creep);
-      }
-
       if (creep.store.getUsedCapacity() === 0) {
+        TransBaseTask.reset(creep);
         creep.memory.state = stat_carry.restore;
+      } else {
+        const task_in = TransBaseTask.get_one(creep, dc.trans_type.in);
+        if (task_in) {
+          creep.memory.state = stat_carry.dropping;
+          task_in.creeps.add(creep);
+          task_in.last_time = Game.time;
+          creep.memory.task = task_in.id;
+        }
       }
     }
     if (stat_carry.dropping === creep.memory.state) {
-      const task_id = creep.memory.task;
-      const task = room.cache.tasks.get(task_id!) as TransBaseTask;
-      if (!task) {
-        console.log(`TransInTask.run_creep creep ${creep.name} task ${task_id} not found`);
+      const task_in = room.cache.tasks.get(creep.memory.task!) as TransBaseTask;
+      if (!task_in) {
         TransBaseTask.reset(creep);
       } else {
-        task.do_work(creep);
+        task_in.do_work(creep);
       }
     }
   }

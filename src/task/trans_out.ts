@@ -176,23 +176,25 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
           lineStyle: "dashed",
         },
       });
-      return ERR_NOT_IN_RANGE;
+      return dc.code_ret.err_not_in_range;
     }
     try {
       const g1 = task.target as any as Resource | undefined;
       const g2 = task.target as any as StructureContainer | undefined;
+      let ret: ScreepsReturnCode;
       if (g1?.amount) {
-        return creep.pickup(g1);
+        ret = creep.pickup(g1);
       } else if (g2?.store) {
         const types = Object.keys(g2.store) as ResourceConstant[];
         types.sort(() => Math.random() - 0.5);
-        for (const t of types) {
-          creep.withdraw(g2, t);
-        }
+        ret = creep.withdraw(g2, types[0]);
       }
-      return OK;
+      return ret;
+    } catch (e) {
+      return dc.code_ret.err_unknown;
+      //skip
     } finally {
-      task.finish(creep);
+      // task.finish(creep);
     }
   }
 

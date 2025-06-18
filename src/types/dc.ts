@@ -1,6 +1,17 @@
 import { Role } from "./enum";
 
 export namespace dc {
+  export enum role {
+    starter = "starter",
+    worker = "worker",
+    carrier = "carrier",
+    carry = "carry", // carrier v2
+    ruin_cary = "ruin_carry",
+    upgrader = "upgrader",
+    builder = "builder",
+    harvester = "harvester",
+    repairer = "repairer",
+  }
   export enum stat_role {
     idle = "idle",
 
@@ -25,13 +36,22 @@ export namespace dc {
 
     renew = "renew",
   }
+  export enum stat_carry {
+    idle = "idle",
+    restore = "restore", // try to restore , no target, creep is empty
+    restoreing = "restoring", // restoring, move to target and restore
+    drop = "drop", // try to drop resource , no target, creep is not empty
+    dropping = "dropping", // move to target and drop
+  }
 
   export enum code_ret {
-    ok = 1,
+    ok = OK,
 
     err_no_target = -1,
 
     err_unknown = -77,
+
+    err_not_in_range = 3,
   }
 
   export interface FindFilter<T> {

@@ -119,8 +119,6 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
 
   public do_work(creep: Creep) {
     const task = this;
-    // const amo = task.amount_need;
-    // console.log("TransInTask.do_work", creep.name, task.id, amo);
     if (!creep.pos.isNearTo(task.pos)) {
       creep.moveTo(task.pos, {
         visualizePathStyle: {
@@ -129,7 +127,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
           lineStyle: "dashed",
         },
       });
-      return ERR_NOT_IN_RANGE;
+      return dc.code_ret.ok;
     }
     try {
       const g = task.target as any;
@@ -142,13 +140,14 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
         }
       }
       return OK;
-    } finally {
-      task.finish(creep);
+    } catch (e) {
+      console.log(`TransInTask.do_work error: ${e}, task: ${task.id}, target: ${task.t_id}, creep: ${creep.name}`);
+      return dc.code_ret.err_unknown;
     }
   }
 
   // get the amount of resource needed for this task
-  public get amount_need(): number {
+  public get amount(): number {
     const stru = this.target as any as StructureContainer;
     const types = Object.keys(this._task.resource_need);
     if (stru?.store) {
@@ -171,7 +170,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
       }
       amount_on_the_way += creep.store.getUsedCapacity();
     }
-    return Math.max(0, this.amount_need - amount_on_the_way);
+    return Math.max(0, this.amount - amount_on_the_way);
   }
 
   public reserve(creep: Creep) {
