@@ -1,3 +1,5 @@
+import { Log } from "./decorator";
+
 export interface FindFilter<T> {
   filter?: (t: T) => boolean;
 }
@@ -33,7 +35,38 @@ export class Helper {
     if (arr.length === 0) return undefined;
     return arr[Math.floor(Math.random() * arr.length)];
   }
+
+  public static tick_cache<T>() {}
 }
+
+function CacheTick(ttl: number = 0): MethodDecorator {
+  return (target: any, propertyKey: string, desc: PropertyDescriptor) => {
+    const original = desc.value;
+    let cache = {
+      tick: -1,
+      _cache: null,
+    };
+    desc.value = function () {
+      if (Game.time - cache.tick >= ttl) {
+        const res = original.apply(this, arguments);
+        cache.tick = Game.time;
+        cache._cache = res;
+      }
+      return cache._cache;
+    };
+  };
+}
+
+
+class Player {
+  @Log(1, "outer")
+  @CacheTick(3)
+  @Log(1, "inner")
+  getRdGameTime(v: string = ""): string {
+    return Game.time + Math.floor(Math.random() * 1000) + v;
+  }
+}
+export const player = new Player();
 
 const obj = {
   a: 1,

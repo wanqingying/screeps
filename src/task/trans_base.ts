@@ -41,10 +41,9 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     room.cache.max_rank_in = 4;
     room.cache.max_rank_out = 4;
     let debug: string[] = [];
-    let list = Array.from(room.cache.tasks.values())
+    let list: any[] = Array.from(room.cache.tasks.values())
       .filter(t => t.target && t.getAmountLeft() > 0)
-
-      .filter(t => {
+      .map(t => {
         // update max rank
         if (t.type === dc.trans_type.in) {
           room.cache.max_rank_in = Math.max(room.cache.max_rank_in, t.rank);
@@ -52,20 +51,48 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         if (t.type === dc.trans_type.out) {
           room.cache.max_rank_out = Math.max(room.cache.max_rank_out, t.rank);
         }
+        return t;
+      })
+      .filter(t => t.type === type)
+      .map(t => {
         // filter by type
-        if (t.type !== type) return false;
+        if (t.type !== type)
+          return {
+            task: t,
+            reason: "type",
+          };
         // trans-out must have rank_in + rank_out >= 10
         if (type === dc.trans_type.out) {
-          return t.rank + room.cache.max_rank_in >= 10;
+          if (t.rank + room.cache.max_rank_in < 10) {
+            return {
+              task: t,
+              reason: "rank",
+            };
+          }
+          return { task: t, reason: "" };
         }
         // trans-in must have resource need
         if (type === dc.trans_type.in) {
-          return Object.keys(creep.store).some(res_type => {
-            return t.resource_need[res_type] > 0;
+          const fed = Object.keys(creep.store).some(res_type => {
+            return t.resource_need[res_type] !== undefined;
           });
+          if (!fed) {
+            return {
+              task: t,
+              reason: "res_type",
+            };
+          } else {
+            return { task: t, reason: "" };
+          }
         }
-        return false;
+        return {
+          task: t,
+          reason: "mis",
+        };
       });
+    const reasons = list.map(b => `${b.task.desc}:${b.reason}`).join(",");
+    debug.push(reasons);
+    list = list.filter(t => t.reason === "").map(t => t.task) as any[];
     debug.push(
       `get_one_${type} list:${list.length}, max_rank_in:${room.cache.max_rank_in}, max_rank_out:${room.cache.max_rank_out}`,
     );
@@ -177,9 +204,26 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     if (stat_carry.dropping === creep.memory.state) {
       const task_in = room.cache.tasks.get(creep.memory.task!) as TransBaseTask;
       if (!task_in) {
+        creep.say("task_in not found");
         TransBaseTask.reset(creep);
       } else {
+        creep.say(`task_in ${task_in.desc}`);
         task_in.do_work(creep);
+        const free = creep.store.getFreeCapacity();
+        const amo = task_in.amount;
+        if (free === 0 || amo <= 0) {
+          // if creep is empty or task is empty, finish
+          task_in.creeps.delete(creep);
+          creep.memory.task = "";
+          task_in.last_time = Game.time;
+          if (free / cap > 0.7) {
+            // empty
+            creep.memory.state = stat_carry.restore;
+          } else {
+            // still have resource, continue drop
+            creep.memory.state = stat_carry.drop;
+          }
+        }
       }
     }
   }

@@ -101,7 +101,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
     }
   }
 
-  public static create(t: dc.base_task<any>, room: Room): TransOutTask<any> {
+  public static create<T extends _HasId>(t: dc.trans_out_task<T>, room: Room): TransOutTask<any> {
     if (room.cache.task_out_targets.has(t.t_id)) {
       const tid = room.cache.task_out_targets.get(t.t_id) as string;
       if (room.cache.tasks.has(tid)) {
@@ -122,7 +122,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
     return m === -1 ? c.store.getFreeCapacity() : m;
   }
 
-  protected _task: dc.trans_out_task<Target>;
+  protected _task: dc.trans_out_task<Target> = null as any;
   constructor(task: dc.trans_out_task<Target>) {
     super(task);
     this._task = task;

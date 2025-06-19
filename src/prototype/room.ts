@@ -1,8 +1,12 @@
 import { EventBus } from "utils";
 import { dc } from "types";
 import { TransBaseTask } from "task";
+import { RoomExtend } from "room/extend";
 
 declare global {
+  interface GlobalCache {
+    rooms: g_cache_room;
+  }
   interface cache_room {
     tasks: Map<string, TransBaseTask<any>>;
     task_out_targets: Map<string, string>; // Record<targetId, taskId>
@@ -15,43 +19,51 @@ declare global {
     handle_tick_event?: boolean;
   }
 }
-
-if (!Room.prototype.hasOwnProperty("cache")) {
-  Object.defineProperties(Room.prototype, {
-    cache: {
-      get: function () {
-        if (!global.cache) {
-          global.cache = { rooms: {}, time: Game.time };
-        }
-        if (!global.cache.rooms[this.name]) {
-          global.cache.rooms[this.name] = {
-            event: new EventBus(),
-            init: true,
-            tasks: new Map<string, any>(),
-            task_in_targets: new Map<string, any>(),
-            task_out_targets: new Map<string, any>(),
-            max_rank_in: 6,
-            max_rank_out: 6,
-          };
-        }
-        return new Proxy(global.cache.rooms[this.name], {
-          get: (target, prop) => {
-            let che: any = global.cache.rooms[this.name];
-            return che[prop];
-          },
-          set: (target, prop, value) => {
-            let che: any = global.cache.rooms[this.name];
-            che[prop] = value;
-            return true;
-          },
-        });
-      },
-      set: function (value) {
-        global.cache.rooms[this.name] = value;
-      },
+const extend_map: Record<string, RoomExtend> = {};
+Object.defineProperties(Room.prototype, {
+  cache: {
+    get: function () {
+      if (!global.cache.rooms[this.name]) {
+        global.cache.rooms[this.name] = {
+          event: new EventBus(),
+          init: true,
+          tasks: new Map<string, any>(),
+          task_in_targets: new Map<string, any>(),
+          task_out_targets: new Map<string, any>(),
+          max_rank_in: 6,
+          max_rank_out: 6,
+        };
+      }
+      return new Proxy(global.cache.rooms[this.name], {
+        get: (target, prop) => {
+          let che: any = global.cache.rooms[this.name];
+          return che[prop];
+        },
+        set: (target, prop, value) => {
+          let che: any = global.cache.rooms[this.name];
+          che[prop] = value;
+          return true;
+        },
+      });
     },
-  });
-}
+    set: function (value) {
+      global.cache.rooms[this.name] = value;
+    },
+  },
+  extend: {
+    get: function (this: Room): RoomExtend {
+      if (!extend_map[this.name]) {
+        extend_map[this.name] = new RoomExtend(this);
+      }
+      const ext = extend_map[this.name];
+      ext.setRoom(this);
+      return ext;
+    },
+    set: function (this: Room, value: RoomExtend) {
+      extend_map[this.name] = value;
+    },
+  },
+});
 
 Room.prototype.tick = function (this: Room): void {
   // const events = this.getEventLog();
@@ -65,6 +77,10 @@ Room.prototype.tick = function (this: Room): void {
   // if(ev2.event === EVENT_BUILD){
   //   const b=ev2.data.targetId
   // }
+};
+
+Room.prototype.is_my = function (this: Room): boolean {
+  return this.controller && this.controller.my;
 };
 
 Room.prototype.init = function (this: Room): void {

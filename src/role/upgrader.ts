@@ -22,7 +22,7 @@ export enum state_updater {
   idle = "idle",
   upgrading = "upgrading",
   dropping = "dropping",
-  restore = "restore"
+  restore = "restore",
 }
 
 export function work_upgrader(creep: Creep) {
@@ -32,14 +32,13 @@ export function work_upgrader(creep: Creep) {
   }
   // creep.say(creep.memory.state);
   if (creep.memory.state === state_updater.restore) {
-    const spawn = room.find(FIND_MY_SPAWNS)[0];
     if (room.memory.controller?.container) {
       let target: any = Game.getObjectById(room.memory.controller?.container);
-      if (target?.store?.[RESOURCE_ENERGY]! < 40) {
+      if (!target || target?.store?.[RESOURCE_ENERGY]! < 40) {
         target =
           room.storage ||
           creep.pos.findClosestByPath(FIND_RUINS, {
-            filter: r => r.store[RESOURCE_ENERGY] > 0
+            filter: r => r.store[RESOURCE_ENERGY] > 0,
           });
       }
 
@@ -61,14 +60,15 @@ export function work_upgrader(creep: Creep) {
   if (creep.memory.state === state_updater.upgrading) {
     const controller = room.controller;
     if (controller) {
-      if (creep.upgradeController(controller) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(controller);
+      if (creep.pos.inRangeTo(controller, 2)) {
+        creep.upgradeController(controller);
+        creep.say("upgrading");
       } else {
-        if (!creep.memory.near) {
-          creep.moveTo(controller);
-          creep.memory.near = 1;
-        }
+        creep.say("goto");
+        creep.moveTo(controller);
       }
+    } else {
+      creep.say("no controller");
     }
     if (creep.store[RESOURCE_ENERGY] === 0) {
       creep.memory.state = state_updater.restore;

@@ -1,5 +1,5 @@
 import { Role, dc } from "types";
-import { EventBus, setIntervalTick, dc_config } from "utils";
+import { EventBus, setIntervalTick, dc_config, } from "utils";
 export * from "./tower";
 
 console.log("Room index loaded");
@@ -8,9 +8,6 @@ global.event = new EventBus();
 global.event.on("build_over", (data: any) => {
   console.log("event build_over", JSON.stringify(data));
 });
-if (!global.cache) {
-  global.cache = { rooms: {}, time: Game.time };
-}
 
 export function init_mem(room: Room) {
   if (room.controller) {
@@ -18,21 +15,18 @@ export function init_mem(room: Room) {
     const ct = room.controller;
     if (!room.memory.controller) {
       room.memory.controller = {
-        id: ct.id
+        id: ct.id,
       };
     }
 
     if (!room.memory.controller.container) {
       const containers = ct.pos.findInRange(FIND_STRUCTURES, 1, {
-        filter: s => s.structureType === STRUCTURE_CONTAINER
+        filter: s => s.structureType === STRUCTURE_CONTAINER,
       });
       if (containers.length) {
         room.memory.controller.container = containers[0].id as Id<StructureContainer>;
       }
     }
-  }
-  if (!global.cache) {
-    global.cache = { rooms: {}, time: Game.time };
   }
 
   if (!room.memory.sources) {
@@ -44,7 +38,7 @@ export function init_mem(room: Room) {
       room.memory.sources[source.id] = {};
       if (!room.memory.sources[source.id].container) {
         const containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-          filter: s => s.structureType === STRUCTURE_CONTAINER
+          filter: s => s.structureType === STRUCTURE_CONTAINER,
         });
         if (containers.length) {
           room.memory.sources[source.id].container = containers[0].id as Id<StructureContainer>;
@@ -77,7 +71,7 @@ export function init_mem(room: Room) {
         name: creep.name,
         room: room.name,
         wkn: dc.wkn_temp_role.temp_none,
-        state: "idle"
+        state: "idle",
       };
     }
     room.memory.roles[creep.memory.role].push(creep.name);
@@ -115,27 +109,46 @@ export function init_mem(room: Room) {
 
 setIntervalTick(13, () => {
   for (const room of Object.values(Game.rooms)) {
-    if (!room.memory.sources) continue;
-    for (const [id, s] of Object.entries(room.memory.sources)) {
-      if (s.harvester) {
-        const creep = Game.getObjectById(s.harvester as Id<Creep>);
-        if (!creep) {
-          delete s.harvester;
+
+    if (room.memory.sources) {
+      for (const [id, s] of Object.entries(room.memory.sources)) {
+        if (s.harvester) {
+          const creep = Game.getObjectById(s.harvester as Id<Creep>);
+          if (!creep) {
+            delete s.harvester;
+          }
+        }
+        if (s.container) {
+          const container = Game.getObjectById(s.container as Id<StructureContainer>);
+          if (!container) {
+            delete s.container;
+          }
+        }
+        const source = Game.getObjectById(id as Id<Source>);
+        if (source && !s.container) {
+          const containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
+            filter: s => s.structureType === STRUCTURE_CONTAINER,
+          });
+          if (containers.length) {
+            room.memory.sources[id].container = containers[0].id as Id<StructureContainer>;
+          }
         }
       }
-      if (s.container) {
-        const container = Game.getObjectById(s.container as Id<StructureContainer>);
-        if (!container) {
-          delete s.container;
-        }
-      }
-      const source = Game.getObjectById(id as Id<Source>);
-      if (source && !s.container) {
-        const containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
-          filter: s => s.structureType === STRUCTURE_CONTAINER
-        });
-        if (containers.length) {
-          room.memory.sources[id].container = containers[0].id as Id<StructureContainer>;
+    }
+
+    // reset controller container
+    if (room.memory.controller?.container) {
+      const obj = Game.getObjectById(room.memory.controller.container as Id<StructureContainer>);
+      if (!obj) {
+        delete room.memory.controller.container;
+        const ctrl = Game.getObjectById(room.memory.controller.id as Id<StructureController>);
+        if (ctrl) {
+          const ctn = ctrl.pos.findInRange(FIND_STRUCTURES, 1, {
+            filter: s => s.structureType === STRUCTURE_CONTAINER,
+          });
+          if (ctn.length) {
+            room.memory.controller.container = ctn[0].id as Id<StructureContainer>;
+          }
         }
       }
     }

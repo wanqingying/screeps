@@ -111,7 +111,7 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
     return task;
   }
 
-  protected _task: dc.trans_in_task<Target>;
+  protected _task: dc.trans_in_task<Target> = null as any;
   constructor(t: any) {
     super(t);
     this._task = t;

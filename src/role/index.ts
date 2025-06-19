@@ -7,7 +7,7 @@ import { work_carrier } from "./carrier";
 import { work_repair } from "./repair";
 import { TransBaseTask } from "task";
 import { renew } from "spawn";
-import {RoleHarvestSource} from "role-v2"
+import { RoleHarvestSource, get_role } from "role-v2";
 
 const runs: Record<Role, Function> = {
   [Role.starter]: work_starter,
@@ -19,11 +19,11 @@ const runs: Record<Role, Function> = {
   [Role.upgrader]: work_upgrader,
   [Role.builder]: work_builder,
   // [Role.harvester]: work_harvester,
-  [Role.harvester]:(creep:Creep)=>{
-    if（creep
+  [Role.harvester]: (creep: Creep) => {
+    get_role(creep).update_tick(creep);
   },
   [Role.repairer]: work_repair,
-  [Role.carry]: TransBaseTask.run_creep
+  [Role.carry]: TransBaseTask.run_creep,
 };
 
 export function work(creep: Creep) {

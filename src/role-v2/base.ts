@@ -1,4 +1,4 @@
-import { dc } from "types";
+import { dc, Role } from "types";
 
 interface LocalCache {
   workers: Record<string, BaseRole>;
@@ -66,6 +66,11 @@ export abstract class BaseRole {
       }
     }
   }
+
+  // public static get_role(creep: Creep): BaseRole {
+
+
+  // }
 
   public moveTo(pos: RoomPosition) {
     return this.creep.moveTo(pos);

@@ -16,6 +16,7 @@ export namespace dc {
     idle = "idle",
 
     restore = "restore",
+    restoreing = "restoring",
 
     harvest = "harvest",
 
@@ -26,6 +27,7 @@ export namespace dc {
     upgrade = "upgrade",
 
     drop = "drop",
+    dropping = "dropping",
   }
   export enum stat_spawn {
     idle = "idle",

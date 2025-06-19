@@ -5,11 +5,17 @@ declare global {
   interface Room {
     cache: cache_room;
   }
+  interface Creep {
+    cache: cache_creep;
+  }
 
   interface cache_room {
     //   ruins_worker?: Record<string, string>;
     event: EventBus;
     init: boolean;
+  }
+  interface cache_creep{
+
   }
 
   interface g_cache_room {
