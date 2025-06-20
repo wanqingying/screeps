@@ -33,7 +33,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
   public abstract getAmountLeft(): number;
   public abstract reserve(creep: Creep): void;
   public abstract do_work(creep: Creep): dc.code_ret;
-  public abstract finish(creep: Creep): void;
+  // public abstract finish(creep: Creep): void;
   public abstract amount: number;
 
   public static get_one(creep: Creep, type: dc.trans_type) {
@@ -278,7 +278,8 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
     return m === -1 ? c.store.getFreeCapacity() : m;
   }
 
-  public creeps: Set<Creep> = new Set();
+  public creeps: Set<Id<Creep>> = new Set();
+  
   public last_time: number = Game.time; // last reserve time
   public get rank() {
     return this._task.rank;

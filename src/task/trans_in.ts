@@ -163,9 +163,10 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
   // get left amound needed
   public getAmountLeft() {
     let amount_on_the_way = 0;
-    for (const creep of new Set(this.creeps)) {
-      if (creep.memory.task !== this.id) {
-        this.creeps.delete(creep);
+    for (const id of new Set(this.creeps)) {
+      const creep = Game.getObjectById(id);
+      if (!creep || creep.memory.task !== this.id) {
+        this.creeps.delete(id);
         continue;
       }
       amount_on_the_way += creep.store.getUsedCapacity();
@@ -175,23 +176,9 @@ export class TransInTask<Target extends _HasId = any> extends TransBaseTask<Targ
 
   public reserve(creep: Creep) {
     const task = this;
-    task.creeps.add(creep);
+    task.creeps.add(creep.id);
     task.last_time = Game.time;
 
     creep.memory.task = task.id;
-  }
-
-  public finish(creep: Creep) {
-    const task = this;
-    // finish pickup
-    task.creeps.delete(creep);
-    creep.memory.task = "";
-    task.last_time = Game.time;
-    if (creep.store.getUsedCapacity() === 0) {
-      // empty
-      creep.memory.state = stat_carry.restore;
-    } else {
-      creep.memory.state = stat_carry.drop;
-    }
   }
 }

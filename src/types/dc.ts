@@ -92,6 +92,11 @@ export namespace dc {
     rooms: Record<string, Config>;
   }
 
+  export enum task_type {
+    trans_in = "trans_in",
+    trans_out = "trans_out",
+  }
+
   export enum trans_type {
     in = "in",
     out = "out",

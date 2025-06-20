@@ -16,7 +16,7 @@ export function CacheTick(ttl: number = 0): MethodDecorator {
   };
 }
 
-export function CacheIdList(ttl: number = 0): MethodDecorator {
+export function CacheIds(ttl: number = 0): MethodDecorator {
   return (target: any, propertyKey: string, desc: PropertyDescriptor) => {
     const original = desc.value;
     let cache = {
@@ -33,6 +33,27 @@ export function CacheIdList(ttl: number = 0): MethodDecorator {
         return res;
       }
       return cache._ids.map(id => Game.getObjectById(id)) as _HasId[];
+    };
+  };
+}
+
+export function CacheId(ttl: number = 0): MethodDecorator {
+  return (target: any, propertyKey: string, desc: PropertyDescriptor) => {
+    const original = desc.value;
+    let cache = {
+      tick: -1,
+      _id: null as Id<_HasId> | null,
+    };
+    desc.value = function (...args: any[]) {
+      if (Game.time - cache.tick >= ttl) {
+        const res = original.apply(target, args) as _HasId;
+        if (res && res.id) {
+          cache.tick = Game.time;
+          cache._id = res.id;
+        }
+        return res;
+      }
+      return Game.getObjectById(cache._id) as _HasId | null;
     };
   };
 }
