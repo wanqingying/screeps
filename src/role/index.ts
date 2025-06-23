@@ -20,7 +20,8 @@ const runs: Record<Role, Function> = {
   [Role.builder]: work_builder,
   // [Role.harvester]: work_harvester,
   [Role.harvester]: (creep: Creep) => {
-    get_role(creep).update_tick(creep);
+    // get_role(creep).update_tick(creep);
+    work_harvester(creep);
   },
   [Role.repairer]: work_repair,
   [Role.carry]: TransBaseTask.run_creep,

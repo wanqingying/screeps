@@ -13,26 +13,24 @@
 //   }
 
 import { dc } from "types";
+import { TaskTransBase, TaskTransBaseConfig } from "./trans-base";
+import { Helper } from "utils";
 
 //   export interface trans_out_task<Target extends _HasId> extends base_task<Target> {}
-export interface TaskTransOutConfig<T extends _HasId> {
-  type: dc.task_type;
-  desc: string;
-  pos: RoomPosition;
-  target: Id<T>; // target id
+export interface TaskTransOutConfig<T extends _HasId> extends TaskTransBaseConfig<T> {
+  // type: dc.task_type;
+  // desc: string;
+  // pos: RoomPosition;
+  // target: Id<T>; // target id
+  // judge: (c: Creep) => boolean; // judge function for creep
 }
 
-export class TaskTransOut<T extends _HasId> {
+export class TaskTransOut<T extends _HasId> extends TaskTransBase<T> {
   public readonly config: TaskTransOutConfig<T>;
-  public readonly id = Math.random().toString(36).substring(2, 7);
-  public readonly created = Game.time;
 
   constructor(config: TaskTransOutConfig<T>) {
+    super();
     this.config = config;
-  }
-
-  public get target() {
-    return Game.getObjectById(this.config.target);
   }
 
   public work(creep: Creep) {
@@ -48,28 +46,18 @@ export class TaskTransOut<T extends _HasId> {
       return dc.code_ret.err_not_in_range;
     }
     const target = this.target;
+    const g2 = this.target as any as StructureContainer;
     if (!target) {
       return dc.code_ret.err_no_target;
     }
-	if()
-
-    try {
-      const g1 = task.target as any as Resource | undefined;
-      const g2 = task.target as any as StructureContainer | undefined;
-      let ret: ScreepsReturnCode;
-      if (g1?.amount) {
-        ret = creep.pickup(g1);
-      } else if (g2?.store) {
-        const types = Object.keys(g2.store) as ResourceConstant[];
-        types.sort(() => Math.random() - 0.5);
-        ret = creep.withdraw(g2, types[0]);
-      }
-      return ret;
-    } catch (e) {
-      return dc.code_ret.err_unknown;
-      //skip
-    } finally {
-      // task.finish(creep);
+    if (target instanceof Resource) {
+      return creep.pickup(target);
+    } else if (g2?.store) {
+      const types = Object.keys(g2.store) as ResourceConstant[];
+      return creep.withdraw(g2, Helper.random_arr_value(types));
+    } else {
+      console.log("Unsupported target type for TaskTransOut:", this.desc);
     }
+    return dc.code_ret.err_unknown;
   }
 }

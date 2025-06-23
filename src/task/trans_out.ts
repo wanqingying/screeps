@@ -148,9 +148,14 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
 
   public getAmountLeft() {
     let amount_on_the_way = 0;
-    for (const creep of new Set(this.creeps)) {
+    for (const id of new Set(this.creeps)) {
+      const creep = Game.getObjectById(id);
+      if (!creep) {
+        this.creeps.delete(id);
+        continue;
+      }
       if (creep.memory.task !== this.id) {
-        this.creeps.delete(creep);
+        this.creeps.delete(id);
         continue;
       }
       amount_on_the_way += creep.store.getFreeCapacity();
@@ -160,7 +165,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
 
   public reserve(creep: Creep) {
     const task = this;
-    task.creeps.add(creep);
+    task.creeps.add(creep.id);
     task.last_time = Game.time;
 
     creep.memory.task = task.id;
@@ -200,7 +205,7 @@ export class TransOutTask<Target extends _HasId = any> extends TransBaseTask<Tar
 
   public finish(creep: Creep) {
     const task = this;
-    task.creeps.delete(creep);
+    task.creeps.delete(creep.id);
     task.last_time = Game.time;
     creep.memory.task = "";
     if (creep.store.getFreeCapacity() === 0) {

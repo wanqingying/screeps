@@ -1,10 +1,11 @@
 import { Role } from "types";
+import { Helper } from "utils";
 
 export enum state_harvester {
   idle = "idle",
   harvesting = "harvesting",
 
-  dropping = "dropping"
+  dropping = "dropping",
 }
 
 export function work_harvester(creep: Creep) {
@@ -16,30 +17,34 @@ export function work_harvester(creep: Creep) {
     creep.memory.state = state_harvester.harvesting;
   }
   if (creep.memory.state === state_harvester.harvesting) {
-    let source_best: Source | null = Game.getObjectById(creep.memory.target as Id<Source>);
-    if (!source_best) {
-      source_best = creep.pos.findClosestByPath(FIND_SOURCES, {
-        filter: s => {
-          return room.memory.sources[s.id]?.container && !room.memory.sources[s.id].harvester;
-        }
+    const exts = room.extend.get_sources_ext();
+    let source: Source | null = Game.getObjectById(creep.memory.target as Id<Source>);
+    if (!source) {
+      const source_ext = exts.filter(e => !e.harvester);
+      const clost = Helper.getClosestByPos(creep.pos, source_ext);
+      source = Game.getObjectById(clost?.id as Id<Source>);
+    }
+    if (!source) {
+      creep.say("no source");
+      return;
+    }
+    const ext = exts.find(e => e.id === source.id);
+    const pos1 = ext?.container?.pos;
+    const pos2 = source.pos;
+
+    if (pos1 && !creep.pos.isEqualTo(pos1)) {
+      creep.moveTo(pos1);
+    } else if (pos2 && !creep.pos.isNearTo(pos2)) {
+      creep.moveTo(pos2);
+    } else {
+      creep.harvest(source);
+    }
+    if (source) {
+      creep.memory.target = source.id;
+      room.extend.update_source_ext(source.id, {
+        harvester: creep.id,
       });
     }
-    if (!source_best) {
-      source_best = creep.pos.findClosestByPath(FIND_SOURCES);
-    }
-    if (source_best) {
-      creep.memory.target = source_best.id;
-      room.memory.sources[source_best.id].harvester = creep.id;
-      const container = room.memory.sources[source_best.id]?.container;
-      const ct = Game.getObjectById(container as Id<StructureContainer>);
-      if (creep.harvest(source_best) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(ct || source_best);
-      }
-      if (ct) {
-        creep.moveTo(ct);
-      }
-    }
-    // move to event.on('die')
     if (creep.ticksToLive && creep.ticksToLive === 1) {
       delete room.memory.sources[creep.memory.target!].harvester;
       delete creep.memory.target;
@@ -47,7 +52,7 @@ export function work_harvester(creep: Creep) {
         role: creep.memory.role,
         name: creep.name,
         id: creep.id,
-        room: creep.room.name
+        room: creep.room.name,
       });
     }
   } else if (creep.memory.state === state_harvester.dropping) {

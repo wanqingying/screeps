@@ -174,7 +174,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         const amo = task.amount;
         if (free === 0 || amo <= 0) {
           // if creep is full or task is empty, finish
-          task.creeps.delete(creep);
+          task.creeps.delete(creep.id);
           task.last_time = Game.time;
           creep.memory.task = "";
           if (free / cap > 0.7) {
@@ -213,7 +213,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
         const amo = task_in.amount;
         if (free === 0 || amo <= 0) {
           // if creep is empty or task is empty, finish
-          task_in.creeps.delete(creep);
+          task_in.creeps.delete(creep.id);
           creep.memory.task = "";
           task_in.last_time = Game.time;
           if (free / cap > 0.7) {
@@ -243,9 +243,9 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
           room.cache.task_out_targets.delete(task.t_id);
         }
       } else {
-        for (const creep of new Set(task.creeps)) {
-          if (!Game.creeps[creep.name]) {
-            task.creeps.delete(creep);
+        for (const id of new Set(task.creeps)) {
+          if (!Game.getObjectById(id)) {
+            task.creeps.delete(id);
           }
         }
       }
@@ -279,7 +279,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
   }
 
   public creeps: Set<Id<Creep>> = new Set();
-  
+
   public last_time: number = Game.time; // last reserve time
   public get rank() {
     return this._task.rank;

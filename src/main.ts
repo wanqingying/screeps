@@ -25,8 +25,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
   for (const fn of tick_callbacks) {
     fn(room);
   }
-  console.log(`time:${Game.time}, rd:${room.extend.getRdGameTime("loop")}`);
+  // console.log(`time:${Game.time}, rd:${room.extend.getRdGameTime("loop")}`);
   runTowerAtk(room);
+  // console.log("sources ", JSON.stringify(room.extend.get_sources_ext()));
 
   if (Game.time % 10 === 0) {
     const roles_count = getRolesCount(room);

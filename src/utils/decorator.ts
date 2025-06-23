@@ -58,6 +58,31 @@ export function CacheId(ttl: number = 0): MethodDecorator {
   };
 }
 
+interface DescConfig<T> {
+  tick: number;
+  result?: T;
+}
+export function CacheValid<T>(valid: (desc: DescConfig<T>) => boolean): MethodDecorator {
+  return (target: any, propertyKey: string, desc: PropertyDescriptor) => {
+    const original = desc.value;
+    let cache: DescConfig<T> = {
+      tick: -1,
+      result: undefined,
+    };
+    desc.value = function (...args: any[]) {
+      const isValid = valid(cache);
+      if (!isValid) {
+        const res = original.apply(this, args);
+        cache.tick = Game.time;
+        cache.result = res as T;
+        return res;
+      }
+      return cache.result as T;
+
+    };
+  };
+}
+
 export function Log(tick = 1, prefix = ""): MethodDecorator {
   return (target: any, propertyKey: string, desc: PropertyDescriptor) => {
     const original = desc.value;
