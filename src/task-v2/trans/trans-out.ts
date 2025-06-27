@@ -33,6 +33,17 @@ export class TaskTransOut<T extends _HasId> extends TaskTransBase<T> {
     this.config = config;
   }
 
+  public get_pending(): number {
+    let pending = 0;
+    for (const creepId of this.creeps) {
+      const creep = Game.getObjectById(creepId);
+      if (creep && creep.store) {
+        pending += creep.store.getFreeCapacity();
+      }
+    }
+    return pending;
+  }
+
   public work(creep: Creep) {
     const pos = this.config.pos;
     if (!creep.pos.isNearTo(pos)) {

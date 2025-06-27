@@ -1,4 +1,4 @@
-import { RoomExtend } from "room/extend";
+import { RoomExtend } from "extend/room";
 import { dc } from "./dc";
 
 declare global {

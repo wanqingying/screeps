@@ -29,6 +29,20 @@ export class TaskTransIn<T extends _HasId> extends TaskTransBase<T> {
     this.config = config;
   }
 
+  public get_pending(): number {
+    let pending = 0;
+    const needs = Array.from(Object.keys(this.config.needs)) as ResourceConstant[];
+    for (const creepId of this.creeps) {
+      const creep = Game.getObjectById(creepId);
+      if (creep && creep.store) {
+        for (const t of needs) {
+          pending += Math.max(0, creep.store[t] || 0);
+        }
+      }
+    }
+    return pending;
+  }
+
   public work(creep: Creep) {
     if (!creep.pos.isNearTo(this.pos)) {
       creep.moveTo(this.pos, {

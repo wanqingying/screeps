@@ -1,7 +1,7 @@
 import { EventBus } from "utils";
 import { dc } from "types";
 import { TransBaseTask } from "task";
-import { RoomExtend } from "room/extend";
+import { RoomExtend } from "extend/room";
 
 declare global {
   interface GlobalCache {
@@ -56,7 +56,7 @@ Object.defineProperties(Room.prototype, {
         extend_map[this.name] = new RoomExtend(this);
       }
       const ext = extend_map[this.name];
-      ext.setRoom(this);
+      ext.room = this;
       return ext;
     },
     set: function (this: Room, value: RoomExtend) {
