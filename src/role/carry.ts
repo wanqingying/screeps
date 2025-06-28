@@ -72,7 +72,7 @@ export class Carry {
       .some((s: StructureSpawn) => {
         return s.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
       });
-    const t1 = ctn.store.getFreeCapacity(RESOURCE_ENERGY) > 500;
+    const t1 = ctn.store.getFreeCapacity(RESOURCE_ENERGY) > 1000;
     const t2 = towers.some(t => t.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
     return t0 || t1 || t2;
   }

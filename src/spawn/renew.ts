@@ -6,7 +6,7 @@ export function renew(creep: Creep) {
     }
     if (creep.pos.isNearTo(t.pos)) {
       t.renewCreep(creep);
-      if (creep.ticksToLive && creep.ticksToLive > 1450) {
+      if (creep.ticksToLive && creep.ticksToLive > 1490) {
         creep.memory.state = "idle";
         creep.memory.target = "";
 		delete creep.room.cache.renew;
