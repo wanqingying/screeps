@@ -7,7 +7,7 @@ export function CacheTick(ttl: number = 0): MethodDecorator {
     };
     desc.value = function (...args: any[]) {
       if (Game.time - cache.tick >= ttl) {
-        const res = original.apply(target, args);
+        const res = original.apply(this, args);
         cache.tick = Game.time;
         cache._cache = res;
       }
@@ -25,7 +25,7 @@ export function CacheIds(ttl: number = 0): MethodDecorator {
     };
     desc.value = function (...args: any[]) {
       if (Game.time - cache.tick >= ttl) {
-        const res = original.apply(target, args) as _HasId[];
+        const res = original.apply(this, args) as _HasId[];
         if (Array.isArray(res)) {
           cache._ids = res.map(item => item.id);
           cache.tick = Game.time;
@@ -46,7 +46,7 @@ export function CacheId(ttl: number = 0): MethodDecorator {
     };
     desc.value = function (...args: any[]) {
       if (Game.time - cache.tick >= ttl) {
-        const res = original.apply(target, args) as _HasId;
+        const res = original.apply(this, args) as _HasId;
         if (res && res.id) {
           cache.tick = Game.time;
           cache._id = res.id;

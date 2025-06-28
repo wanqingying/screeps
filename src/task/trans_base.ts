@@ -171,8 +171,7 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
       } else {
         task.do_work(creep);
         const free = creep.store.getFreeCapacity();
-        const amo = task.amount;
-        if (free === 0 || amo <= 0) {
+        if (task.amount === 0) {
           // if creep is full or task is empty, finish
           task.creeps.delete(creep.id);
           task.last_time = Game.time;
@@ -182,8 +181,11 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
           } else {
             creep.memory.state = stat_carry.drop;
           }
-        } else {
-          // continue restore this task
+        }
+        if (creep.store.getFreeCapacity() === 0) {
+          // if creep is full, change state
+          task.creeps.delete(creep.id);
+          creep.memory.state = stat_carry.drop;
         }
       }
     }
@@ -216,12 +218,10 @@ export abstract class TransBaseTask<Target extends _HasId = any> {
           task_in.creeps.delete(creep.id);
           creep.memory.task = "";
           task_in.last_time = Game.time;
-          if (free / cap > 0.7) {
-            // empty
+
+          if (creep.store.getUsedCapacity() === 0) {
+            // if creep is empty, reset state
             creep.memory.state = stat_carry.restore;
-          } else {
-            // still have resource, continue drop
-            creep.memory.state = stat_carry.drop;
           }
         }
       }

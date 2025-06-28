@@ -10,6 +10,9 @@ if (!StructureTower.prototype.hasOwnProperty("memory")) {
             [this.id]: {},
           };
         }
+        if (!Memory.tower[this.id]) {
+          Memory.tower[this.id] = {};
+        }
 
         return new Proxy(Memory.tower[this.id], {
           get: (target, prop) => {

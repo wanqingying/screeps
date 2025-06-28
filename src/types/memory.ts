@@ -34,6 +34,7 @@ declare global {
     wkn: dc.wkn_temp_role;
     state: string;
     target?: string;
+    tag?: any;
     task?: string;
     near?: number; // distance to target , upgrader
     _move?: any;

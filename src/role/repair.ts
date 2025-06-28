@@ -7,7 +7,7 @@ enum state_repair {
   idle = "idle",
   //   building = "building",
   restore = "restore",
-  repair = "repair"
+  repair = "repair",
 }
 
 export function work_repair(creep: Creep) {
@@ -23,6 +23,7 @@ export function work_repair(creep: Creep) {
   } else if (creep.memory.state === state_repair.repair) {
     let target = Game.getObjectById(creep.memory.target as Id<Structure>);
     if (!target) {
+      creep.memory.target = "";
       target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s: Structure) => {
           if (s.structureType === STRUCTURE_ROAD) {
@@ -31,7 +32,7 @@ export function work_repair(creep: Creep) {
           return (
             s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART && s.hitsMax - s.hits > 200
           );
-        }
+        },
       });
     }
 

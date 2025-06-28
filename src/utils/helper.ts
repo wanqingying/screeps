@@ -36,7 +36,35 @@ export class Helper {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  public static tick_cache<T>() {}
+  public static tick_cache<T, F extends Function>(fn: F, ttl = 0): F {
+    let cache = {
+      tick: -1,
+      _cache: null as T,
+    };
+    return function (...args: any[]) {
+      if (Game.time - cache.tick > ttl) {
+        const res = fn.apply(this, args);
+        cache.tick = Game.time;
+        cache._cache = res;
+      }
+      return cache._cache;
+    } as unknown as F;
+  }
+  // cache by function arguments
+  public static cache<T, F extends Function>(fn: F, ttl = 0): F {
+    let cache = new Map<string, { tick: number; _cache: T }>();
+    return function (...args: any[]) {
+      const key = Array.from(arguments).join(",");
+      const it = cache.get(key);
+      if (it && Game.time - it.tick < ttl) {
+        return it._cache;
+      } else {
+        const res = fn.apply(this, args);
+        cache.set(key, { tick: Game.time, _cache: res });
+        return res;
+      }
+    } as unknown as F;
+  }
 }
 
 function CacheTick(ttl: number = 0): MethodDecorator {
@@ -56,7 +84,6 @@ function CacheTick(ttl: number = 0): MethodDecorator {
     };
   };
 }
-
 
 class Player {
   @Log(1, "outer")

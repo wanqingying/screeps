@@ -101,7 +101,8 @@ export function init_mem(room: Room) {
   if (!room.memory.config) {
     const config = dc_config.rooms[room.name];
     if (!config) {
-      throw new Error(`No config found for room ${room.name}`);
+      // throw new Error(`No config found for room ${room.name}`);
+      return console.log(`No config found for room ${room.name}`);
     }
     room.memory.config = config;
   }

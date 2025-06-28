@@ -25,7 +25,7 @@ export class TaskTransIn<T extends _HasId> extends TaskTransBase<T> {
   public readonly config: TaskTransInConfig<T>;
 
   constructor(config: TaskTransInConfig<T>) {
-    super();
+    super(config);
     this.config = config;
   }
 
@@ -43,31 +43,31 @@ export class TaskTransIn<T extends _HasId> extends TaskTransBase<T> {
     return pending;
   }
 
-  public work(creep: Creep) {
-    if (!creep.pos.isNearTo(this.pos)) {
-      creep.moveTo(this.pos, {
-        visualizePathStyle: {
-          stroke: "#ffffff",
-          opacity: 0.5,
-          lineStyle: "dashed",
-        },
-      });
-      return dc.code_ret.ok;
-    }
-    const g = this.target as any as StructureContainer;
-    const t = Helper.random_obj_key(this.config.needs);
-    const need = this.config.needs[t];
-    if (!need) {
-      creep.say("no need");
-      return dc.code_ret.err_unknown;
-    }
-    if (need === -1) {
-      creep.transfer(g, t);
-    } else {
-      creep.transfer(g, t, need);
-    }
-    return OK;
-  }
+  // public work(creep: Creep) {
+  //   if (!creep.pos.isNearTo(this.pos)) {
+  //     creep.moveTo(this.pos, {
+  //       visualizePathStyle: {
+  //         stroke: "#ffffff",
+  //         opacity: 0.5,
+  //         lineStyle: "dashed",
+  //       },
+  //     });
+  //     return dc.code_ret.ok;
+  //   }
+  //   const g = this.target as any as StructureContainer;
+  //   const t = Helper.random_obj_key(this.config.needs);
+  //   const need = this.config.needs[t];
+  //   if (!need) {
+  //     creep.say("no need");
+  //     return dc.code_ret.err_unknown;
+  //   }
+  //   if (need === -1) {
+  //     creep.transfer(g, t);
+  //   } else {
+  //     creep.transfer(g, t, need);
+  //   }
+  //   return OK;
+  // }
 }
 //--vfs-fs dropzone --vfs-archive archives_win64 --vfs-fs.
 //--vfs-fs dropzone --vfs-archive patch_win64 --vfs-archive archives_win64 --vfs-archive dlc_win64 --vfs-fs.

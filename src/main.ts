@@ -10,12 +10,15 @@ import { Role } from "types";
 import { init_mem, runTowerAtk } from "room";
 import { player, tick_callbacks } from "utils";
 import { init_trans_tasks } from "task";
+import { TransTaskMST } from "task-v2/trans/trans-manager.js";
+import { RoomExtend } from "extend/room.js";
 
 init_trans_tasks();
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
+  RoomExtend.run_tick();
   // get all creeps in the game
   const creeps = Object.values(Game.creeps);
   const room = Object.values(Game.rooms)[0];
@@ -40,6 +43,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   if (Game.time % 3 === 0) {
     spawn_room(room);
   }
+  // TransTaskMST.run_tick();
 
   for (const creep of creeps) {
     work(creep);

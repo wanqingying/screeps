@@ -12,7 +12,7 @@ export const roles_priority = [
   Role.carry,
   Role.upgrader,
   Role.builder,
-  Role.repairer
+  Role.repairer,
 ].reverse();
 
 // MOVE	50	每 tick 减少 2 点疲惫值
@@ -73,7 +73,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
     case Role.carrier:
     case Role.ruin_cary:
     case Role.carry:
-      capacity = Math.min(capacity, 850);
+      capacity = Math.min(capacity, 950);
       //   move_cap = capacity * 0.33;
       //   cary_cap = capacity - move_cap;
       cary_cap = (capacity - 50) * 0.66;
@@ -82,13 +82,13 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
       count_c = Math.floor(cary_cap / BODYPART_COST[CARRY]);
       return Array(count_c).fill(CARRY).concat(Array(count_m).fill(MOVE));
     case Role.upgrader:
-      capacity = Math.min(capacity, 900);
+      capacity = Math.min(capacity, 1300);
       if (room.memory.controller?.container) {
         // [w,w,c,m]
         count_m = Math.ceil(capacity / 700);
         count_c = Math.ceil(capacity / 700);
         count_w = Math.floor(
-          (capacity - BODYPART_COST[MOVE] * count_m - BODYPART_COST[CARRY] * count_c) / BODYPART_COST[WORK]
+          (capacity - BODYPART_COST[MOVE] * count_m - BODYPART_COST[CARRY] * count_c) / BODYPART_COST[WORK],
         );
         return Array(count_w).fill(WORK).concat(Array(count_c).fill(CARRY)).concat(Array(count_m).fill(MOVE));
       }
@@ -155,8 +155,8 @@ export function spawnCreep(role: Role, spawn?: StructureSpawn) {
       name: name,
       room: spawn.room.name,
       wkn: dc.wkn_temp_role.temp_none,
-      state: "idle"
-    }
+      state: "idle",
+    },
   });
   console.log(`Spawning new creep: ${name} with role ${role}`);
 }
@@ -176,11 +176,11 @@ export function getRolesCount(room: Room) {
 }
 
 export function spawn_room(room: Room) {
-  const dc = room.memory.config;
+  const dc = room.memory.config || {} as dc.Config;
   const exist_roles = room.memory.roles;
   const should_spawn_starter = exist_roles[Role.harvester].length === 0 && exist_roles[Role.carrier].length === 0;
   const wall_and_rampart = room.find(FIND_STRUCTURES, {
-    filter: s => s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART
+    filter: s => s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART,
   });
   const should_spawn_builder =
     room.find(FIND_MY_CONSTRUCTION_SITES).length > 0 || (dc.build_wall && wall_and_rampart.length > 0);
@@ -202,7 +202,7 @@ export function spawn_room(room: Room) {
     }
     sp.push({
       role: r,
-      w: Math.max(0, count_spawn) * (i + 1)
+      w: Math.max(0, count_spawn) * (i + 1),
     });
   });
   sp.sort((a, b) => b.w - a.w);

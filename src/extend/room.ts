@@ -10,6 +10,16 @@ interface SourceExt {
 }
 
 export class RoomExtend {
+  static run_tick() {
+    // for (const room of Object.values(Game.rooms)) {
+    //   if (!room.extend) {
+    //     room.extend = new RoomExtend(room);
+    //   } else {
+    //     room.extend.room = room; // update room reference
+    //   }
+    // }
+  }
+
   public room: Room;
   constructor(room: Room) {
     this.room = room;

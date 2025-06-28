@@ -1,6 +1,6 @@
 import { dc, Role } from "types";
 import { restoreNearbyEnergy } from "./share";
-import { dc_config } from "utils";
+import { dc_config, Helper } from "utils";
 
 const { state_builder } = dc;
 
@@ -22,23 +22,24 @@ export function work_builder(creep: Creep) {
 
 export function handle_builder(creep: Creep) {
   const room = creep.room;
-  const config = dc_config.rooms[room.name];
+  const config = room.memory.config || ({} as dc.Config);
 
   let target: ConstructionSite | AnyStructure | null = Game.getObjectById(
-    creep.memory.target as Id<ConstructionSite>
+    creep.memory.target as Id<ConstructionSite>,
   ) as any;
   if (!target) {
+    creep.memory.target = "";
     target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
   }
   if (!target && config.build_wall) {
     const fixList = room.find(FIND_STRUCTURES, {
       filter: (s: Structure) =>
-        (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART) && s.hits < s.hitsMax
+        (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART) && s.hits < s.hitsMax,
     });
     // get a random target from the lowest hists 3;
     if (fixList.length) {
-      const lowest3 = fixList.sort((a, b) => a.hits - b.hits).slice(0, 3);
-      target = lowest3[Math.floor(Math.random() * lowest3.length)];
+      const lowest3 = fixList.sort((a, b) => a.hits - b.hits).slice(0, 1);
+      target = Helper.random_arr_value(lowest3);
     }
   }
   if (target) {
@@ -58,6 +59,12 @@ export function handle_builder(creep: Creep) {
     if (creep.repair(target) === ERR_NOT_IN_RANGE) {
       creep.moveTo(target);
     }
+  } else if (target instanceof StructureWall || target instanceof StructureRampart) {
+    creep.memory.target = target.id;
+    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+      creep.moveTo(target);
+    }
+    creep.moveTo(target);
   } else {
     const config = room.memory.config;
     const [x, y] = config.pos_idle?.pos || [12, 25];

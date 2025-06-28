@@ -60,12 +60,15 @@ export function work_upgrader(creep: Creep) {
   if (creep.memory.state === state_updater.upgrading) {
     const controller = room.controller;
     if (controller) {
-      if (creep.pos.inRangeTo(controller, 2)) {
+      if (creep.pos.inRangeTo(controller, 3)) {
         creep.upgradeController(controller);
-        creep.say("upgrading");
+        if (creep.memory.tag < 2) {
+          creep.moveTo(controller);
+          creep.memory.tag = (creep.memory.tag || 0) + 1;
+        }
       } else {
-        creep.say("goto");
         creep.moveTo(controller);
+        creep.memory.tag = 0; // reset tag to allow moving
       }
     } else {
       creep.say("no controller");

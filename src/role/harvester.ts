@@ -20,7 +20,10 @@ export function work_harvester(creep: Creep) {
     const exts = room.extend.get_sources_ext();
     let source: Source | null = Game.getObjectById(creep.memory.target as Id<Source>);
     if (!source) {
-      const source_ext = exts.filter(e => !e.harvester);
+      const source_ext = exts.filter(e => {
+        const creep = Game.getObjectById(e.harvester as Id<Creep>);
+        return !creep || creep.memory.target !== e.id;
+      });
       const clost = Helper.getClosestByPos(creep.pos, source_ext);
       source = Game.getObjectById(clost?.id as Id<Source>);
     }

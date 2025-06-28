@@ -9,13 +9,13 @@ export const dc_config: dc.GameConfig = {
       roles_limit: {
         [Role.starter]: 1,
         [Role.worker]: 0,
-        [Role.carrier]: 4,
+        [Role.carrier]: 0,
         [Role.upgrader]: 5,
         [Role.builder]: 4,
         [Role.harvester]: 2,
         [Role.ruin_cary]: 0,
         [Role.repairer]: 1,
-        [Role.carry]: 0
+        [Role.carry]: 2
       }
     },
     W8N7: {
@@ -33,6 +33,7 @@ export const dc_config: dc.GameConfig = {
         [Role.repairer]: 1,
         [Role.carry]: 2
       }
-    }
+    },
+
   }
 };

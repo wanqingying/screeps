@@ -29,7 +29,7 @@ export class TaskTransOut<T extends _HasId> extends TaskTransBase<T> {
   public readonly config: TaskTransOutConfig<T>;
 
   constructor(config: TaskTransOutConfig<T>) {
-    super();
+    super(config);
     this.config = config;
   }
 
@@ -44,31 +44,32 @@ export class TaskTransOut<T extends _HasId> extends TaskTransBase<T> {
     return pending;
   }
 
-  public work(creep: Creep) {
-    const pos = this.config.pos;
-    if (!creep.pos.isNearTo(pos)) {
-      creep.moveTo(pos, {
-        visualizePathStyle: {
-          stroke: "#ffff00",
-          opacity: 0.5,
-          lineStyle: "dashed",
-        },
-      });
-      return dc.code_ret.err_not_in_range;
-    }
-    const target = this.target;
-    const g2 = this.target as any as StructureContainer;
-    if (!target) {
-      return dc.code_ret.err_no_target;
-    }
-    if (target instanceof Resource) {
-      return creep.pickup(target);
-    } else if (g2?.store) {
-      const types = Object.keys(g2.store) as ResourceConstant[];
-      return creep.withdraw(g2, Helper.random_arr_value(types));
-    } else {
-      console.log("Unsupported target type for TaskTransOut:", this.desc);
-    }
-    return dc.code_ret.err_unknown;
-  }
+  // public work(creep: Creep) {
+  //   creep.say('work')
+  //   const pos = this.config.pos;
+  //   if (!creep.pos.isNearTo(pos)) {
+  //     creep.moveTo(pos, {
+  //       visualizePathStyle: {
+  //         stroke: "#ffff00",
+  //         opacity: 0.5,
+  //         lineStyle: "dashed",
+  //       },
+  //     });
+  //     return dc.code_ret.err_not_in_range;
+  //   }
+  //   const target = this.target;
+  //   const g2 = this.target as any as StructureContainer;
+  //   if (!target) {
+  //     return dc.code_ret.err_no_target;
+  //   }
+  //   if (target instanceof Resource) {
+  //     return creep.pickup(target);
+  //   } else if (g2?.store) {
+  //     const types = Object.keys(g2.store) as ResourceConstant[];
+  //     return creep.withdraw(g2, Helper.random_arr_value(types));
+  //   } else {
+  //     console.log("Unsupported target type for TaskTransOut:", this.desc);
+  //   }
+  //   return dc.code_ret.err_unknown;
+  // }
 }
