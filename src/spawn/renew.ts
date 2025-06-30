@@ -9,7 +9,7 @@ export function renew(creep: Creep) {
       if (creep.ticksToLive && creep.ticksToLive > 1490) {
         creep.memory.state = "idle";
         creep.memory.target = "";
-		delete creep.room.cache.renew;
+        delete creep.room.cache.renew;
       }
     } else {
       creep.moveTo(t);
@@ -20,7 +20,7 @@ export function renew(creep: Creep) {
     if (sp) {
       creep.memory.target = sp.id;
       creep.memory.state = "renew";
-	  creep.room.cache.renew = creep.name;
+      creep.room.cache.renew = creep.name;
       creep.moveTo(sp);
     }
   }

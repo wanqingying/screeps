@@ -11,19 +11,35 @@ interface SourceExt {
 
 export class RoomExtend {
   static run_tick() {
-    // for (const room of Object.values(Game.rooms)) {
-    //   if (!room.extend) {
-    //     room.extend = new RoomExtend(room);
-    //   } else {
-    //     room.extend.room = room; // update room reference
-    //   }
-    // }
+    for (const room of Object.values(Game.rooms)) {
+      if (!room.extend) {
+        room.extend = new RoomExtend(room);
+      } else {
+        room.extend.room = room; // update room reference
+      }
+      room.extend.run_tick();
+    }
+  }
+  public run_tick() {
+    if (!Array.isArray(this.creeps_pos) || this.creeps_pos.length === 0) {
+      this.creeps_pos = this.room.memory.config?.pos_controller || [];
+    } else {
+      for (const p of this.creeps_pos) {
+        const creep = Game.getObjectById<any>(p.creep) as Creep;
+        const pos = new RoomPosition(p.x, p.y, this.room.name);
+        if (!creep || !creep.pos.isEqualTo(pos)) {
+          p.creep = "";
+        }
+      }
+    }
   }
 
   public room: Room;
   constructor(room: Room) {
     this.room = room;
   }
+
+  public creeps_pos: { x: number; y: number; creep: string }[] = [];
 
   @CacheTick(3)
   @Log(1, "TEST")

@@ -25,8 +25,15 @@ export enum state_updater {
   restore = "restore",
 }
 
+// let creeps_pos = [];
+// let pos = [];
+
+function get_pos(creep: Creep, pc: any[], pos: string[]) {}
+
 export function work_upgrader(creep: Creep) {
   const room = creep.room;
+  const config = room.extend.creeps_pos;
+  const pos = config.find(p => !p.creep);
   if (creep.memory.state === state_updater.idle || !creep.memory.state) {
     creep.memory.state = state_updater.restore; // default state
   }
@@ -59,16 +66,23 @@ export function work_upgrader(creep: Creep) {
   }
   if (creep.memory.state === state_updater.upgrading) {
     const controller = room.controller;
+    const t_pos = pos ? new RoomPosition(pos.x, pos.y, room.name) : undefined;
     if (controller) {
       if (creep.pos.inRangeTo(controller, 3)) {
         creep.upgradeController(controller);
-        if (creep.memory.tag < 2) {
+        if (!t_pos && creep.memory.tag < 2) {
           creep.moveTo(controller);
           creep.memory.tag = (creep.memory.tag || 0) + 1;
         }
-      } else {
+      } else if (!t_pos) {
         creep.moveTo(controller);
         creep.memory.tag = 0; // reset tag to allow moving
+      }
+      if (t_pos) {
+        pos.creep = creep.id;
+        if (!creep.pos.isEqualTo(t_pos)) {
+          creep.moveTo(t_pos, { visualizePathStyle: { stroke: "#ffffff" } });
+        }
       }
     } else {
       creep.say("no controller");

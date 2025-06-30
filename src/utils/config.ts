@@ -4,6 +4,11 @@ export const dc_config: dc.GameConfig = {
   rooms: {
     W51S34: {
       pos_idle: { pos: [13, 23] },
+      pos_controller: [
+        [28, 20],
+        [29, 19],
+        [28, 19],
+      ],
       min_source_ctn: 1000,
       build_wall: false,
       roles_limit: {
@@ -15,8 +20,8 @@ export const dc_config: dc.GameConfig = {
         [Role.harvester]: 2,
         [Role.ruin_cary]: 0,
         [Role.repairer]: 1,
-        [Role.carry]: 2
-      }
+        [Role.carry]: 2,
+      },
     },
     W8N7: {
       pos_idle: { pos: [13, 23] },
@@ -31,9 +36,8 @@ export const dc_config: dc.GameConfig = {
         [Role.harvester]: 2,
         [Role.ruin_cary]: 0,
         [Role.repairer]: 1,
-        [Role.carry]: 2
-      }
+        [Role.carry]: 2,
+      },
     },
-
-  }
+  },
 };

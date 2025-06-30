@@ -83,6 +83,7 @@ export namespace dc {
     pos_idle?: {
       pos: [number, number];
     };
+    pos_controller?: any[];
     min_source_ctn: number;
     build_wall?: boolean;
     roles_limit: Record<Role, number>;

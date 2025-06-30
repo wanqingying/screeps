@@ -73,7 +73,7 @@ function getCreepBody(role: Role, room: Room): BodyPartConstant[] {
     case Role.carrier:
     case Role.ruin_cary:
     case Role.carry:
-      capacity = Math.min(capacity, 950);
+      capacity = Math.min(capacity, 1100);
       //   move_cap = capacity * 0.33;
       //   cary_cap = capacity - move_cap;
       cary_cap = (capacity - 50) * 0.66;

@@ -76,8 +76,19 @@ export class Carry {
     const t2 = towers.some(t => t.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
     return t0 || t1 || t2;
   }
-  public static carry_map = new Map<string, any>();
-  //   public static drop_map = new Map<string, any>();
+  public static carry_map = new Map<string, Id<Creep>>();
+  public static run_tick() {
+    // Clean up carry_map
+    Carry.carry_map.forEach((creepId, targetId) => {
+      const creep = Game.getObjectById<Creep>(creepId);
+      if (!creep || !creep.room || creep.spawning) {
+        Carry.carry_map.delete(targetId);
+      }
+      if (creep && creep.memory.target !== targetId) {
+        Carry.carry_map.delete(targetId);
+      }
+    });
+  }
 
   public static restore(creep: Creep) {
     const room = creep.room;
@@ -117,7 +128,7 @@ export class Carry {
       const storage = room.storage;
       creep.memory.target = storage.id;
       creep.memory.state = dc.stat_carry.restoreing;
-      creep.memory.tag = "storage";
+      //   creep.memory.tag = "storage";
       //   Carry.restore_map.set(storage.id, creep.id);
     }
   }
@@ -173,6 +184,9 @@ export class Carry {
         }
       }
       const ctn = Game.getObjectById(room.memory.controller?.container as Id<StructureContainer>);
+      if (ctn && Carry.carry_map.has(ctn.id)) {
+        creep.say("ctn");
+      }
       if (ctn && ctn.store.getFreeCapacity(RESOURCE_ENERGY) > free && !Carry.carry_map.has(ctn.id)) {
         creep.memory.state = dc.stat_carry.dropping;
         Carry.set_target(creep, ctn.id);
