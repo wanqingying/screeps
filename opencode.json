@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "https://api.vveai.com/v1",
+        "apiKey": "sk-jt5647X5Cpl0sw6B0aBe614dAcE94a5fBb7a2063E2AaEaAb"
+      }
+    }
+  },
+  "model": "anthropic/claude-haiku-4-5-20251001",
+  "small_model": "anthropic/claude-haiku-4-5-20251001"
+}

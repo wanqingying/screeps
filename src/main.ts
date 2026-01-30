@@ -1,3 +1,5 @@
+import { planner } from "./mod/autoplannerv201";
+
 import "./mod/path.js";
 import "types";
 import "./prototype/room";
@@ -14,11 +16,16 @@ import { TransTaskMST } from "task-v2/trans/trans-manager";
 import { RoomExtend } from "extend/room";
 import { Carry } from "role/carry";
 
+console.log("ttd", Date.now().toLocaleString());
+
 init_trans_tasks();
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
+  //@ts-ignore
+  // visualizePlan('W8N7')
+  // RP('W8N7')
   RoomExtend.run_tick();
   Carry.run_tick();
   // get all creeps in the game
@@ -38,6 +45,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
     const roles_count = getRolesCount(room);
     const rm = Object.entries(roles_count)
       .map(([role, count]) => `${role}: ${count}`)
+      .sort()
       .join(", ");
     console.log(`time:${Game.time}, ${rm}`);
   }

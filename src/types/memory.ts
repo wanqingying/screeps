@@ -16,6 +16,13 @@ declare global {
     uuid: number;
     log: any;
     tower: Record<string, TowerMemory>;
+    roomPlanner: Record<string, RoomPlan>;
+  }
+
+  interface RoomPlan {
+    savedAt: number;
+    timestamp: number;
+    layout: Record<BuildableStructureConstant, { x: number; y: number }[]>;
   }
 
   interface TowerMemory {

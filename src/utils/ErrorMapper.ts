@@ -1,4 +1,8 @@
 import { SourceMapConsumer } from "source-map";
+import profiler from "screeps-profiler";
+
+profiler.enable();
+console.log("profiler enabled");
 
 export class ErrorMapper {
   // Cache consumer
@@ -39,7 +43,7 @@ export class ErrorMapper {
       if (match[2] === "main") {
         const pos = this.consumer.originalPositionFor({
           column: parseInt(match[4], 10),
-          line: parseInt(match[3], 10)
+          line: parseInt(match[3], 10),
         });
 
         if (pos.line != null) {
@@ -71,7 +75,11 @@ export class ErrorMapper {
   public static wrapLoop(loop: () => void): () => void {
     return () => {
       try {
-        loop();
+        profiler.wrap(() => {
+          loop();
+        });
+
+        // loop();
       } catch (e) {
         if (e instanceof Error) {
           if ("sim" in Game.rooms) {

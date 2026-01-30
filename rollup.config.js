@@ -20,19 +20,13 @@ export default {
     {
       file: "dist/main.js",
       format: "cjs",
-      sourcemap: true
+      sourcemap: true,
     },
-    {
-      file: "C:Users/wanqingying/AppData/Local/Screeps/scripts/screeps.com/tutorial-2/main.js",
-      format: "cjs",
-      sourcemap: true
-    },
-    //C:\Users\wanqingying\AppData\Local\Screeps\scripts\127_0_0_1___21025\default
     {
       file: "C:Users/wanqingying/AppData/Local/Screeps/scripts/127_0_0_1___21025/default/main.js",
       format: "cjs",
-      sourcemap: true
-    }
+      sourcemap: true,
+    },
   ],
 
   plugins: [
@@ -40,6 +34,6 @@ export default {
     resolve({ rootDir: "src" }),
     commonjs(),
     typescript({ tsconfig: "./tsconfig.json" }),
-    screeps({ config: cfg, dryRun: cfg == null })
-  ]
+    screeps({ config: cfg, dryRun: cfg == null }),
+  ],
 };
